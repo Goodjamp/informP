@@ -25,6 +25,7 @@
 #include "processing_modbus.h"
 #include "processing_simple_gpio.h"
 #include "processing_reset_control.h"
+#include "HIDInterface.h"
 
 
 // פאיכ ס ץטהונאלט ןנמצוססמג ףסענמיסעגא
@@ -103,6 +104,8 @@ int main(void)
 		INIT_MBB_read_addjust_table(s_mem_map.p_start_config_data,sizeof(S_global_config), PAGE_USER_CONFIG);
 	}
 
+	//Run HID (usb)
+	USB_HIDInit();
 
 	/*******************************************************************************/
 	//---------------ÇÀÏÓÑÊÀÞ ÇÀÄÀ×È ÏÐÎÒÎÊÎËÎÂ ÑÎÃËÀÑÍÎ ÍÀÑÒÐÎÅÊ--------------------

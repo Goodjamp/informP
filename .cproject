@@ -32,9 +32,12 @@
 						<entry flags="" kind="includePath" name="FreeRTOS_Source/portable/MemMang"/>
 						<entry flags="" kind="includePath" name="P_dev_model"/>
 						<entry flags="" kind="includePath" name="P_dev_model/P_FRQmetter_signal"/>
-						<entry flags="" kind="includePath" name="P_dev_model/P_RTC"/>
-						<entry flags="" kind="includePath" name="P_dev_model/P_RTC/stringtonum"/>
 						<entry flags="" kind="includePath" name="P_dev_model/P_simple_gpio"/>
+						<entry flags="" kind="includePath" name="P_dev_model/P_TIME"/>
+						<entry flags="" kind="includePath" name="P_dev_model/P_TIME/GPSProcessing"/>
+						<entry flags="" kind="includePath" name="P_dev_model/P_TIME/RTCProcessing"/>
+						<entry flags="" kind="includePath" name="STM32_USB-FS-Device_Driver/core/inc"/>
+						<entry flags="" kind="includePath" name="STM32_USB-FS-Device_Driver/portable/inc"/>
 						<entry flags="" kind="includePath" name="stm_lib"/>
 						<entry flags="" kind="includePath" name="stm_lib/inc"/>
 						<entry flags="" kind="includePath" name="USART_OPERATION"/>
@@ -69,9 +72,12 @@
 		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP_STM32103CB/FreeRTOS_Source/portable/MemMang" kind="inc" path="" system="true"/>
 		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP_STM32103CB/P_dev_model" kind="inc" path="" system="true"/>
 		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP_STM32103CB/P_dev_model/P_FRQmetter_signal" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP_STM32103CB/P_dev_model/P_RTC" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP_STM32103CB/P_dev_model/P_RTC/stringtonum" kind="inc" path="" system="true"/>
 		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP_STM32103CB/P_dev_model/P_simple_gpio" kind="inc" path="" system="true"/>
+		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP_STM32103CB/P_dev_model/P_TIME" kind="inc" path="" system="true"/>
+		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP_STM32103CB/P_dev_model/P_TIME/GPSProcessing" kind="inc" path="" system="true"/>
+		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP_STM32103CB/P_dev_model/P_TIME/RTCProcessing" kind="inc" path="" system="true"/>
+		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP_STM32103CB/STM32_USB-FS-Device_Driver/core/inc" kind="inc" path="" system="true"/>
+		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP_STM32103CB/STM32_USB-FS-Device_Driver/portable/inc" kind="inc" path="" system="true"/>
 		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP_STM32103CB/stm_lib" kind="inc" path="" system="true"/>
 		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP_STM32103CB/stm_lib/inc" kind="inc" path="" system="true"/>
 		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP_STM32103CB/USART_OPERATION" kind="inc" path="" system="true"/>

@@ -66,8 +66,11 @@
       <includepath path="P_dev_model/P_simple_gpio"/>
       <includepath path="USART_OPERATION"/>
       <includepath path="P_dev_model/P_FRQmetter_signal"/>
-      <includepath path="P_dev_model/P_RTC"/>
-      <includepath path="P_dev_model/P_RTC/stringtonum"/>
+      <includepath path="STM32_USB-FS-Device_Driver/core/inc"/>
+      <includepath path="STM32_USB-FS-Device_Driver/portable/inc"/>
+      <includepath path="P_dev_model/P_TIME"/>
+      <includepath path="P_dev_model/P_TIME/GPSProcessing"/>
+      <includepath path="P_dev_model/P_TIME/RTCProcessing"/>
       
       <!-- arm-none-eabi-gcc compiler arguments -->
       <compilerarg value="-mcpu=cortex-m3"/>

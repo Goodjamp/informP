@@ -1,14 +1,16 @@
-#include "stdio.h"
-#include "string.h"
+/*
+ * file:   RTCProcessing.c
+ * Authot: Gerasimchuk A.
+ * Date:   19 jun 2017
+ * Version 1.0
+ */
 
 #include "stm32f10x.h"
 #include "stm32f10x_rtc.h"
 #include "stm32f10x_rcc.h"
-#include "stm32f10x_usart.h"
-#include "stm32f10x_gpio.h"
-#include "stm32f10x_exti.h"
-#include "stm32f10x_rtc.h"
+#include "stm32f10x_pwr.h"
 
+//include FreeR
 
 //include FreeRtos header
 #include "FreeRTOS.h"
@@ -17,16 +19,9 @@
 #include "timers.h"
 
 // include my header
-#include "processing_USART.h"
-#include "USART_fifo_operation.h"
-
-
-u8 cheak_summ_head=0;
-S_port_config s_port_config_gps;
-u8 s_gprmc[]={'$','G','P','R','M','C',','};
-u8 time_string[15];
-S_Task_parameters *ptaskparameters;
-u32 rtc_isr_state;
+#include "processing_TIME.h"
+#include "processing_mem_map_extern.h"
+#include "processing_simple_gpio.h"
 
 void initRTC(void){
 	uint32_t lseRedyCNT = 0;
@@ -38,7 +33,7 @@ void initRTC(void){
 	// Config oscilation RTC
 	RCC_LSEConfig(RCC_LSE_ON);
 	for(;;lseRedyCNT++){
-		if(RCC_GetFlagStatus(RCC_FLAG_LSERDY));
+		if(RCC_GetFlagStatus(RCC_FLAG_LSERDY)){break;};
 	}
 	RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);
 	RCC_RTCCLKCmd(ENABLE);
@@ -63,15 +58,5 @@ void initRTC(void){
 void RTC_IRQHandler(void){
 	if( !RTC_GetITStatus(RTC_IT_SEC) ) return;
 	RTC_ClearITPendingBit(RTC_IT_SEC);
+	P6_PORT->ODR ^= GPIO_ODR_ODR3;
 }
-
-
-void t_processing_rtc(void *pvParameters){
-
-	initRTC();
-
-	while(1){
-
-	}
-}
-

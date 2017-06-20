@@ -8,7 +8,7 @@
 #include "processing_USART.h"
 
 
-//----выделяем память бля буфферов и настроек USART---------------------------------------------------
+//----USART Tx/Rx bufers---------------------------------------------------
 unsigned char Buf_USART_Transmit[NUMBER_USART][SIZE_OUT_BUFER];
 unsigned char Buf_USART_Read[NUMBER_USART][SIZE_READ_BUFER];
 // -------структуры обслуживания стека приема/передачи---------------------------------
@@ -16,12 +16,12 @@ struct point_wrdirobject WrUSART_CODE[NUMBER_USART]; // Масив структур обслужива
 struct point_wrdirobject RdUSART_CODE[NUMBER_USART]; //Масив структур обслуживания стека приема. Индекс соответствует номеру юзарта
 
 //------------указатели на ЮЗАРТы указывают на начальные структуры из масива структур ЮЗАРТов
-struct point_wrdirobject *WrUSART=&WrUSART_CODE[0];;
-struct point_wrdirobject *RdUSART=&RdUSART_CODE[0];;
+struct point_wrdirobject *WrUSART=&WrUSART_CODE[0];
+struct point_wrdirobject *RdUSART=&RdUSART_CODE[0];
 
 //------------масив структру в которой записаны указатели на буферы приема/передачи ---------------
 S_Task_parameters task_parameters[NUMBER_MY_PROCES];
-S_Task_parameters *ptask_parameters=&task_parameters[0];;
+S_Task_parameters *ptask_parameters=&task_parameters[0];
 //--------------------------------------------------------------------
 
 //------------масив указателей на USART которые пользователь разрешил использовать, и под которые выделенная память для стеков прийома/передачи-----------------------

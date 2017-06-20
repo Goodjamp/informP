@@ -13,15 +13,24 @@
 #include "stm32f10x_rcc.h"
 
 
+//-----------user port definition--------------------------
+#define P3_PORT         GPIOA
+#define P4_PORT         GPIOA
+#define P6_PORT         GPIOB
+#define P7_PORT         GPIOB
+
+//-----------user pin definition--------------------------
+#define P3_PIN          GPIO_Pin_0
+#define P4_PIN          GPIO_Pin_2
+#define P6_PIN          GPIO_Pin_3
+#define P7_PIN          GPIO_Pin_4
+
 // Настройки джамперов
 // порты джамперов выбора режима конфигурации (по_умолчанию/пользовательская)
-#define PORT_JAMP1         GPIOB
-// порты джамперов выбора режима проверок ТУ(без_проверок внешних цепей/из проверками)
-#define PORT_JAMP2         GPIOA
+#define PORT_JAMP1         GPIOA
 
 // пины джамперов
 #define PIN_JAMP1           GPIO_Pin_3
-#define PIN_JAMP2           GPIO_Pin_15
 
 // Настройки светодиодовв индикации
 // порты светодиодов индикации
@@ -33,7 +42,6 @@
 
 // ---------- МАКРОСЫ ЧТЕНИЯ ДЖАМПЕРОВ --------------------------------------
 #define STATE_JAMPER1          GPIO_ReadInputDataBit(PORT_JAMP1,PIN_JAMP1)
-#define STATE_JAMPER2          GPIO_ReadInputDataBit(PORT_JAMP2,PIN_JAMP2)
 
 // ---------- МАКРОСЫ УПРАВЛЕНИЯ ИНДИКАЦИЕЙ --------------------------------------
 #define IND_OUT_INVERSE
@@ -47,14 +55,12 @@
 #define IND_ERROR_SET            GPIO_SetBits(PORT_IND_ERROR,PIN_IND_ERROR);
 #endif
 
-
-
-
-
 //-------------Прототипы функций--------------
 void processing_simple_gpio(void);
 void work_jamper_init(void);
 void work_ind_init(void);
 void remap_out_pin(void);
+
+
 
 #endif

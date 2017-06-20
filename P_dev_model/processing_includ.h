@@ -35,5 +35,6 @@
 // подключаимые файлы програмных модулей
 #include "processing_FRQmetter_extern.h"
 #include "processing_modbus_extern.h"
+#include "processing_TIME_extern.h"
 
 #endif
