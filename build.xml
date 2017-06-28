@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project default="postbuild" name="test">
-  <property name="project.name" value="informP_STM32103CB"/>
+  <property name="project.name" value="informP"/>
   <property name="project.debug" value="Debug"/>
   <property name="project.obj" value="Debug/obj"/>
   <property name="project.bin" value="Debug/bin"/>
@@ -90,6 +90,9 @@
       <linkerarg value="--gc-sections"/>
       <linkerarg value="-T${linkdir}\link.ld"/>
       
+    <linkerarg value="-lgcc"/>
+      <linkerarg value="-lc"/>
+      <linkerarg value="-lm"/>
     </cc>
   </target>
 

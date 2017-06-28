@@ -27,6 +27,8 @@
 #include "processing_reset_control.h"
 #include "HIDInterface.h"
 
+#include "GPSprocessing.h"
+
 
 // файл с хидерами процессов устройства
 #include "processing_includ.h"
@@ -65,12 +67,12 @@ void delay_loop(){
 	}
 }
 
+
 S_modbus_tsk_par s_modbus_tsk_par[NUM_PORT_MODBUS];
 //---------------------------------------------------------------------------
 int main(void)
 {
 	u8 k1;
-
 	delay_loop(); // ожидаю пока стабилизируеться питание
 	// настройка портов логического управления
 	processing_simple_gpio();
