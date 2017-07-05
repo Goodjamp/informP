@@ -10,9 +10,10 @@
 //#include "USART_fifo_operation.h"
 #include "GPSprocessing.h"
 
-static uint8_t charHexToLSOct(uint8_t dataIn, uint8_t *numDigits);
+static uint8_t charHexToLSOctet(uint8_t dataIn, uint8_t *numDigits);
 static void parsGPRMC(processingGPS *procGPS);
 static void parsGPGGA(processingGPS *procGPS);
+static uint8_t charHexToLSOctet(uint8_t dataIn, uint8_t *numDigits);
 
 
 static const struct {
@@ -47,7 +48,8 @@ void initUSARTGPS(void){
 */
 
 uint8_t calcCheckSum(uint8_t *data, uint8_t size){
-    uint8_t k, rezCeckSum = 0;
+    uint8_t k = 1;
+    uint8_t rezCeckSum = 0;
     for(;k<size; k++)
         rezCeckSum ^= data[k];
     return rezCeckSum;
@@ -58,28 +60,52 @@ void clearGPSPars(processingGPS *procGPS){
     procGPS->rxMesSize = 0;
     procGPS->state = Rx_HEAD;
     memset(procGPS->parsGPSBuff, 0, SIZEOF_PARS_BUFF);
-    procGPS->calcCheckSum ^= calcCheckSum(listGPSMes[procGPS->typeMes].header, procGPS->headSize);
+    procGPS->calcCheckSum = calcCheckSum(listGPSMes[procGPS->typeMes].header, procGPS->headSize);
 }
 
 // Set new message for pars
 GPS_STATUS addGPSPars(GPS_TYPE_MES mesType, void *procGPSIn){
     processingGPS *procGPS = procGPSIn;
     if(  !ISGPSMES(mesType)  ) return GPS_ERROR_TYPE_MES;
-    if( mesType == procGPS->typeMes ) return GPS_OK;
+    if( mesType == procGPS->typeMes ) return GPS_RX_PROCESS;
     procGPS->typeMes = mesType;
     procGPS->headSize = (uint8_t)strlen((char*)listGPSMes[mesType].header);
     procGPS->rxMesSize = procGPS->headSize;
     clearGPSPars(procGPS);
-    return GPS_OK;
+    return GPS_RX_PROCESS;
 }
 
-
+uint8_t charHexToLSOctet(uint8_t dataIn, uint8_t *numDigits) {
+    if (isalpha(dataIn)) {
+        dataIn = tolower(dataIn);
+        if ((dataIn >= 'a') || (dataIn <= 'f'))
+        {
+            (*numDigits) <<= 4;
+            (*numDigits) |= dataIn - 'a' + 10;
+         }
+        else
+        {
+            return 1;
+        }
+    }
+    else if (isdigit(dataIn))
+    {
+        (*numDigits) <<= 4;
+        (*numDigits) |= dataIn - '0';
+    }
+    else
+    {
+        return 1;  // All other symbols - error
+    }
+    return 0;
+}
 
 
 
 void parsGPS(void *procGPS_in, uint8_t *symbols, uint8_t length){
     uint16_t cnt, k;
     processingGPS *procGPS = (processingGPS*)procGPS_in;
+    procGPS->statusGPS = GPS_RX_PROCESS;
     for(cnt = 0; cnt < length; cnt++){
         switch(procGPS->state){
         case Rx_HEAD:
@@ -107,9 +133,8 @@ void parsGPS(void *procGPS_in, uint8_t *symbols, uint8_t length){
             break;
         case Rx_CHECKSUM:
             procGPS->cntChekSum++;
-            if(charHexToLSOct(symbols[cnt], &procGPS->rxCheckSum))
+            if(charHexToLSOctet(symbols[cnt], &procGPS->rxCheckSum))
             {
-                procGPS->statusGPS = GPS_ERROR_RX_CHEKSUM;
                 procGPS->state = Rx_HEAD;
                 break;
             }
@@ -121,7 +146,6 @@ void parsGPS(void *procGPS_in, uint8_t *symbols, uint8_t length){
             if(procGPS->rxCheckSum != procGPS->calcCheckSum)
             {
                 procGPS->state = Rx_HEAD;
-                procGPS->statusGPS = GPS_ERROR_CHEKSUM;
                 break;
             }
             // Receive message unsuccessful.
@@ -130,32 +154,6 @@ void parsGPS(void *procGPS_in, uint8_t *symbols, uint8_t length){
         default: break;
         }
     }
-}
-
-uint8_t charHexToLSOct(uint8_t dataIn, uint8_t *numDigits) {
-
-    if (isalpha(dataIn)) {
-        dataIn = tolower(dataIn);
-        if ((dataIn >= 'a') || (dataIn <= 'f'))
-        {
-            (*numDigits) <<= 4;
-            (*numDigits) |= dataIn - 'a' + 10;
-         }
-        else
-        {
-            return 1;
-        }
-    }
-    else if (isdigit(dataIn))
-    {
-        (*numDigits) <<= 4;
-        (*numDigits) |= dataIn - '0';
-    }
-    else
-    {
-        return 1;  // All other symbols - error
-    }
-    return 0;
 }
 
 // Pars GPRMS message
@@ -170,36 +168,25 @@ inline void parsGPRMC(processingGPS *procGPS){
         {
             fieldCnt++;
         }
-        if( fieldCnt != RMC_F_VALIDITY) continue;
-        cnt++;
-        // Find validation field
-        if( (pGPRMC->procesingPars.parsGPSBuff[cnt]  != sateliteRx) ||
-            (pGPRMC->procesingPars.parsGPSBuff[cnt]  != sateliteNotRx) )
-        {
-            pGPRMC->procesingPars.statusGPS = GPS_ERROR_SYMBOL;
-            return;
-        }
-        if(pGPRMC->procesingPars.parsGPSBuff[cnt] == sateliteNotRx )
-        {
-            pGPRMC->procesingPars.statusGPS = GPS_NOT_VALID;
-            return;
-        }
-        else
-        {
-            break;
-        }
+        if( fieldCnt >= RMC_F_VALIDITY) break;
     }
+    cnt++;
     if( fieldCnt != RMC_F_VALIDITY)
     {
-        pGPRMC->procesingPars.statusGPS = GPS_NOT_VALID;
+        return;
     }
+    if(pGPRMC->procesingPars.parsGPSBuff[cnt] == sateliteNotRx )
+    {
+        return;
+    }
+    printf("GPRMC data \n");
+    // pars
     for(cnt = 0; cnt <  pGPRMC->procesingPars.rxMesSize; cnt++){
 
         switch (cnt){
             case 0:
                 if(!isdigit(pGPRMC->procesingPars.parsGPSBuff[cnt]))
                 {
-                    pGPRMC->procesingPars.statusGPS = GPS_ERROR_SYMBOL;
                     return;
                 }
                 pGPRMC->honour =
@@ -212,6 +199,13 @@ inline void parsGPRMC(processingGPS *procGPS){
     }
 }
 
+void charToNum(uint8_t charSize, uint8_t typeNum, uint8_t *chsrIn, void *numOut ){
+
+}
+
+
 void parsGPGGA(processingGPS *procGPS){
 
 }
+
+

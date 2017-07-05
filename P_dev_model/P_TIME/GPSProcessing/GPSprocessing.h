@@ -33,13 +33,9 @@
 
 
 typedef enum{
-	GPS_OK,
-	GPS_NOT_VALID,
-	GPS_ERROR_MESSAGE,
-	GPS_ERROR_TYPE_MES,
-	GPS_ERROR_RX_CHEKSUM,
-	GPS_ERROR_CHEKSUM,
-	GPS_ERROR_SYMBOL,
+    GPS_RX_PROCESS,
+    GPS_COMPLETE,
+    GPS_ERROR_TYPE_MES
 }GPS_STATUS;
 
 typedef enum{
@@ -89,8 +85,8 @@ typedef struct{
 //   eg3. $GPRMC,220516,A,5133.82,N,00042.24,W,173.8,231.8,130694,004.2,W*70
 //                 0    1    2    3    4     5    6    7      8     9   10 11
 
-#define sateliteRx         'V'
-#define sateliteNotRx      'A'
+#define sateliteRx         'A'
+#define sateliteNotRx      'V'
 
 #define RMC_F_TIMESTAMP_1   0
 #define RMC_F_VALIDITY      1
@@ -103,6 +99,23 @@ typedef struct{
 #define RMC_F_UT_DATE	    8
 #define RMC_F_VARIATION     9
 #define RMC_F_V_EAST_WEST  10
+typedef enum{
+    FLOAT_DATA,
+    CHAR_DATA,
+    TEXT_DATA,
+    ARRAY
+}typeField;
+
+typedef struct{
+    typeField type;
+    void *data;
+}fieldType;
+
+struct GPRMC{
+    fieldType time;
+    fieldTyp latitude;
+}
+
 
 
 void parsGPS(void *procGPS_in, uint8_t *symbols, uint8_t length);

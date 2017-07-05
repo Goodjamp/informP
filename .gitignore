@@ -4,9 +4,7 @@
 *.map
 *.txt
 *.o
-*.pro
+*.exe
 Debug
 bin
 obj
-build-gpsPRJ-Desktop_Qt_5_6_2_MinGW_32bit-Debug
-gpsPRJ
