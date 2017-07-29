@@ -4,6 +4,7 @@
  * Date:   19 jun 2017
  * Version 1.0
  */
+#include "stdio.h"
 
 #include "stm32f10x.h"
 #include "stm32f10x_rtc.h"
@@ -60,3 +61,9 @@ void RTC_IRQHandler(void){
 	RTC_ClearITPendingBit(RTC_IT_SEC);
 	P6_PORT->ODR ^= GPIO_ODR_ODR3;
 }
+
+void setTime(uint32_t UTCtime){
+	RTC_SetCounter(UTCtime);
+}
+
+

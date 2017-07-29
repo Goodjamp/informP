@@ -11,6 +11,8 @@
     <Component id="bfbf8721-96ed-11df-80ae-001d7d723e56" name="PWR"/>
     <Component id="c00bf971-96ed-11df-80ae-001d7d723e56" name="RTC"/>
   </Components>
-  <ExcludedFiles/>
+  <ExcludedFiles>
+    <Exclude path="P_dev_model/P_TIME/GPSProcessing/gpsPRJ/mainGPS.c"/>
+  </ExcludedFiles>
   <Drivers/>
 </Project>

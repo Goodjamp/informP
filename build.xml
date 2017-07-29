@@ -34,6 +34,7 @@
         <include name="**/*.c"/>
         <include name="**/*.cpp"/>
         <include name="**/*.s"/>
+        <exclude name="P_dev_model/P_TIME/GPSProcessing/gpsPRJ/mainGPS.c"/>
       </fileset>
       <project outfile="${project.name}.elf" overwrite="true" type="xcode"/>
       

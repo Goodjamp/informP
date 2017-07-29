@@ -9,7 +9,7 @@
 #ifndef RTCPROCESSING_H_
 #define RTCPROCESSING_H_
 
-#include "stdio.h"
-
+void initRTC(void);
+void setTime(uint32_t UTCtime);
 
 #endif

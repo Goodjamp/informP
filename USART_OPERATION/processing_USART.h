@@ -70,7 +70,6 @@ typedef struct
 	USART_TypeDef                   *USARTx;            // указатель на USART с которым работает данная структура
 	struct point_wrdirobject 		*WrUSART;           // структура буферов передачи
 	struct point_wrdirobject 		*RdUSART;           // структура буферов приема
-	//u8                              num_port;           // номер порта (Герасимчук)
  }S_Task_parameters;
 
 // Эта сборная структура которая описывает настройки процеса, который работает с USART

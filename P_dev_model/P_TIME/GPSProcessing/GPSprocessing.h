@@ -12,6 +12,14 @@
 
 #include "stdint.h"
 
+#define ENABLE_GPS_DEBUG_MES
+
+#ifdef ENABLE_GPS_DEBUG_MESx
+#define GPS_PRINTF(...) printf(__VA_ARGS__)
+#else
+#define GPS_PRINTF(...)
+#endif
+
 #define NUM_DATA_GPRMC    100
 
 #define NUM_CYKL_FIND_START 300
@@ -19,23 +27,23 @@
 #define PORT_PPS   GPIOA
 #define PIN_PPS    GPIO_Pin_8
 
-#define gpsUSARTDef    		 USART1
-#define gpsUSARTSpeed  		 9600
-#define gpsUSARTParity       USART_Parity_No
-#define gpsUSARTWordLengt    USART_WordLength_8b
-#define gpsUSARTStopBits     USART_StopBits_1
-#define gpsUSARTPotokControl 0
-
-#define SIZEOF_PARS_BUFF     50
+#define SIZEOF_PARS_BUFF     70
 #define SIZEOF_CHECKSUM      2
+
+#define FIELD_DEVIDER       ','
 
 #define GPRMC_MES "GPRMC"
 
 
+
 typedef enum{
-    GPS_RX_PROCESS,
-    GPS_COMPLETE,
-    GPS_ERROR_TYPE_MES
+    GPS_STATUS_COMPLETE,
+    GPS_STATUS_RX_PROCESS,
+    GPS_STATUS_ERROR_TYPE_MES,
+    GPS_STATUS_ERROR_CRC,
+    GPS_STATUS_ERROR_CONV_TO_NUM,
+    GPS_STATUS_ERROR_TAKE_FIELD,
+    GPS_STATUS_ERROR_GENERAL
 }GPS_STATUS;
 
 typedef enum{
@@ -51,8 +59,17 @@ typedef enum{
 	Rx_CHECKSUM
 }STATE_GPS;
 
+
+typedef enum{
+    TYPE_NUM_FLOAT,
+    TYPE_NUM_INT,
+    TYPE_NUM_DATA,
+    TYPE_NUM_ARRAY
+}TYPE_NUM;
+
+
 typedef struct{
-	uint8_t typeMes:4;
+    uint8_t typeMes:4;
 	uint8_t state:4;
 	uint8_t headSize:4;
 	GPS_STATUS statusGPS:4;
@@ -63,22 +80,6 @@ typedef struct{
     uint8_t parsGPSBuff[SIZEOF_PARS_BUFF];
 }processingGPS;
 
-typedef struct{
-	processingGPS procesingPars;
-	uint8_t year;
-	uint8_t mounth;
-	uint8_t date;
-	uint8_t honour;
-	uint8_t minutes;
-	uint8_t seconds;
-	uint16_t mseconds;
-	float   latitude;
-	float   longitude;
-	uint8_t latitude_side:4;
-	uint8_t longitude_side:4;
-	float   speed;
-}GPRMC_Def;
-
 #define DEVIDE_SYMBOL  ','
 
 /*-------------------------------RMC message definition------------------------------*/
@@ -88,37 +89,53 @@ typedef struct{
 #define sateliteRx         'A'
 #define sateliteNotRx      'V'
 
-#define RMC_F_TIMESTAMP_1   0
-#define RMC_F_VALIDITY      1
-#define RMC_F_LATITUDE      2
-#define RMC_F_NORTH_SOUTH   3
-#define RMC_F_LONGITITUDE   4
-#define RMC_F_EAST_WEST     5
-#define RMC_F_SPEED         6
-#define RMC_F_TRUE_COURSE   7
-#define RMC_F_UT_DATE	    8
-#define RMC_F_VARIATION     9
-#define RMC_F_V_EAST_WEST  10
-typedef enum{
-    FLOAT_DATA,
-    CHAR_DATA,
-    TEXT_DATA,
-    ARRAY
-}typeField;
+#define RMC_F_TIME              0
+#define RMC_F_TIME_HOURS        0
+#define RMC_F_TIME_HOURS_SIZE   2
+#define RMC_F_TIME_MINUTES      2
+#define RMC_F_TIME_MINUTES_SIZE 2
+#define RMC_F_TIME_SECONDS      4
+#define RMC_F_TIME_SECONDS_SIZE 2
+#define RMC_F_VALIDITY          1
+#define RMC_F_LATITUDE          2
+#define RMC_F_NORTH_SOUTH       3
+#define RMC_F_NORTH_SOUTH_SIZE  2
+#define RMC_F_LONGITITUDE       4
+#define RMC_F_EAST_WEST         5
+#define RMC_F_EAST_WEST_SIZE    2
+#define RMC_F_SPEED             6
+#define RMC_F_TRUE_COURSE       7
+#define RMC_F_DATE              8
+#define RMC_F_DATE_DAY          0
+#define RMC_F_DATE_DAY_SIZE     2
+#define RMC_F_DATE_MONTH        2
+#define RMC_F_DATE_MONTH_SIZE   2
+#define RMC_F_DATE_YER          4
+#define RMC_F_DATE_YER_SIZE     2
+#define RMC_F_VARIATION         9
+#define RMC_F_V_EAST_WEST       10
 
 typedef struct{
-    typeField type;
-    void *data;
-}fieldType;
+    processingGPS procesingPars;
+    uint8_t  year;
+    uint8_t  mounth;
+    uint8_t  date;
+    uint8_t  honour;
+    uint8_t  minutes;
+    float    seconds;
+    uint16_t mseconds;
+    float    latitude;
+    float    longitude;
+    uint8_t  latitude_side;
+    uint8_t  longitude_side;
+    float    speed;
+}GPRMC_Def;
 
-struct GPRMC{
-    fieldType time;
-    fieldTyp latitude;
-}
+// Standallone functin for every messages
+// API function and some message description
 
-
-
-void parsGPS(void *procGPS_in, uint8_t *symbols, uint8_t length);
+GPS_STATUS parsGPS(void *procGPS_in, uint8_t *symbols, uint8_t length);
 GPS_STATUS addGPSPars(GPS_TYPE_MES mesType, void *procGPSIn);
+GPS_STATUS rxGPSStatus(void *procGPS_in);
 
  #endif

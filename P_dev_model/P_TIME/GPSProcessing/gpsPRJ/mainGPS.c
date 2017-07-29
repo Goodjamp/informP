@@ -3,23 +3,45 @@
 #include "string.h"
 #include "..\GPSprocessing.h"
 
-uint8_t data[] = "$GPRMC,220516,A,5133.82,N,00042.24,W,173.8,231.8,130694,004.2,W*70";
+uint8_t data1[] = "asdsfasfas$GPR";
+uint8_t data2[] = "MC,2254";
+uint8_t data3[] = "46,A";
+uint8_t data4[] = ",4916.45,N";
+uint8_t data5[] = ",12311.12,W,000.";
+uint8_t data6[] = "5,054.7,1911";
+uint8_t data7[] = "94,020.3,E*68";
+
+typedef struct{
+    uint32_t sign:1;
+    uint32_t mantisa:8;
+    uint32_t data:23;
+}floatBitField;
 
 int main(int argc, char *argv[]){
-    GPRMC_Def myGPRMC;
+    float a = 14.5;
+    float b = 145;
+    float c = 0.01;
+    printf("a = %f\n", a);
+    printf("b = %f\n", b);
+    b =  b * c;
+    printf("b = %f\n", b);
 
-    uint8_t data[]={5, 10};
-    uint8_t *pdata = data;
-    uint8_t data1 = *pdata++;
-    printf("*pdata = %u\n",*pdata );
-    printf("data1 = *pdata++; data1 = %u\n",data1 );
-    printf("data[0] = %u\n",data[0] );
-    printf("data[1] = %u\n",data[1] );
+    GPRMC_Def myGPRMC;
     addGPSPars(GPRMC, &myGPRMC);
-    parsGPS(&myGPRMC, (uint8_t*)data, (uint8_t)strlen(data));
-    printf("myGPRMC.headSize =  %u\n", myGPRMC.procesingPars.headSize);
+    parsGPS(&myGPRMC, (uint8_t*)data1, (uint8_t)strlen(data1));
+    printf("gps Rx status =  %u\n", myGPRMC.procesingPars.statusGPS);
+    printf("gps Rx status =  %u\n", myGPRMC.procesingPars.statusGPS);
+    parsGPS(&myGPRMC, (uint8_t*)data3, (uint8_t)strlen(data3));
+    printf("gps Rx status =  %u\n", myGPRMC.procesingPars.statusGPS);
+    parsGPS(&myGPRMC, (uint8_t*)data4, (uint8_t)strlen(data4));
+    printf("gps Rx status =  %u\n", myGPRMC.procesingPars.statusGPS);
+    parsGPS(&myGPRMC, (uint8_t*)data5, (uint8_t)strlen(data5));
+    printf("gps Rx status =  %u\n", myGPRMC.procesingPars.statusGPS);
+    parsGPS(&myGPRMC, (uint8_t*)data6, (uint8_t)strlen(data6));
+    printf("gps Rx status =  %u\n", myGPRMC.procesingPars.statusGPS);
+    parsGPS(&myGPRMC, (uint8_t*)data7, (uint8_t)strlen(data7));
+    printf("gps Rx status =  %u\n", myGPRMC.procesingPars.statusGPS);
 	return 0;
 }
-typedef struct{
-    float
-}parsStar;
+
+

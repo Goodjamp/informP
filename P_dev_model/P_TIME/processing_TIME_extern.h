@@ -26,16 +26,26 @@
 
 //-----------------------------Адреса оперативных регистров процесса FRQmetter---------------------------------------------------------------
 typedef struct{
-	uint16_t  status_TIME; // статус регистры FRQmetter
-	uint16_t  rez_TIME;  // адрес в памяти МК регистров состояния FRQmetter
+	uint16_t  status_TIME;  // status register TIME module addtres
+	uint16_t  date_year;    // date: year
+	uint16_t  date_month;   // date: month
+	uint16_t  date_day;     // date: day
+	uint16_t  time_honour;  // time: honour
+	uint16_t  time_minute;  // time: minute
+	uint16_t  time_second;  // time: second
 } S_TIME_address;
 //--------------------------------------------------------------------------------------------------------------------------------------
 
 
 //----------------------------- Оперативные регистры процесса FRQmetter------------------------------------------------------------------------
 typedef struct{
-	S_proces_object_modbus  status_TIME; // статус регистры FRQmetter
-	S_proces_object_modbus  rez_TIME;    // measurement result
+	S_proces_object_modbus  status_TIME; // status register TIME module
+	S_proces_object_modbus  date_year;    // date: year
+	S_proces_object_modbus  date_month;   // date: month
+	S_proces_object_modbus  date_day;     // date: day
+	S_proces_object_modbus  time_honour;  // time: honour
+	S_proces_object_modbus  time_minute;  // time: minute
+	S_proces_object_modbus  time_second;  // time: second
 } S_TIME_oper_data;
 //--------------------------------------------------------------------------------------------------------------------------------------
 
