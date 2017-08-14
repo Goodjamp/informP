@@ -1,11 +1,11 @@
-/*
-* processing_FRQmetter_extern.h
- *
- *  Created on: April 23, 2017
- *      Author: Gerasimchuk
- *      Versin: 1
- */
-
+/**
+  ******************************************************************************
+  * @file    processing_FRQmetter_extern.h
+  * @author  Gerasimchuk A.
+  * @version V1.0.0
+  * @date    23-April-2017
+  * @brief
+  */
 #ifndef PROCESSING_FRQMETTER_EXTERN_H_
 #define PROCESSING_FRQMETTER_EXTERN_H_
 

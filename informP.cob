@@ -9,7 +9,9 @@
     <Component id="bf8a1f41-96ed-11df-80ae-001d7d723e56" name="CMSIS_Boot"/>
     <Component id="bfa102a1-96ed-11df-80ae-001d7d723e56" name="RCC"/>
     <Component id="bfbf8721-96ed-11df-80ae-001d7d723e56" name="PWR"/>
+    <Component id="bfe42621-96ed-11df-80ae-001d7d723e56" name="GPIO"/>
     <Component id="c00bf971-96ed-11df-80ae-001d7d723e56" name="RTC"/>
+    <Component id="c04d9651-96ed-11df-80ae-001d7d723e56" name="I2C"/>
   </Components>
   <ExcludedFiles>
     <Exclude path="P_dev_model/P_TIME/GPSProcessing/gpsPRJ/mainGPS.c"/>

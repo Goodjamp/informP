@@ -1,8 +1,11 @@
-/* File:   processing_FRQmetter.h
- * Author: Gerasimchuk A.
- * Date:  03.03.2017
- *
- */
+/**
+  ******************************************************************************
+  * @file    processing_FRQmetter.h
+  * @author  Gerasimchuk A.
+  * @version V1.0.0
+  * @date    3-Mach-2017
+  * @brief
+  */
 #include "stdint.h"
 
 #include "FreeRTOS.h"

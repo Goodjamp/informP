@@ -1,25 +1,15 @@
-/* File:   processing_FRQmetter.h
- * Author: Gerasimchuk A.
- * Date:  03.03.2017
- *
- */
+/**
+  ******************************************************************************
+  * @file    processing_FRQmetter.h
+  * @author  Gerasimchuk A.
+  * @version V1.0.0
+  * @date    3-Mach-2017
+  * @brief
+  */
+
 
 #ifndef PROCESSING_FEQMETTER_H_
 #define PROCESSING_FEQMETTER_H_
-
-#include "stm32f10x_gpio.h"
-#include "stm32f10x_tim.h"
-
-#include "FreeRTOS.h"
-#include "semphr.h"
-#include "task.h"
-
-#include "processing_mem_map.h"
-#include "processing_modbus.h"
-#include "init_system.h"
-#include "processing_FRQmetter_extern.h"
-#include "processing_reset_control.h"
-
 
 // frequency threshold F*1000
 #define FRQ_MAX 55000

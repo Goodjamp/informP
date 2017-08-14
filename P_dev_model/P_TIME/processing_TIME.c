@@ -73,7 +73,6 @@ void secondRTCCallBack(void){
 
 void updateTime(void){
 	uint8_t numRezRead = 0;
-	char *timeStr;
 	while(1)
 	{
 		numRezRead = ReadUSART(task_parameters[gpsUSARTNum].RdUSART, (uint8_t*)usartReadBuff, USART_READ_BUFF_SIZE, USART_READ_BUFF_TIME_MS);

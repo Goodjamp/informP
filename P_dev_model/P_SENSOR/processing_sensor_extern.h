@@ -13,7 +13,7 @@
 
 #include "processing_mem_map.h"
 
-#define DEV_6                sensor
+#define DEV_8                sensor
 //#define DEV_1_BIT_STATUS_REG 1
 
 // Количекство статус-регистров sensor

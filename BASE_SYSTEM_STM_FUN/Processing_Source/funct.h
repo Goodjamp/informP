@@ -1,4 +1,10 @@
-
+/*
+*   funct.h
+ *
+ *  Created on: July 29, 2017
+ *      Author: Gerasimchuk
+ *      Versin: 1
+ */
 #ifndef FUNCT_H_
 #define FUNCT_H_
 

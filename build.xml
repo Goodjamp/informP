@@ -72,6 +72,9 @@
       <includepath path="P_dev_model/P_TIME"/>
       <includepath path="P_dev_model/P_TIME/GPSProcessing"/>
       <includepath path="P_dev_model/P_TIME/RTCProcessing"/>
+      <includepath path="P_dev_model/P_SENSOR"/>
+      <includepath path="P_dev_model/P_SENSOR/I2C_HAL"/>
+      <includepath path="P_dev_model/P_SENSOR/DS1621_HAL"/>
       
       <!-- arm-none-eabi-gcc compiler arguments -->
       <compilerarg value="-mcpu=cortex-m3"/>
