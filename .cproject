@@ -31,10 +31,9 @@
 						<entry flags="" kind="includePath" name="FreeRTOS_Source/portable/GCC/ARM_CM3"/>
 						<entry flags="" kind="includePath" name="FreeRTOS_Source/portable/MemMang"/>
 						<entry flags="" kind="includePath" name="P_dev_model"/>
-						<entry flags="" kind="includePath" name="P_dev_model/P_DISPALAY/MAX7219/fifo_"/>
-						<entry flags="" kind="includePath" name="P_dev_model/P_DISPALAY/MAX7219/fifo_/inc"/>
-						<entry flags="" kind="includePath" name="P_dev_model/P_DISPALAY/MAX7219/inc"/>
-						<entry flags="" kind="includePath" name="P_dev_model/P_DISPALAY/MAX7219/src"/>
+						<entry flags="" kind="includePath" name="P_dev_model/P_DISPLAY"/>
+						<entry flags="" kind="includePath" name="P_dev_model/P_DISPLAY/MAX7219/fifo_/inc"/>
+						<entry flags="" kind="includePath" name="P_dev_model/P_DISPLAY/MAX7219/inc"/>
 						<entry flags="" kind="includePath" name="P_dev_model/P_FRQmetter_signal"/>
 						<entry flags="" kind="includePath" name="P_dev_model/P_SENSOR"/>
 						<entry flags="" kind="includePath" name="P_dev_model/P_SENSOR/DS1621_HAL"/>
@@ -78,10 +77,9 @@
 		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/FreeRTOS_Source/portable/GCC/ARM_CM3" kind="inc" path="" system="true"/>
 		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/FreeRTOS_Source/portable/MemMang" kind="inc" path="" system="true"/>
 		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/P_dev_model" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/P_dev_model/P_DISPALAY/MAX7219/fifo_" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/P_dev_model/P_DISPALAY/MAX7219/fifo_/inc" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/P_dev_model/P_DISPALAY/MAX7219/inc" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/P_dev_model/P_DISPALAY/MAX7219/src" kind="inc" path="" system="true"/>
+		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/P_dev_model/P_DISPLAY" kind="inc" path="" system="true"/>
+		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/P_dev_model/P_DISPLAY/MAX7219/fifo_/inc" kind="inc" path="" system="true"/>
+		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/P_dev_model/P_DISPLAY/MAX7219/inc" kind="inc" path="" system="true"/>
 		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/P_dev_model/P_FRQmetter_signal" kind="inc" path="" system="true"/>
 		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/P_dev_model/P_SENSOR" kind="inc" path="" system="true"/>
 		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/P_dev_model/P_SENSOR/DS1621_HAL" kind="inc" path="" system="true"/>

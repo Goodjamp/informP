@@ -129,7 +129,6 @@ DS1621status ds1621MesDone(interfaceAddressDef *interfaceAddress, DS1621MessStat
 }
 
 DS1621status ds1621StartMess(interfaceAddressDef *interfaceAddress){
-	uint8_t configReg;
 	if( i2c_read_data(interfaceAddress->I2Cdef,
 			DS1621_ADDRESS | interfaceAddress->addressMS4B,
 			DS1621ComandStartConvertT,

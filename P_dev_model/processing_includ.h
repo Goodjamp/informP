@@ -37,5 +37,6 @@
 #include "processing_modbus_extern.h"
 #include "processing_TIME_extern.h"
 #include "processing_sensor_extern.h"
+#include "processing_display_extern.h"
 
 #endif

@@ -1,10 +1,11 @@
-/*
-*  i2c_sourse.h
- *
- *  Created on: July 30, 2017
- *      Author: Gerasimchuk
- *      Versin: 1
- */
+/**
+  ******************************************************************************
+  * @file    i2c_sourse.h
+  * @author  Gerasimchuk A.
+  * @version V1.0.0
+  * @date    30-July-2017
+  * @brief
+  */
 #ifndef I2C_SOURCE_H_
 #define I2C_SOURCE_H_
 

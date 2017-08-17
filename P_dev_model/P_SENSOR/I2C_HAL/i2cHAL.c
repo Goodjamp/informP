@@ -1,11 +1,11 @@
-/*
-*  i2cHAL.c
- *
- *  Created on: Ogust 30, 2017
- *      Author: Gerasimchuk
- *      Versin: 1
- */
-
+/**
+  ******************************************************************************
+  * @file    i2cHAL.c
+  * @author  Gerasimchuk A.
+  * @version V1.0.0
+  * @date    30-July-2017
+  * @brief
+  */
 #include "stdint.h"
 
 #include "stm32f10x.h"

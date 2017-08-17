@@ -1,10 +1,11 @@
-/*
-* processing_sensor.c
- *
- *  Created on: July 29, 2017
- *      Author: Gerasimchuk
- *      Versin: 1
- */
+/**
+  ******************************************************************************
+  * @file    processing_sensor.c
+  * @author  Gerasimchuk A.
+  * @version V1.0.0
+  * @date    29-July-2017
+  * @brief
+  */
 #include "stdint.h"
 
 #include "FreeRTOS.h"
@@ -63,7 +64,6 @@ struct{
 	uint8_t cnt;
 }rezMes;
 void t_processing_sensor(void *pvParameters){
-	uint8_t rezStatus1, rezStatus2, rezStatus3;
 	//S_sensor_user_config *s_FRQConfig =(S_sensor_user_config*)pvParameters;
 	initI2C();
 

@@ -1,10 +1,11 @@
-/*
- * processing_sensor.h
- *
- *  Created on: July 30, 2017
- *      Author: Gerasimchuk
- *      Versin: 1
- */
+/**
+  ******************************************************************************
+  * @file    processing_sensor.h
+  * @author  Gerasimchuk A.
+  * @version V1.0.0
+  * @date    30-July-2017
+  * @brief
+  */
 
 #ifndef PROCESSING_FEQMETTER_H_
 #define PROCESSING_FEQMETTER_H_
