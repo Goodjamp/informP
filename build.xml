@@ -75,6 +75,9 @@
       <includepath path="P_dev_model/P_SENSOR"/>
       <includepath path="P_dev_model/P_SENSOR/I2C_HAL"/>
       <includepath path="P_dev_model/P_SENSOR/DS1621_HAL"/>
+      <includepath path="P_dev_model/P_DISPLAY"/>
+      <includepath path="P_dev_model/P_DISPLAY/MAX7219/fifo_/inc"/>
+      <includepath path="P_dev_model/P_DISPLAY/MAX7219/inc"/>
       
       <!-- arm-none-eabi-gcc compiler arguments -->
       <compilerarg value="-mcpu=cortex-m3"/>

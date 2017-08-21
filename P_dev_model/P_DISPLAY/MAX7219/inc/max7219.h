@@ -101,70 +101,52 @@ typedef enum{
 }maxTestDef;
 
 
-
-
 /* @brief
  * */
 typedef enum {
-	TX_ADDRESS_ONE = 0x0,
-	TX_ADDRESS_ALL = 0x1F,
-}TX_ADDRESS;
+	DISPLAY_OK,
+	DISPLAY_BUSY,
+	DISPLAY_ERROR_INIT,
+	DISPLAY_ERROR_TX_NUM
+}DISPLAY_STATUS;
 
 
-/* @brief
- * */
-typedef enum {
-	MAX7219_OK,
-	MAX7219_BUSY,
-	MAX7219_ERROR_INIT,
-	MAX7219_ERROR_LD_THRESHOLD,
-	MAX7219_ERROR_TX_NUM
-}MAX7219_STATUS;
-
+typedef enum{
+	TX_DATA,
+	GEN_LD,
+	TX_COMPLITE
+}txState;
 
 /* @brief Description video bufer for one MAX7219
  * */
 typedef uint16_t displayBuffDef[NUM_MAX_DIGITS];
-
-typedef void (*interfaseTxDef)(uint16_t data);
-typedef void (*setLDDef)(uint16_t numberOfDisp, TX_ADDRESS txAddress);
-
-typedef struct{
-	interfaseTxDef   txDadaCB;
-	setLDDef         setLDCB;
-}displayCallbackDef;
 
 /* @brief
  * */
 typedef struct{
 	uint16_t         dataCnt;   // Data transmit counter  (set user according number of max chips per display)
 	uint8_t          digitCnt;  // digit transmit counter (count to max number of digits NUM_MAX_DIGITS)
-	uint8_t          txSize;    //number of maxBuffTypedef (the same as number of MAX chips per display)
+	uint8_t          txSize;    // number of maxBuffTypedef (the same as number of MAX chips per display)
 	displayBuffDef  *txData;
-	uint8_t          txAddress; // pointed on the Display target: for current Display or ALL Display from the list
 }displayTxHandlerDef;
 
 /* @brief
  * */
 typedef struct{
-	MAX7219_STATUS      status;
+	DISPLAY_STATUS       status;
 	displayTxHandlerDef  txBuff;
-	void                *dispList;     // pointer on Array for save pointer on max7219Handler
-	uint16_t   		  orderDispl;
-	uint8_t           displayCnt;   // counter
 }displayHandlerDef;
 
+txState displayTxCallback(displayHandlerDef *displayHandler, uint16_t *nexSymbol);
+DISPLAY_STATUS displayTx(displayHandlerDef *displayHandler, uint8_t numData, displayBuffDef *pData );
+DISPLAY_STATUS displayInterfaceInit(volatile displayHandlerDef *displayHandler);
+DISPLAY_STATUS displayIntarfaceGetStatus(displayHandlerDef const *max7219Interface);
 
-void displaySetCallback(displayCallbackDef *displayCallbackIn);
-void displayTxCallback(displayHandlerDef *tmpInterH);
-void displayStartGenLD(void);
-MAX7219_STATUS displayTx(displayHandlerDef *displayHandler, uint16_t orderNumberDispl, uint8_t numData, displayBuffDef *pData, TX_ADDRESS txAddress);
-MAX7219_STATUS displayInterfaceInit(displayHandlerDef *max7219Interface, void* displayList, uint16_t sizeDisplayList);
-MAX7219_STATUS displayIntarfaceGetStatus(displayHandlerDef const *max7219Interface);
-
-void displaySetMatrix(uint8_t numMax, uint8_t data, displayBuffDef *maxBuff);
+void displaySetMatrix(uint8_t numMax, uint16_t totalNumMax, uint8_t data, displayBuffDef *maxBuff);
 void displaySetConfig(uint8_t numMax, maxComandDef maxComand, uint8_t data, displayBuffDef *maxBuff);
 void displayConfigDecodeMode(uint8_t numMax, uint8_t data, displayBuffDef *maxBuff);
 void displayConfigIntensity(uint8_t numMax, maxIntensityDef data, displayBuffDef *maxBuff);
+void displayConfigWorkMode(uint8_t numMax, shutDownDef data, displayBuffDef *maxBuff);
+void displayConfigScanLimit(uint8_t numMax, maxScanLimDef data, displayBuffDef *maxBuff);
 
 #endif

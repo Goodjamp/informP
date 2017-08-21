@@ -73,6 +73,11 @@ S_modbus_tsk_par s_modbus_tsk_par[NUM_PORT_MODBUS];
 int main(void)
 {
 	u8 k1;
+
+	t_processing_display((void*)&k1);
+
+
+
 	delay_loop(); // ожидаю пока стабилизируеться питание
 	// настройка портов логического управления
 	processing_simple_gpio();

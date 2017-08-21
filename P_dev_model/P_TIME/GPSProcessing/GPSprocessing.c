@@ -12,7 +12,7 @@
 
 static uint8_t charHexToLSOctet(uint8_t dataIn, uint8_t *numDigits);
 static GPS_STATUS parsGPRMC(void *procGPS);
-static void parsGPGGA(void *procGPS);
+inline GPS_STATUS parsGPGGA(void *procGPS);
 static uint8_t convertStrToNum(uint8_t *data, uint8_t size, TYPE_NUM type,  void *rez);
 static uint8_t takeFIeld(uint8_t **data, uint8_t *size, uint8_t numField, processingGPS *message);
 
@@ -342,8 +342,8 @@ static uint8_t takeFIeld(uint8_t **data, uint8_t *size, uint8_t numField, proces
 }
 
 
-inline void parsGPGGA(void *procGPS){
-
+inline GPS_STATUS parsGPGGA(void *procGPS){
+	return GPS_STATUS_COMPLETE;
 }
 
 
