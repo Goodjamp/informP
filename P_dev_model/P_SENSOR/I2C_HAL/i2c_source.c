@@ -42,6 +42,9 @@ void  i2c_config(I2CConfig *configData){
 	I2C_InitTypeDef I2C_InitStruct;
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
 
+	I2C_GenerateSTART(I2C1, DISABLE);
+	I2C1->CR1 = 0;
+
 	I2C_InitStruct.I2C_ClockSpeed = configData->fI2C;
 	I2C_InitStruct.I2C_Mode = I2C_Mode_I2C;			  // I2C mode
 	I2C_InitStruct.I2C_DutyCycle = I2C_DutyCycle_2;	  // 50% duty cycle --> standard

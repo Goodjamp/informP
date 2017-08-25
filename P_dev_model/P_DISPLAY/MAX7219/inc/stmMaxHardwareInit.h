@@ -72,7 +72,7 @@ typedef struct{
 }LDDescr;
 
 
-DISPLAY_STATUS displayTxData(displayHandlerDef *displayHandler, uint16_t orderNumberDispl, uint8_t numData, displayBuffDef *pData, TX_ADDRESS txAddress);
+DISPLAY_STATUS displayTxData(displayHandlerDef *displayHandler, uint16_t orderNumberDispl, uint8_t numData, TX_ADDRESS txAddress);
 void initDisplay(displayHandlerDef *displayHandler, LDDescr *LDList, uint16_t numScreen, SPI_TypeDef *selSPI);
 
 #endif

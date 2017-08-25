@@ -24,9 +24,10 @@
   * @param
   * @retval None
   */
-DISPLAY_STATUS displayInterfaceInit( displayHandlerDef volatile *displayHandler)
+DISPLAY_STATUS displayInterfaceInit( displayHandlerDef *displayHandler, displayBuffDef *displayBuff)
 {
 	displayHandler->status = DISPLAY_OK;
+	displayHandler->txBuff.txData = displayBuff;
 
 	return DISPLAY_OK;
 }
@@ -60,7 +61,7 @@ txState displayTxCallback(displayHandlerDef *displayHandler, uint16_t *nexSymbol
   * @param
   * @retval None
   */
-DISPLAY_STATUS displayTx(displayHandlerDef *displayHandler, uint8_t numData, displayBuffDef *pData )
+DISPLAY_STATUS displayTx(displayHandlerDef *displayHandler, uint8_t numData )
 {
 	if(displayHandler->status == DISPLAY_BUSY)
 	{
@@ -74,7 +75,6 @@ DISPLAY_STATUS displayTx(displayHandlerDef *displayHandler, uint8_t numData, dis
 	displayHandler->txBuff.digitCnt  = 0;
 	displayHandler->txBuff.dataCnt   = 0;
 	displayHandler->txBuff.txSize    = numData;
-	displayHandler->txBuff.txData    = pData;
 	displayHandler->status = DISPLAY_BUSY;
 
 	return DISPLAY_OK;
@@ -97,14 +97,26 @@ DISPLAY_STATUS displayIntarfaceGetStatus(displayHandlerDef const *displayHandler
   * @param
   * @retval None
   */
-void displaySet7Segment(uint8_t numMax, uint16_t totalNumMax, uint8_t numDig, uint8_t data, displayBuffDef *maxBuff )
+void displayClearBuff(displayHandlerDef *displayIntarface, uint8_t numMax)
+{   uint16_t cnt = 0;
+	for(;cnt < NUM_MAX_DIGITS; cnt++){
+		displayIntarface->txBuff.txData[0][cnt] = maxSetConfig_( (cnt+1), 0);
+		displayIntarface->txBuff.txData[1][cnt] = maxSetConfig_( (cnt+1), 0);
+	}
+}
+
+
+/**
+  * @brief Fill video buffer for 7 segments indicator
+  * @param
+  * @retval None
+  */
+void displaySet7Segment(displayHandlerDef *displayIntarface, uint8_t numMax, uint8_t data, uint8_t numDig)
 {
 	uint8_t cnt = 0;
 	for(;cnt < sizeof(symbols7Segments)/sizeof(symbols7Segments[0]); cnt++){
 		if( data == symbols7Segments[cnt].symbol){
-			// fill buffer
-			*((uint16_t*)maxBuff + cnt * (totalNumMax - 1)) = symbols7Segments[cnt].segments;
-			//maxBuff[numMax][numDig] = symbols7Segments[cnt].segments;
+			displayIntarface->txBuff.txData[numMax][numDig] = maxSetConfig_( numDig, symbols7Segments[cnt].segments);
 			return;
 		}
 	}
@@ -116,22 +128,17 @@ void displaySet7Segment(uint8_t numMax, uint16_t totalNumMax, uint8_t numDig, ui
   * @param
   * @retval None
   */
-void displaySetMatrix(uint8_t numMax, uint16_t totalNumMax, uint8_t data, displayBuffDef *maxBuff)
+void displaySet8x8Matrix(displayHandlerDef * displayIntarface, uint8_t numMax, uint8_t data)
 {
 	uint16_t cnt = 0;
-	uint16_t *tempBuf = (uint16_t*)maxBuff;
-	uint8_t orderDigit = totalNumMax-1;
 	for(;cnt < sizeof(symbols8x8Matrix)/sizeof(symbols8x8Matrix[0]); cnt++){
 		if( data == symbols8x8Matrix[cnt].symbol){
-			//memcpy(maxBuff[numMax], symbols8x8Matrix[cnt].points, )
-			//break;
+			// Copy all symboll
+			memcpy( (uint8_t*)displayIntarface->txBuff.txData[numMax], symbols8x8Matrix[cnt].points, sizeof(symbols8x8Matrix[cnt].points) );
+
+			return;
 		}
 	}
-	// Copy symbol in special order
-	//for(cnt = 0; cnt < NUM_MAX_DIGITS; cnt++)
-	//{
-		//*(tempBuf + cnt * orderDigit) = symbols8x8Matrix[cnt].points[cnt];
-	//}
 }
 
 
@@ -140,9 +147,9 @@ void displaySetMatrix(uint8_t numMax, uint16_t totalNumMax, uint8_t data, displa
   * @param
   * @retval None
   */
-void displaySetConfig(uint8_t numMax, maxComandDef maxComand, uint8_t data, displayBuffDef *maxBuff)
+void displaySetConfig(displayHandlerDef * displayIntarface, uint8_t numMax,  maxComandDef maxComand, uint8_t data)
 {
-	maxBuff[numMax][0] = maxSetConfig_(maxComand, data);
+	displayIntarface->txBuff.txData[numMax][0] = maxSetConfig_(maxComand, data);
 }
 
 /**
@@ -152,13 +159,13 @@ void displaySetConfig(uint8_t numMax, maxComandDef maxComand, uint8_t data, disp
   */
 
 
-void displaySetConfigMulti(uint8_t sizeBuff, maxComandDef maxComand, uint8_t data, displayBuffDef *maxBuff)
+void displaySetConfigMulti(displayHandlerDef * displayIntarface, uint8_t sizeBuff, maxComandDef maxComand, uint8_t data)
 {
 	uint8_t cnt=0;
 	uint16_t newConfig = maxSetConfig_(maxComand, data);
 	for(; cnt<sizeBuff; cnt++)
 	{
-		maxBuff[cnt][0] = newConfig;
+		displayIntarface->txBuff.txData[cnt][0] = newConfig;
 	}
 }
 
@@ -168,9 +175,9 @@ void displaySetConfigMulti(uint8_t sizeBuff, maxComandDef maxComand, uint8_t dat
   * @param
   * @retval None
   */
-void displayConfigDecodeMode(uint8_t numMax, uint8_t data, displayBuffDef *maxBuff)
+void displayConfigDecodeMode(displayHandlerDef * displayIntarface, uint8_t numMax, uint8_t data)
 {
-	maxBuff[numMax][0] = maxSetConfig_(DECODE_MODE, data);
+	displayIntarface->txBuff.txData[numMax][0] = maxSetConfig_(DECODE_MODE, data);
 }
 
 /**
@@ -178,9 +185,9 @@ void displayConfigDecodeMode(uint8_t numMax, uint8_t data, displayBuffDef *maxBu
   * @param
   * @retval None
   */
-void displayConfigIntensity(uint8_t numMax, maxIntensityDef data, displayBuffDef *maxBuff)
+void displayConfigIntensity(displayHandlerDef * displayIntarface, uint8_t numMax, maxIntensityDef data)
 {
-	maxBuff[numMax][0] = maxSetConfig_(INTENSITY, data);
+	displayIntarface->txBuff.txData[numMax][0] = maxSetConfig_(INTENSITY, data);
 }
 
 /**
@@ -188,13 +195,13 @@ void displayConfigIntensity(uint8_t numMax, maxIntensityDef data, displayBuffDef
   * @param
   * @retval None
   */
-void displayConfigWorkMode(uint8_t numMax, shutDownDef data, displayBuffDef *maxBuff)
+void displayConfigWorkMode(displayHandlerDef * displayIntarface, uint8_t numMax, shutDownDef data)
 {
-	maxBuff[numMax][0] = maxSetConfig_(SHUTDOWN, data);
+	displayIntarface->txBuff.txData[numMax][0] = maxSetConfig_(SHUTDOWN, data);
 }
 
 
-void displayConfigScanLimit(uint8_t numMax, maxScanLimDef data, displayBuffDef *maxBuff)
+void displayConfigScanLimit(displayHandlerDef * displayIntarface, uint8_t numMax, maxScanLimDef data)
 {
-	maxBuff[numMax][0] = maxSetConfig_(SCAN_LIMIT, data);
+	displayIntarface->txBuff.txData[numMax][0] = maxSetConfig_(SCAN_LIMIT, data);
 }

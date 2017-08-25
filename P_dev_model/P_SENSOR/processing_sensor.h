@@ -11,7 +11,7 @@
 #define PROCESSING_FEQMETTER_H_
 
 #define DS1321Interface  I2C1
-#define frqI2C           (uint16_t)80000
+#define frqI2C           (uint16_t)12000
 #define DS1621Address    (uint8_t)0b000
 
 

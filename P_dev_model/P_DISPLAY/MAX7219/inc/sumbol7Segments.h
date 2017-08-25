@@ -81,7 +81,7 @@ const symbol7SegmentsTypedef symbols7Segments[] = {\
 		/*******        9       *******/
 				.symbol = '9',
 				  //.abcdefg
-	            .segments = 0b00110000,
+	            .segments = 0b01111011,
 
 		},
 		{

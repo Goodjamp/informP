@@ -63,6 +63,7 @@ struct{
 	uint16_t temperature[tempBuffSize];
 	uint8_t cnt;
 }rezMes;
+
 void t_processing_sensor(void *pvParameters){
 	//S_sensor_user_config *s_FRQConfig =(S_sensor_user_config*)pvParameters;
 	initI2C();
@@ -71,6 +72,7 @@ void t_processing_sensor(void *pvParameters){
 	ds1621StartMess(&ds1621Sensor);
 
 	while(1){
+
 		if(ds1621MesDone(&ds1621Sensor, &mesStatus) == DS1621_STATUS_BUSS_ERROR){
 			vTaskDelay(20);
 			continue;

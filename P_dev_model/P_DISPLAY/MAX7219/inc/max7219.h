@@ -138,15 +138,23 @@ typedef struct{
 }displayHandlerDef;
 
 txState displayTxCallback(displayHandlerDef *displayHandler, uint16_t *nexSymbol);
-DISPLAY_STATUS displayTx(displayHandlerDef *displayHandler, uint8_t numData, displayBuffDef *pData );
-DISPLAY_STATUS displayInterfaceInit(volatile displayHandlerDef *displayHandler);
+DISPLAY_STATUS displayTx(displayHandlerDef *displayHandler, uint8_t numData);
+DISPLAY_STATUS displayInterfaceInit( displayHandlerDef *displayHandler, displayBuffDef *displayBuff);
 DISPLAY_STATUS displayIntarfaceGetStatus(displayHandlerDef const *max7219Interface);
 
-void displaySetMatrix(uint8_t numMax, uint16_t totalNumMax, uint8_t data, displayBuffDef *maxBuff);
-void displaySetConfig(uint8_t numMax, maxComandDef maxComand, uint8_t data, displayBuffDef *maxBuff);
-void displayConfigDecodeMode(uint8_t numMax, uint8_t data, displayBuffDef *maxBuff);
-void displayConfigIntensity(uint8_t numMax, maxIntensityDef data, displayBuffDef *maxBuff);
-void displayConfigWorkMode(uint8_t numMax, shutDownDef data, displayBuffDef *maxBuff);
-void displayConfigScanLimit(uint8_t numMax, maxScanLimDef data, displayBuffDef *maxBuff);
+
+// Update screen function
+void displaySet7Segment(displayHandlerDef  *displayIntarface, uint8_t numMax, uint8_t data, uint8_t numDig);
+void displaySet8x8Matrix(displayHandlerDef *displayIntarface, uint8_t numMax, uint8_t data);
+
+
+// Config display function
+void displayClearBuff(displayHandlerDef *displayIntarface, uint8_t numMax);
+void displaySetConfig(displayHandlerDef        *displayIntarface, uint8_t numMax,  maxComandDef maxComand, uint8_t data);
+void displaySetConfigMulti(displayHandlerDef   *displayIntarface, uint8_t sizeBuff, maxComandDef maxComand, uint8_t data);
+void displayConfigDecodeMode(displayHandlerDef *displayIntarface, uint8_t numMax, uint8_t data);
+void displayConfigIntensity(displayHandlerDef * displayIntarface, uint8_t numMax, maxIntensityDef data);
+void displayConfigWorkMode(displayHandlerDef   *displayIntarface, uint8_t numMax, shutDownDef data);
+void displayConfigScanLimit(displayHandlerDef  *displayIntarface, uint8_t numMax, maxScanLimDef data);
 
 #endif

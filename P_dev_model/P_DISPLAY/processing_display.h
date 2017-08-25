@@ -16,7 +16,19 @@
 #define DISPLAY_SPI  SPI2
 
 #define numberOfScreen  4
-#define maxPerScreen    2
+
+#define ORDER_NUM_MATRIX        0
+#define ORDER_NUM_7SEG          1
+#define NUMBER_7_SEGMENTS_IND   4
+#define MAX_PER_SCREEN          2
+
+
+typedef enum{
+	COLOR_GREEN = 0,
+	COLOR_RED      ,
+	COLOR_ORANGE
+}COLOR;
+
 
 /* @brief
  *

@@ -21,7 +21,6 @@ union{
 
 
 int main(int argc, char *argv[]){
-
     GPRMC_Def myGPRMC;
     addGPSPars(GPRMC, &myGPRMC);
     parsGPS(&myGPRMC, (uint8_t*)data1, (uint8_t)strlen(data1));

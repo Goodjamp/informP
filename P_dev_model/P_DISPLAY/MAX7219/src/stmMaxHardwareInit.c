@@ -253,7 +253,6 @@ void TIM2_IRQHandler(void)
 	if(ldStatusDef.address == TX_ADDRESS_ONE)
 	{
 		GPIO_ResetBits(LDGenDef.ListOfLD[ldStatusDef.numLD].port, LDGenDef.ListOfLD[ldStatusDef.numLD].pin);
-		return;
 	}
 	else
 	{
@@ -337,15 +336,15 @@ static void displayInterruptTx(displayHandlerDef *displayHandler)
 
 
 
-//               USER CALL
+//-----------------------------------USER AREA-------------------------------------------
 /**
   * @brief
   * @param
   * @retval
   */
-DISPLAY_STATUS displayTxData(displayHandlerDef *displayHandler, uint16_t orderNumberDispl, uint8_t numData, displayBuffDef *pData, TX_ADDRESS txAddress){
+DISPLAY_STATUS displayTxData(displayHandlerDef *displayHandler, uint16_t orderNumberDispl, uint8_t numData, TX_ADDRESS txAddress){
 
-	if(displayTx(displayHandler, numData, pData) != DISPLAY_OK)
+	if(displayTx(displayHandler, numData) != DISPLAY_OK)
 	{
 		return DISPLAY_BUSY;
 	};
@@ -358,13 +357,20 @@ DISPLAY_STATUS displayTxData(displayHandlerDef *displayHandler, uint16_t orderNu
 	return DISPLAY_BUSY;
 }
 
+/**
+  * @brief
+  * @param
+  * @retval
+  */
 void initDisplay(displayHandlerDef *displayHandler, LDDescr *LDList, uint16_t numScreen, SPI_TypeDef *selSPI)
 {
 	uint16_t cnt = 0;
+	// Config display driver
 	LDGenDef.sellSPI = selSPI;
 	LDGenDef.ListOfLD = LDList;
 	LDGenDef.numScreen = numScreen;
-	displayInterfaceInit(displayHandler);
+
+	// Config peripherals
 	displayIntarface = displayHandler;
 	for(;cnt < LDGenDef.numScreen; cnt++)
 	{
