@@ -146,4 +146,16 @@ const symbol8x8MatrixTypedef symbols8x8Matrix[] = {
 
 };
 
+const symbol8x8MatrixTypedef error8x8Segments =
+		descript8X8Sumbol('9',
+		0b00000000, //1
+		0b00000000, //2
+		0b00000000, //3
+		0b00000000, //4
+		0b00000000, //5
+		0b00000000, //6
+		0b00000000, //7
+		0b00000011  //8
+);
+
 #endif

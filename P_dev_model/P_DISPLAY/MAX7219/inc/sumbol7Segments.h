@@ -143,4 +143,11 @@ const symbol7SegmentsTypedef symbols7Segments[] = {\
 
 		};
 
+const symbol7SegmentsTypedef error7Segments = {
+		/*******        _       *******/
+				.symbol = '_',
+			    .segments = 0b00001000,
+
+		};
+
 #endif

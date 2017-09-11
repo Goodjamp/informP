@@ -75,18 +75,18 @@ void updateScreen(displayHandlerDef *displayHandler, uint16_t numScreen, uint8_t
 	// set max#1 sumbol - 8x8 matrix
 	displaySet8x8Matrix( displayHandler, ORDER_NUM_MATRIX,  str[ORDER_NUM_MATRIX] );
 	// set max#2 - 7 segment 4 ripple colors digits
-	for(cnt = 1 ; cnt <= NUMBER_7_SEGMENTS_IND; cnt++)
+	for(cnt = 0 ; cnt < NUMBER_7_SEGMENTS_IND; cnt++)
 	{
 		switch (color){
 		case COLOR_GREEN:
-			displaySet7Segment(  displayHandler, ORDER_NUM_7SEG, str[cnt],  cnt);
+			displaySet7Segment(  displayHandler, ORDER_NUM_7SEG, str[cnt + 1],  cnt);
 			break;
 		case COLOR_RED:
-			displaySet7Segment(  displayHandler, ORDER_NUM_7SEG, str[cnt],  cnt + 4);
+			displaySet7Segment(  displayHandler, ORDER_NUM_7SEG, str[cnt + 1],  cnt + 4);
 			break;
 		case COLOR_ORANGE:
-			displaySet7Segment(  displayHandler, ORDER_NUM_7SEG, str[cnt],  cnt);
-			displaySet7Segment(  displayHandler, ORDER_NUM_7SEG, str[cnt],  cnt + 4);
+			displaySet7Segment(  displayHandler, ORDER_NUM_7SEG, str[cnt + 1],  cnt);
+			displaySet7Segment(  displayHandler, ORDER_NUM_7SEG, str[cnt + 1],  cnt + 4);
 			break;
 		}
 	}
@@ -119,7 +119,7 @@ void refreshDisplays(void)
 }
 
 
-uint8_t str[] = "12345";
+uint8_t str[] = "h111a";
 /**
   * @brief
   * @param
@@ -137,11 +137,12 @@ void t_processing_display(void *pvParameters){
 	refreshDisplays();
 
 	uint32_t cnt = 0;
-	COLOR currentCollor = COLOR_GREEN;
+	COLOR currentCollor = COLOR_RED;
 	while(1){
-		updateScreen(&displayHandler, SCREEN_4, str, strlen(str), currentCollor, TX_ADDRESS_ONE);
+		updateScreen(&displayHandler, SCREEN_4, str, strlen((char*)str), currentCollor, TX_ADDRESS_ONE);
+
 		while(displayIntarfaceGetStatus(&displayHandler) == DISPLAY_BUSY){}
-		while(cnt < 4000000){
+		while(cnt < 200000){
 			cnt++;
 		}
 		cnt = 0;

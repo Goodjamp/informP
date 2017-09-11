@@ -116,10 +116,12 @@ void displaySet7Segment(displayHandlerDef *displayIntarface, uint8_t numMax, uin
 	uint8_t cnt = 0;
 	for(;cnt < sizeof(symbols7Segments)/sizeof(symbols7Segments[0]); cnt++){
 		if( data == symbols7Segments[cnt].symbol){
-			displayIntarface->txBuff.txData[numMax][numDig] = maxSetConfig_( numDig, symbols7Segments[cnt].segments);
+			displayIntarface->txBuff.txData[numMax][numDig] = maxSetConfig_( (numDig + 1), symbols7Segments[cnt].segments);
 			return;
 		}
 	}
+	// if symbol don't fond - set error symbol
+	displayIntarface->txBuff.txData[numMax][numDig] = maxSetConfig_( (numDig + 1), error7Segments.segments);
 }
 
 
@@ -135,10 +137,10 @@ void displaySet8x8Matrix(displayHandlerDef * displayIntarface, uint8_t numMax, u
 		if( data == symbols8x8Matrix[cnt].symbol){
 			// Copy all symboll
 			memcpy( (uint8_t*)displayIntarface->txBuff.txData[numMax], symbols8x8Matrix[cnt].points, sizeof(symbols8x8Matrix[cnt].points) );
-
 			return;
 		}
 	}
+	memcpy( (uint8_t*)displayIntarface->txBuff.txData[numMax], symbols8x8Matrix[cnt].points, sizeof(symbols8x8Matrix[cnt].points) );
 }
 
 
