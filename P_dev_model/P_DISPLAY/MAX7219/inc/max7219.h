@@ -127,7 +127,7 @@ typedef struct{
 	uint16_t         dataCnt;   // Data transmit counter  (set user according number of max chips per display)
 	uint8_t          digitCnt;  // digit transmit counter (count to max number of digits NUM_MAX_DIGITS)
 	uint8_t          txSize;    // number of maxBuffTypedef (the same as number of MAX chips per display)
-	displayBuffDef  *txData;
+	displayBuffDef  *txData;    // pointer on the buffer for Tx data
 }displayTxHandlerDef;
 
 /* @brief

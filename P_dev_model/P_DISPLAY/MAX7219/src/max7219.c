@@ -195,6 +195,9 @@ void displayConfigIntensity(displayHandlerDef * displayIntarface, uint8_t numMax
 /**
   * @brief Set SHUTDOWN/NORMAL_OPERATION for selected digits
   * @param
+  * [displayIntarface] - pointer on the display interface (display - serial connection of few (from one to ...) MAX7219 chips)
+  * [numMax]           - order number of MAX7219 in display
+  * [data]             - new mode for selected numMax. ref to the "shutDownDef"
   * @retval None
   */
 void displayConfigWorkMode(displayHandlerDef * displayIntarface, uint8_t numMax, shutDownDef data)

@@ -7,6 +7,7 @@
   * @brief
   */
 #include "stdint.h"
+#include "stddef.h"
 
 #include "FreeRTOS.h"
 #include "semphr.h"
@@ -178,3 +179,123 @@ void t_processing_display(void *pvParameters){
 
 	}
 }
+
+#define MAX_NUM_PAR            6
+
+
+typedef enum{
+	PARAM_SYMB_POS_DATE        = 0,
+	PARAM_SYMB_POS_TIME        = 1,
+	PARAM_SYMB_POS_FREQUENCY   = 2,
+	PARAM_SYMB_POS_HUMIDITY    = 3,
+	PARAM_SYMB_POS_ATM_PRESURE = 4,
+	PARAM_SYMB_POS_TEMPERATURE = 5
+}PARAM_SYMB_POS;
+
+
+const uint8_t *paramitersSymbols[] = {
+		[PARAM_SYMB_POS_DATE]        = "Dt",
+		[PARAM_SYMB_POS_TIME]        = "Tm",
+		[PARAM_SYMB_POS_FREQUENCY]   = "Fr",
+		[PARAM_SYMB_POS_HUMIDITY]    = "Hd",
+		[PARAM_SYMB_POS_ATM_PRESURE] = "Pr",
+		[PARAM_SYMB_POS_TEMPERATURE] = "Tc",
+};
+
+
+typedef struct{
+	uint8_t parSymbol;
+	uint16_t parAddress;
+	uint32_t data;
+}screenParList;
+
+typedef struct{
+	uint8_t Pos;
+	uint8_t numPar;
+	screenParList *list;
+}listBox;
+
+
+typedef enum{
+	DISPLAY_STATE_WORK,
+	DISPLAY_STATE_TEST
+}DISPLAY_STATE;
+
+
+
+struct{
+	uint8_t widjetCnt;
+	listBox **listOfListBox;
+	uint8_t brightnes;         // global brightens
+	DISPLAY_STATE displayState;     // display state: test, work
+}menuDescription;
+
+typedef enum{
+	ACTION_USER,
+	ACTION_TIMER,
+}DIASPALY_ACTION;
+
+#define isDIASPALY_ACTION(X) (( X == ACTION_USER)|| \\
+							  ( X == ACTION_TIMER) )
+
+typedef enum{
+	ACTION_ENTER,
+	ACTION_ESC,
+	ACTION_SELL,
+	ACTION_TEST
+}USER_ACTION; // connected with Press Button
+
+
+
+
+void goToTestMode(void);
+void increaseWidgetP(void);
+void decreaseWidgetP(void);
+void switchActionTimer(void);
+
+/**
+  * @brief  Action on change display
+  * @param
+  * @retval
+  */
+void userActionReaction(USER_ACTION inAction){
+// menuDescription
+	if(inAction == ACTION_ENTER)
+	{
+		// shift to next widget
+		increaseWidgetP();
+	}
+	else if(inAction == ACTION_ESC)
+	{
+
+	}
+	//
+
+
+}
+
+void goToTestMode(void){
+
+}
+
+
+void increaseWidjetP(void){
+
+}
+
+void decreaseWidjetP(void){
+
+}
+
+/*
+ * Display is -  menu with 2 levels: 1 (ROOT) - selected screen, (have 1 adjustment parameter - brightens)
+ *                                   2 -  adjustment screen parameters (sel. showing parameter).
+ *
+ * shift between screen - is like a menu tree. Press "MODE" button - open current menu position.
+ *                                             Press "CORREC" button - set new menu parameters
+ *
+ * */
+
+
+
+
