@@ -8,6 +8,7 @@
   */
 #include "stdint.h"
 #include "stddef.h"
+#include "string.h"
 
 #include "FreeRTOS.h"
 #include "semphr.h"
@@ -18,12 +19,13 @@
 #include "processing_display.h"
 #include "max7219.h"
 #include "stmMaxHardwareInit.h"
+#include "buttonProcessing.h"
 
 #include "stm32f10x_gpio.h"
 #include "stm32f10x_rcc.h"
 
 extern S_address_oper_data s_address_oper_data;
-xTimerHandle updateButtonPressTimer;
+xTimerHandle screenUpdateTimer;
 
 
 static displayBuffDef    displayBuff[MAX_PER_SCREEN];
@@ -47,6 +49,25 @@ static LDDescr LDList[numberOfScreen] = {
 				},
 };
 
+struct{
+	uint8_t widjetCnt;
+	uint8_t widjetNum;
+	listBox **listOfListBox;
+	uint8_t brightnes;         // global brightens
+	DISPLAY_STATE displayState;     // display state: test, work
+	uint8_t listBoxSellFlag;
+}menuDescription;
+
+
+const char *paramitersSymbols[] = {
+		[PARAM_SYMB_POS_DATE]        = "Dt",
+		[PARAM_SYMB_POS_TIME]        = "Tm",
+		[PARAM_SYMB_POS_FREQUENCY]   = "Fr",
+		[PARAM_SYMB_POS_HUMIDITY]    = "Hd",
+		[PARAM_SYMB_POS_ATM_PRESURE] = "Pr",
+		[PARAM_SYMB_POS_TEMPERATURE] = "Tc",
+};
+
 
 /**
   * @brief
@@ -55,6 +76,50 @@ static LDDescr LDList[numberOfScreen] = {
   */
 uint16_t display_calc_address_oper_reg(S_display_address *ps_sensor_address, u16 adres_start){
 	return adres_start;
+}
+
+
+
+/**
+  * @brief This function implement parsing string according next template: max#1 - 8x8 matrix, max#2 - 7 segment 4 ripple colors digits
+  * @param
+  * [displayHandler]  display handler (should be initialized before used)
+  * [numScreen]       order number of the screen (associate with order number LD pin)
+  * [str]             ASCII string
+  * [strSize]         size of str
+  * [color]           selected color of screen
+  * [txAddress]       address of str: for all screen inside displayHandler, or only one - numScreen
+  * @retval
+  */
+void updateScreen(displayHandlerDef *displayHandler, uint16_t numScreen, uint8_t *str, uint16_t strSize, COLOR color, TX_ADDRESS txAddress)
+{
+	uint16_t cnt = 0;
+	// For current screen configuration:
+	// first max7219  - 8x8 matrix indicator
+	// Second max7219 - 7-segment indicator
+
+	displayClearBuff(displayHandler, MAX_PER_SCREEN);
+	displayTxData(displayHandler, numScreen, MAX_PER_SCREEN, txAddress);
+	while(displayIntarfaceGetStatus(displayHandler) == DISPLAY_BUSY){}
+	// set max#1 sumbol - 8x8 matrix
+	displaySet8x8Matrix( displayHandler, ORDER_NUM_MATRIX,  str[ORDER_NUM_MATRIX] );
+	// set max#2 - 7 segment 4 ripple colors digits
+	for(cnt = 0 ; cnt < NUMBER_7_SEGMENTS_IND; cnt++)
+	{
+		switch (color){
+		case COLOR_GREEN:
+			displaySet7Segment(  displayHandler, ORDER_NUM_7SEG, str[cnt + 1],  cnt);
+			break;
+		case COLOR_RED:
+			displaySet7Segment(  displayHandler, ORDER_NUM_7SEG, str[cnt + 1],  cnt + 4);
+			break;
+		case COLOR_ORANGE:
+			displaySet7Segment(  displayHandler, ORDER_NUM_7SEG, str[cnt + 1],  cnt);
+			displaySet7Segment(  displayHandler, ORDER_NUM_7SEG, str[cnt + 1],  cnt + 4);
+			break;
+		}
+	}
+	displayTxData(displayHandler, numScreen, MAX_PER_SCREEN, txAddress);
 }
 
 
@@ -98,7 +163,7 @@ uint8_t str[] = "h111a";
 void t_processing_display(void *pvParameters){
 
 	buttonGpioConfig();
-	xTimerCreate("SCREEN UPDATE TIMER", BUTTON_TIMER_PERIOD_UPDATE, pdFALSE, (void*)(&buttonTimerID) , screenUpdateTimer);
+	screenUpdateTimer = xTimerCreate("SCREEN UPDATE TIMER", BUTTON_TIMER_PERIOD_UPDATE, pdFALSE, (void*)(0) , screenUpdateTimerCallback);
 
 
 
@@ -114,7 +179,7 @@ void t_processing_display(void *pvParameters){
 	uint32_t cnt = 0;
 	COLOR currentCollor = COLOR_RED;
 	while(1){
-		updateScreen(&displayHandler, SCREEN_4, str, strlen((char*)str), currentCollor, TX_ADDRESS_ONE);
+		updateScreen(&displayHandler, SCREEN_4, str, strlen((const char*)str), currentCollor, TX_ADDRESS_ONE);
 
 		while(displayIntarfaceGetStatus(&displayHandler) == DISPLAY_BUSY){}
 		while(cnt < 200000){
@@ -155,92 +220,6 @@ void t_processing_display(void *pvParameters){
 }
 
 
-
-
-#define MAX_NUM_PAR            6
-
-typedef enum{
-	PARAM_SYMB_POS_DATE        = 0,
-	PARAM_SYMB_POS_TIME        = 1,
-	PARAM_SYMB_POS_FREQUENCY   = 2,
-	PARAM_SYMB_POS_HUMIDITY    = 3,
-	PARAM_SYMB_POS_ATM_PRESURE = 4,
-	PARAM_SYMB_POS_TEMPERATURE = 5
-}PARAM_SYMB_POS;
-
-const uint8_t *paramitersSymbols[] = {
-		[PARAM_SYMB_POS_DATE]        = "Dt",
-		[PARAM_SYMB_POS_TIME]        = "Tm",
-		[PARAM_SYMB_POS_FREQUENCY]   = "Fr",
-		[PARAM_SYMB_POS_HUMIDITY]    = "Hd",
-		[PARAM_SYMB_POS_ATM_PRESURE] = "Pr",
-		[PARAM_SYMB_POS_TEMPERATURE] = "Tc",
-};
-
-// Structure described item inside widget ListBox
-typedef struct{
-	uint8_t parSymbol;
-	uint16_t parAddress;
-	uint32_t data;
-}itemListBox;
-
-
-typedef struct{
-	itemListBox listOfPar[MAX_NUM_PAR];
-}ListBox;
-
-// structure described menu
-typedef struct{
-	uint8_t selPos;      // order number of selected menu item (list), should be les then 0x11111110 = 0x254
-	uint8_t numPar;      // quantity of menu item
-	screenParList *list; // pointer on the list of menu item
-}listBox;
-
-typedef enum{
-	DISPLAY_STATE_WORK,
-	DISPLAY_STATE_TEST
-}DISPLAY_STATE;
-
-
-
-struct{
-	uint8_t widjetCnt;
-	uint8_t widjetNum;
-	listBox **listOfListBox;
-	uint8_t brightnes;         // global brightens
-	DISPLAY_STATE displayState;     // display state: test, work
-	uint8_t listBoxSellFlag;
-}menuDescription;
-
-typedef enum{
-	ACTION_USER,
-	ACTION_TIMER,
-}DIASPALY_ACTION;
-
-#define isDIASPALY_ACTION(X) (( X == ACTION_USER)|| \\
-							  ( X == ACTION_TIMER) )
-
-typedef enum{
-	ACTION_ENTER,
-	ACTION_ESC,
-	ACTION_SELL,
-	ACTION_TEST
-}USER_ACTION; // connected with Press Button
-
-
-
-
-void goToTestMode(void);
-void increaseWidgetP(void);
-void decreaseWidgetP(void);
-void switchActionTimer(void);
-void listBoxChangePar(void);
-void listobProcess(USER_ACTION inAction);
-
-xTimerHandle screenUpdateTimer;
-
-
-
 /**
   * @brief  Action on change display
   * @param
@@ -276,6 +255,8 @@ void listBoxProcess(USER_ACTION inAction){
 	case ACTION_SELL:
 		listBoxChangePar();
 		break;
+	case ACTION_TEST:
+		break;
 	};
 }
 
@@ -288,11 +269,6 @@ void listBoxChangePar(void){
 	}
 	currentListBox->selPos++;
 }
-
-void goToTestMode(void){
-
-}
-
 
 void increaseWidjetP(void){
 	if(menuDescription.widjetCnt >= (menuDescription.widjetNum - 1))

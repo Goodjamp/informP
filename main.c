@@ -138,10 +138,10 @@ int main(void)
 			s_modbus_tsk_par[count_modbus].ps_task_parameters=ptask_parameters+k1;
 			// Описываю задачу для заданого порта
 			if(s_config_moduls.s_connectmodbus_global[count_modbus].type==PROTOCOL_MODBUS_MASTER){
-				xTaskCreate( t_Modbus_MASTER, ( signed char * ) "Modbus_MASTER", 230, (void*)(&s_modbus_tsk_par[count_modbus]), mainQUEUE_RECEIVE_TASK_PRIORITY, NULL );
+				xTaskCreate( t_Modbus_MASTER, ( const char * ) "Modbus_MASTER", 230, (void*)(&s_modbus_tsk_par[count_modbus]), mainQUEUE_RECEIVE_TASK_PRIORITY, NULL );
 			}
 			else if(s_config_moduls.s_connectmodbus_global[count_modbus].type==PROTOCOL_MODBUS_SLAVE){
-				xTaskCreate( t_Modbus_SLAVE, ( signed char * ) "Modbus_SLAVE", 230, (void*)(&s_modbus_tsk_par[count_modbus]), mainQUEUE_RECEIVE_TASK_PRIORITY, NULL );
+				xTaskCreate( t_Modbus_SLAVE, ( const char * ) "Modbus_SLAVE", 230, (void*)(&s_modbus_tsk_par[count_modbus]), mainQUEUE_RECEIVE_TASK_PRIORITY, NULL );
 			}
 			count_modbus++;
 		};
@@ -157,7 +157,7 @@ int main(void)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
 	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_0).state){// если в конфигурации поточный порт выключен
-		xTaskCreate(  TASK_PROCESSING(DEV_0), ( signed char * ) TASK_IDENT(DEV_1), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_0), TASK_PRIORITY(DEV_0), NULL );
+		xTaskCreate(  TASK_PROCESSING(DEV_0), ( const char * ) TASK_IDENT(DEV_1), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_0), TASK_PRIORITY(DEV_0), NULL );
 	}
 #endif
 
@@ -166,7 +166,7 @@ int main(void)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
 	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_1).state){// если в конфигурации поточный модуль выключен
-		xTaskCreate(  TASK_PROCESSING(DEV_1), ( signed char * ) TASK_IDENT(DEV_1), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_1), TASK_PRIORITY(DEV_1), NULL );
+		xTaskCreate(  TASK_PROCESSING(DEV_1), ( const char * ) TASK_IDENT(DEV_1), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_1), TASK_PRIORITY(DEV_1), NULL );
 	}
 #endif
 
@@ -175,7 +175,7 @@ int main(void)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
 	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_2).state){// если в конфигурации поточный модуль выключен
-		xTaskCreate(  TASK_PROCESSING(DEV_2), ( signed char * ) TASK_IDENT(DEV_2), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_2), TASK_PRIORITY(DEV_2), NULL );
+		xTaskCreate(  TASK_PROCESSING(DEV_2), ( const char * ) TASK_IDENT(DEV_2), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_2), TASK_PRIORITY(DEV_2), NULL );
 	}
 #endif
 
@@ -184,7 +184,7 @@ int main(void)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
 	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_3).state){// если в конфигурации поточный модуль выключен
-		xTaskCreate(  TASK_PROCESSING(DEV_3), ( signed char * ) TASK_IDENT(DEV_3), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_3), TASK_PRIORITY(DEV_3), NULL );
+		xTaskCreate(  TASK_PROCESSING(DEV_3), ( const char * ) TASK_IDENT(DEV_3), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_3), TASK_PRIORITY(DEV_3), NULL );
 	}
 #endif
 
@@ -193,7 +193,7 @@ int main(void)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
 	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_4).state){// если в конфигурации поточный модуль выключен
-		xTaskCreate(  TASK_PROCESSING(DEV_4), ( signed char * ) TASK_IDENT(DEV_4), 700,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_4), TASK_PRIORITY(DEV_4), NULL );
+		xTaskCreate(  TASK_PROCESSING(DEV_4), ( const char * ) TASK_IDENT(DEV_4), 700,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_4), TASK_PRIORITY(DEV_4), NULL );
 	}
 #endif
 
@@ -202,7 +202,7 @@ int main(void)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
 	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_5).state){// если в конфигурации поточный модуль выключен
-		xTaskCreate(  TASK_PROCESSING(DEV_5), ( signed char * ) TASK_IDENT(DEV_5), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_5), TASK_PRIORITY(DEV_5), NULL );
+		xTaskCreate(  TASK_PROCESSING(DEV_5), ( const char * ) TASK_IDENT(DEV_5), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_5), TASK_PRIORITY(DEV_5), NULL );
 	}
 #endif
 
@@ -211,7 +211,7 @@ int main(void)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
 	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_6).state){// если в конфигурации поточный модуль выключен
-		xTaskCreate(  TASK_PROCESSING(DEV_6), ( signed char * ) TASK_IDENT(DEV_6), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_6), TASK_PRIORITY(DEV_6), NULL );
+		xTaskCreate(  TASK_PROCESSING(DEV_6), ( const char * ) TASK_IDENT(DEV_6), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_6), TASK_PRIORITY(DEV_6), NULL );
 	}
 #endif
 
@@ -220,7 +220,7 @@ int main(void)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
 	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_7).state){// если в конфигурации поточный модуль выключен
-		xTaskCreate(  TASK_PROCESSING(DEV_7), ( signed char * ) TASK_IDENT(DEV_7), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_7), TASK_PRIORITY(DEV_7), NULL );
+		xTaskCreate(  TASK_PROCESSING(DEV_7), ( const char * ) TASK_IDENT(DEV_7), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_7), TASK_PRIORITY(DEV_7), NULL );
 	}
 #endif
 
@@ -229,7 +229,7 @@ int main(void)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
 	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_8).state){// если в конфигурации поточный модуль выключен
-		//xTaskCreate(  TASK_PROCESSING(DEV_8), ( signed char * ) TASK_IDENT(DEV_8), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_8), TASK_PRIORITY(DEV_8), NULL );
+		//xTaskCreate(  TASK_PROCESSING(DEV_8), ( const char * ) TASK_IDENT(DEV_8), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_8), TASK_PRIORITY(DEV_8), NULL );
 	}
 #endif
 
@@ -238,7 +238,7 @@ int main(void)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
 	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_9).state){// если в конфигурации поточный модуль выключен
-		xTaskCreate(  TASK_PROCESSING(DEV_9), ( signed char * ) TASK_IDENT(DEV_9), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_9), TASK_PRIORITY(DEV_9), NULL );
+		xTaskCreate(  TASK_PROCESSING(DEV_9), ( const char * ) TASK_IDENT(DEV_9), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_9), TASK_PRIORITY(DEV_9), NULL );
 	}
 #endif
 
@@ -247,7 +247,7 @@ int main(void)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
 	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_10).state){// если в конфигурации поточный модуль выключен
-		xTaskCreate(  TASK_PROCESSING(DEV_10), ( signed char * ) TASK_IDENT(DEV_10), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_10), TASK_PRIORITY(DEV_10), NULL );
+		xTaskCreate(  TASK_PROCESSING(DEV_10), ( const char * ) TASK_IDENT(DEV_10), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_10), TASK_PRIORITY(DEV_10), NULL );
 	}
 #endif
 
@@ -256,7 +256,7 @@ int main(void)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
 	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_11).state){// если в конфигурации поточный модуль выключен
-		xTaskCreate(  TASK_PROCESSING(DEV_11), ( signed char * ) TASK_IDENT(DEV_11), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_11), TASK_PRIORITY(DEV_11), NULL );
+		xTaskCreate(  TASK_PROCESSING(DEV_11), ( const char * ) TASK_IDENT(DEV_11), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_11), TASK_PRIORITY(DEV_11), NULL );
 	}
 #endif
 
@@ -265,7 +265,7 @@ int main(void)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
 	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_12).state){// если в конфигурации поточный модуль выключен
-		xTaskCreate(  TASK_PROCESSING(DEV_12), ( signed char * ) TASK_IDENT(DEV_12), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_12), TASK_PRIORITY(DEV_12), NULL );
+		xTaskCreate(  TASK_PROCESSING(DEV_12), ( const char * ) TASK_IDENT(DEV_12), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_12), TASK_PRIORITY(DEV_12), NULL );
 	}
 #endif
 
@@ -274,7 +274,7 @@ int main(void)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
 	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_13).state){// если в конфигурации поточный модуль выключен
-		xTaskCreate(  TASK_PROCESSING(DEV_13), ( signed char * ) TASK_IDENT(DEV_13), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_13), TASK_PRIORITY(DEV_13), NULL );
+		xTaskCreate(  TASK_PROCESSING(DEV_13), ( const char * ) TASK_IDENT(DEV_13), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_13), TASK_PRIORITY(DEV_13), NULL );
 	}
 #endif
 
@@ -283,7 +283,7 @@ int main(void)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
 	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_14).state){// если в конфигурации поточный модуль выключен
-		xTaskCreate(  TASK_PROCESSING(DEV_14), ( signed char * ) TASK_IDENT(DEV_14), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_14), TASK_PRIORITY(DEV_14), NULL );
+		xTaskCreate(  TASK_PROCESSING(DEV_14), ( const char * ) TASK_IDENT(DEV_14), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_14), TASK_PRIORITY(DEV_14), NULL );
 	}
 #endif
 
@@ -292,15 +292,15 @@ int main(void)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
 	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_15).state){// если в конфигурации поточный модуль выключен
-		xTaskCreate(  TASK_PROCESSING(DEV_15), ( signed char * ) TASK_IDENT(DEV_15), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_15), TASK_PRIORITY(DEV_15), NULL );
+		xTaskCreate(  TASK_PROCESSING(DEV_15), ( const char * ) TASK_IDENT(DEV_15), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_15), TASK_PRIORITY(DEV_15), NULL );
 	}
 #endif
 
-	//xTaskCreate( tskTS, ( signed char * ) "M1", 50, NULL, mainQUEUE_RECEIVE_TASK_PRIORITY, NULL );
-	//xTaskCreate( t_tsk_BLINK, ( signed char * ) "M1", 50, NULL, mainQUEUE_RECEIVE_TASK_PRIORITY, NULL );
+	//xTaskCreate( tskTS, ( const char * ) "M1", 50, NULL, mainQUEUE_RECEIVE_TASK_PRIORITY, NULL );
+	//xTaskCreate( t_tsk_BLINK, ( const char * ) "M1", 50, NULL, mainQUEUE_RECEIVE_TASK_PRIORITY, NULL );
 
 // задача управления процесом програмной презагрузки и световой индикации режима работы
-	xTaskCreate(  t_processing_reset_control, ( signed char * ) "WatcDogTask", 70,	NULL, 4, NULL );
+	xTaskCreate(  t_processing_reset_control, ( const char * ) "WatcDogTask", 70,	NULL, 4, NULL );
 
 	//--------------НУ ..... ЗАПУСКАЮ ПЛАНИРОВЩИК-------------И ПОЛЕТЕЛИ!!!!!!!!!!-----------------------------
 	vTaskStartScheduler();

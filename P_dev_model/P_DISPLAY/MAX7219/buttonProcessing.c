@@ -14,7 +14,7 @@
 
 #include "buttonProcessing.h"
 
-buttonProces buttonProces;
+//buttonProces buttonProces;
 
 
 void buttonGpioConfig(void){

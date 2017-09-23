@@ -10,6 +10,8 @@
 #ifndef BUTTONPROCESSING_H_
 #define BUTTONPROCESSING_H_
 
+#include "stdint.h"
+
 #define NUMBER_OF_BUTTON    2
 
 typedef enum{
@@ -24,9 +26,7 @@ typedef enum{
 #define BUTTON_SEL_PORT       GPIOA
 #define BUTTON_SEL_PIN        GPIO_Pin_5
 
-
-#define BUTTON_TIMER_PERIOD_UPDATE    50
-unt32_t buttonTimerID;
+uint32_t buttonTimerID;
 
 typedef struct{
 	uint8_t pressF;
@@ -35,6 +35,7 @@ typedef struct{
 	uint16_t     pinButtpn;
 }buttonProcesS;
 
-
+void buttonGpioConfig(void);
+void updateButtonCallBack( void );
 
 #endif

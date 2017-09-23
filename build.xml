@@ -78,6 +78,7 @@
       <includepath path="P_dev_model/P_DISPLAY"/>
       <includepath path="P_dev_model/P_DISPLAY/MAX7219/fifo_/inc"/>
       <includepath path="P_dev_model/P_DISPLAY/MAX7219/inc"/>
+      <includepath path="P_dev_model/P_DISPLAY/MAX7219"/>
       
       <!-- arm-none-eabi-gcc compiler arguments -->
       <compilerarg value="-mcpu=cortex-m3"/>
