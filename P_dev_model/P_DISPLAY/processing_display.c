@@ -11,6 +11,7 @@
 
 #include "FreeRTOS.h"
 #include "semphr.h"
+#include "timers.h"
 #include "task.h"
 
 #include "processing_mem_map_extern.h"
@@ -18,8 +19,12 @@
 #include "max7219.h"
 #include "stmMaxHardwareInit.h"
 
+#include "stm32f10x_gpio.h"
+#include "stm32f10x_rcc.h"
 
 extern S_address_oper_data s_address_oper_data;
+xTimerHandle updateButtonPressTimer;
+
 
 static displayBuffDef    displayBuff[MAX_PER_SCREEN];
 static displayHandlerDef displayHandler;
@@ -52,48 +57,6 @@ uint16_t display_calc_address_oper_reg(S_display_address *ps_sensor_address, u16
 	return adres_start;
 }
 
-/**
-  * @brief This function implement parsing string according next template: max#1 - 8x8 matrix, max#2 - 7 segment 4 ripple colors digits
-  * @param
-  * [displayHandler]  display handler (should be initialized before used)
-  * [numScreen]       order number of the screen (associate with order number LD pin)
-  * [str]             ASCII string
-  * [strSize]         size of str
-  * [color]           selected color of screen
-  * [txAddress]       address of str: for all screen inside displayHandler, or only one - numScreen
-  * @retval
-  */
-void updateScreen(displayHandlerDef *displayHandler, uint16_t numScreen, uint8_t *str, uint16_t strSize, COLOR color, TX_ADDRESS txAddress)
-{
-	uint16_t cnt = 0;
-	// For current screen configuration:
-	// first max7219  - 8x8 matrix indicator
-	// Second max7219 - 7-segment indicator
-
-	displayClearBuff(displayHandler, MAX_PER_SCREEN);
-	displayTxData(displayHandler, numScreen, MAX_PER_SCREEN, txAddress);
-	while(displayIntarfaceGetStatus(displayHandler) == DISPLAY_BUSY){}
-	// set max#1 sumbol - 8x8 matrix
-	displaySet8x8Matrix( displayHandler, ORDER_NUM_MATRIX,  str[ORDER_NUM_MATRIX] );
-	// set max#2 - 7 segment 4 ripple colors digits
-	for(cnt = 0 ; cnt < NUMBER_7_SEGMENTS_IND; cnt++)
-	{
-		switch (color){
-		case COLOR_GREEN:
-			displaySet7Segment(  displayHandler, ORDER_NUM_7SEG, str[cnt + 1],  cnt);
-			break;
-		case COLOR_RED:
-			displaySet7Segment(  displayHandler, ORDER_NUM_7SEG, str[cnt + 1],  cnt + 4);
-			break;
-		case COLOR_ORANGE:
-			displaySet7Segment(  displayHandler, ORDER_NUM_7SEG, str[cnt + 1],  cnt);
-			displaySet7Segment(  displayHandler, ORDER_NUM_7SEG, str[cnt + 1],  cnt + 4);
-			break;
-		}
-	}
-	displayTxData(displayHandler, numScreen, MAX_PER_SCREEN, txAddress);
-}
-
 
 /**
   * @brief
@@ -120,6 +83,12 @@ void refreshDisplays(void)
 }
 
 
+void screenUpdateTimerCallback( TimerHandle_t xTimer ){
+
+}
+
+
+
 uint8_t str[] = "h111a";
 /**
   * @brief
@@ -127,6 +96,11 @@ uint8_t str[] = "h111a";
   * @retval
   */
 void t_processing_display(void *pvParameters){
+
+	buttonGpioConfig();
+	xTimerCreate("SCREEN UPDATE TIMER", BUTTON_TIMER_PERIOD_UPDATE, pdFALSE, (void*)(&buttonTimerID) , screenUpdateTimer);
+
+
 
 	displayInterfaceInit(&displayHandler, displayBuff);
 	initDisplay(&displayHandler, LDList, numberOfScreen, DISPLAY_SPI);
@@ -180,8 +154,10 @@ void t_processing_display(void *pvParameters){
 	}
 }
 
-#define MAX_NUM_PAR            6
 
+
+
+#define MAX_NUM_PAR            6
 
 typedef enum{
 	PARAM_SYMB_POS_DATE        = 0,
@@ -192,7 +168,6 @@ typedef enum{
 	PARAM_SYMB_POS_TEMPERATURE = 5
 }PARAM_SYMB_POS;
 
-
 const uint8_t *paramitersSymbols[] = {
 		[PARAM_SYMB_POS_DATE]        = "Dt",
 		[PARAM_SYMB_POS_TIME]        = "Tm",
@@ -202,19 +177,24 @@ const uint8_t *paramitersSymbols[] = {
 		[PARAM_SYMB_POS_TEMPERATURE] = "Tc",
 };
 
-
+// Structure described item inside widget ListBox
 typedef struct{
 	uint8_t parSymbol;
 	uint16_t parAddress;
 	uint32_t data;
-}screenParList;
+}itemListBox;
+
 
 typedef struct{
-	uint8_t Pos;
-	uint8_t numPar;
-	screenParList *list;
-}listBox;
+	itemListBox listOfPar[MAX_NUM_PAR];
+}ListBox;
 
+// structure described menu
+typedef struct{
+	uint8_t selPos;      // order number of selected menu item (list), should be les then 0x11111110 = 0x254
+	uint8_t numPar;      // quantity of menu item
+	screenParList *list; // pointer on the list of menu item
+}listBox;
 
 typedef enum{
 	DISPLAY_STATE_WORK,
@@ -225,9 +205,11 @@ typedef enum{
 
 struct{
 	uint8_t widjetCnt;
+	uint8_t widjetNum;
 	listBox **listOfListBox;
 	uint8_t brightnes;         // global brightens
 	DISPLAY_STATE displayState;     // display state: test, work
+	uint8_t listBoxSellFlag;
 }menuDescription;
 
 typedef enum{
@@ -252,6 +234,12 @@ void goToTestMode(void);
 void increaseWidgetP(void);
 void decreaseWidgetP(void);
 void switchActionTimer(void);
+void listBoxChangePar(void);
+void listobProcess(USER_ACTION inAction);
+
+xTimerHandle screenUpdateTimer;
+
+
 
 /**
   * @brief  Action on change display
@@ -260,6 +248,10 @@ void switchActionTimer(void);
   */
 void userActionReaction(USER_ACTION inAction){
 // menuDescription
+	if(menuDescription.listBoxSellFlag){
+
+
+	}
 	if(inAction == ACTION_ENTER)
 	{
 		// shift to next widget
@@ -267,11 +259,34 @@ void userActionReaction(USER_ACTION inAction){
 	}
 	else if(inAction == ACTION_ESC)
 	{
-
+		decreaseWidgetP();
 	}
-	//
 
+}
 
+void listBoxProcess(USER_ACTION inAction){
+	switch(inAction)
+	{
+	case ACTION_ENTER:
+		increaseWidjetP();
+		break;
+	case ACTION_ESC:
+		decreaseWidjetP();
+		break;
+	case ACTION_SELL:
+		listBoxChangePar();
+		break;
+	};
+}
+
+void listBoxChangePar(void){
+	listBox* currentListBox = menuDescription.listOfListBox[menuDescription.widjetCnt];
+	if(currentListBox->selPos >= currentListBox->numPar)
+	{
+		currentListBox->selPos = 0;
+		return;
+	}
+	currentListBox->selPos++;
 }
 
 void goToTestMode(void){
@@ -280,11 +295,21 @@ void goToTestMode(void){
 
 
 void increaseWidjetP(void){
-
+	if(menuDescription.widjetCnt >= (menuDescription.widjetNum - 1))
+	{
+		menuDescription.widjetCnt = 0;
+		return;
+	}
+	menuDescription.widjetCnt++;
 }
 
 void decreaseWidjetP(void){
-
+	if(menuDescription.widjetCnt == 0)
+	{
+		menuDescription.widjetCnt = menuDescription.widjetNum - 1;
+		return;
+	}
+	menuDescription.widjetCnt--;
 }
 
 /*

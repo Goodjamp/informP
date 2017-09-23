@@ -156,5 +156,7 @@ void displayConfigDecodeMode(displayHandlerDef *displayIntarface, uint8_t numMax
 void displayConfigIntensity(displayHandlerDef * displayIntarface, uint8_t numMax, maxIntensityDef data);
 void displayConfigWorkMode(displayHandlerDef   *displayIntarface, uint8_t numMax, shutDownDef data);
 void displayConfigScanLimit(displayHandlerDef  *displayIntarface, uint8_t numMax, maxScanLimDef data);
+void updateScreen(displayHandlerDef *displayHandler, uint16_t numScreen, uint8_t *str, uint16_t strSize, COLOR color, TX_ADDRESS txAddress);
+
 
 #endif

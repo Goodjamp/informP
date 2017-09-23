@@ -62,37 +62,37 @@
 		<pathentry include="C:/Program Files (x86)/GNU Tools ARM Embedded/4.7 2013q2/arm-none-eabi/include" kind="inc" path="" system="true"/>
 		<pathentry include="C:/Program Files (x86)/GNU Tools ARM Embedded/4.7 2013q2/lib/gcc/arm-none-eabi/4.7.4/include" kind="inc" path="" system="true"/>
 		<pathentry include="C:/Program Files (x86)/GNU Tools ARM Embedded/4.7 2013q2/lib/gcc/arm-none-eabi/4.7.4/include-fixed" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/BASE_SYSTEM_STM_FUN/P_config_dev" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/BASE_SYSTEM_STM_FUN/P_flash_operation" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/BASE_SYSTEM_STM_FUN/P_mem_map" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/BASE_SYSTEM_STM_FUN/P_modbus" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/BASE_SYSTEM_STM_FUN/P_reset_control" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/BASE_SYSTEM_STM_FUN/P_routing_data" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/BASE_SYSTEM_STM_FUN/Processing_Source" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/cmsis" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/cmsis_boot" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/FreeRTOS_Source" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/FreeRTOS_Source/include" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/FreeRTOS_Source/portable/GCC/ARM_CM3" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/FreeRTOS_Source/portable/MemMang" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/P_dev_model" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/P_dev_model/P_DISPLAY" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/P_dev_model/P_DISPLAY/MAX7219/fifo_/inc" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/P_dev_model/P_DISPLAY/MAX7219/inc" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/P_dev_model/P_FRQmetter_signal" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/P_dev_model/P_SENSOR" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/P_dev_model/P_SENSOR/DS1621_HAL" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/P_dev_model/P_SENSOR/I2C_HAL" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/P_dev_model/P_simple_gpio" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/P_dev_model/P_TIME" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/P_dev_model/P_TIME/GPSProcessing" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/P_dev_model/P_TIME/RTCProcessing" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/STM32_USB-FS-Device_Driver/core/inc" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/STM32_USB-FS-Device_Driver/portable/inc" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/stm_lib" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/stm_lib/inc" kind="inc" path="" system="true"/>
-		<pathentry include="D:/CooCox/workspace_from_WORK_PC/workspace/INFORM_P/informP/USART_OPERATION" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/BASE_SYSTEM_STM_FUN/P_config_dev" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/BASE_SYSTEM_STM_FUN/P_flash_operation" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/BASE_SYSTEM_STM_FUN/P_mem_map" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/BASE_SYSTEM_STM_FUN/P_modbus" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/BASE_SYSTEM_STM_FUN/P_reset_control" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/BASE_SYSTEM_STM_FUN/P_routing_data" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/BASE_SYSTEM_STM_FUN/Processing_Source" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/cmsis" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/cmsis_boot" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/FreeRTOS_Source" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/FreeRTOS_Source/include" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/FreeRTOS_Source/portable/GCC/ARM_CM3" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/FreeRTOS_Source/portable/MemMang" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/P_dev_model" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/P_dev_model/P_DISPLAY" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/P_dev_model/P_DISPLAY/MAX7219/fifo_/inc" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/P_dev_model/P_DISPLAY/MAX7219/inc" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/P_dev_model/P_FRQmetter_signal" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/P_dev_model/P_SENSOR" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/P_dev_model/P_SENSOR/DS1621_HAL" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/P_dev_model/P_SENSOR/I2C_HAL" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/P_dev_model/P_simple_gpio" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/P_dev_model/P_TIME" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/P_dev_model/P_TIME/GPSProcessing" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/P_dev_model/P_TIME/RTCProcessing" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/STM32_USB-FS-Device_Driver/core/inc" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/STM32_USB-FS-Device_Driver/portable/inc" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/stm_lib" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/stm_lib/inc" kind="inc" path="" system="true"/>
+		<pathentry include="D:/informP/USART_OPERATION" kind="inc" path="" system="true"/>
 		<pathentry kind="mac" name="__GNUC__" path="" value=""/>
 		<pathentry kind="mac" name="STM32F10X_MD" path="" value=""/>
 		<pathentry kind="mac" name="USE_STDPERIPH_DRIVER" path="" value=""/>
