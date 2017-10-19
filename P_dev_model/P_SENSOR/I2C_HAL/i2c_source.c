@@ -161,7 +161,7 @@ uint8_t i2c_wait_set_flag(__IO uint16_t *reg, u32 bit, FlagStatus value_waite,u3
 
 //---------function i2c_read_data-------------------------
 // read
-I2C_ERROR i2c_read_data(void *I2C_SEL_, uint8_t address_dev, uint8_t address_reg,uint8_t num_read, uint8_t *buff){
+I2C_ERROR i2c_read_data(void *I2C_SEL_, uint8_t address_dev, uint8_t address_reg, uint8_t num_read, uint8_t *buff){
 	u8 cnt; //counter rx bytes
 	I2C_TypeDef* I2C_SEL =  (I2C_TypeDef*)I2C_SEL_;
 	I2C_GenerateSTOP(I2C_SEL,DISABLE);

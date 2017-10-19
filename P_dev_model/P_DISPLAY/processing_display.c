@@ -152,74 +152,6 @@ void screenUpdateTimerCallback( TimerHandle_t xTimer ){
 
 }
 
-
-
-uint8_t str[] = "h111a";
-/**
-  * @brief
-  * @param
-  * @retval
-  */
-void t_processing_display(void *pvParameters){
-
-	buttonGpioConfig();
-	screenUpdateTimer = xTimerCreate("SCREEN UPDATE TIMER", BUTTON_TIMER_PERIOD_UPDATE, pdFALSE, (void*)(0) , screenUpdateTimerCallback);
-
-
-
-	displayInterfaceInit(&displayHandler, displayBuff);
-	initDisplay(&displayHandler, LDList, numberOfScreen, DISPLAY_SPI);
-	//Clear all display
-	displayClearBuff(&displayHandler, MAX_PER_SCREEN);
-	displayTxData(&displayHandler, 0, MAX_PER_SCREEN, TX_ADDRESS_ALL);
-	while(displayIntarfaceGetStatus(&displayHandler) == DISPLAY_BUSY){}
-
-	refreshDisplays();
-
-	uint32_t cnt = 0;
-	COLOR currentCollor = COLOR_RED;
-	while(1){
-		updateScreen(&displayHandler, SCREEN_4, str, strlen((const char*)str), currentCollor, TX_ADDRESS_ONE);
-
-		while(displayIntarfaceGetStatus(&displayHandler) == DISPLAY_BUSY){}
-		while(cnt < 200000){
-			cnt++;
-		}
-		cnt = 0;
-
-		str[0]++;
-				if( str[0] > '9') str[0] = '0';
-
-		str[1]++;
-		if( str[1] > '9')
-		{
-		switch(currentCollor){
-		case COLOR_GREEN:
-			currentCollor = COLOR_RED;
-			break;
-		case COLOR_RED:
-			currentCollor = COLOR_ORANGE;
-			break;
-		case COLOR_ORANGE:
-			currentCollor = COLOR_GREEN;
-			break;
-		}
-			str[1] = '0';
-		}
-
-		str[2]++;
-		if( str[2] > '9') str[2] = '0';
-
-		str[3]++;
-		if( str[3] > '9') str[3] = '0';
-
-		str[4]++;
-		if( str[4] > '9') str[4] = '0';
-
-	}
-}
-
-
 /**
   * @brief  Action on change display
   * @param
@@ -286,6 +218,77 @@ void decreaseWidjetP(void){
 		return;
 	}
 	menuDescription.widjetCnt--;
+}
+
+
+
+uint8_t str[] = "h111a";
+/**
+  * @brief
+  * @param
+  * @retval
+  */
+void t_processing_display(void *pvParameters){
+
+	displayInterfaceInit(&displayHandler, displayBuff);
+	initDisplay(&displayHandler, LDList, numberOfScreen, DISPLAY_SPI);
+	//Clear all display
+	displayClearBuff(&displayHandler, MAX_PER_SCREEN);
+	displayTxData(&displayHandler, 0, MAX_PER_SCREEN, TX_ADDRESS_ALL);
+	while(displayIntarfaceGetStatus(&displayHandler) == DISPLAY_BUSY){}
+	// config button processing
+	buttonGpioConfig();
+	//
+	screenUpdateTimer = xTimerCreate("SCREEN UPDATE TIMER",
+									  SCREEN_UPDATE_PERIOD,
+									  pdTRUE,      // AUTO RELOAD THEMSELF
+			                          (void*)(0) ,
+			                          screenUpdateTimerCallback);
+
+
+	refreshDisplays();
+
+	uint32_t cnt = 0;
+	COLOR currentCollor = COLOR_RED;
+	while(1){
+		updateScreen(&displayHandler, SCREEN_4, str, strlen((const char*)str), currentCollor, TX_ADDRESS_ONE);
+
+		while(displayIntarfaceGetStatus(&displayHandler) == DISPLAY_BUSY){}
+		while(cnt < 200000){
+			cnt++;
+		}
+		cnt = 0;
+
+		str[0]++;
+				if( str[0] > '9') str[0] = '0';
+
+		str[1]++;
+		if( str[1] > '9')
+		{
+		switch(currentCollor){
+		case COLOR_GREEN:
+			currentCollor = COLOR_RED;
+			break;
+		case COLOR_RED:
+			currentCollor = COLOR_ORANGE;
+			break;
+		case COLOR_ORANGE:
+			currentCollor = COLOR_GREEN;
+			break;
+		}
+			str[1] = '0';
+		}
+
+		str[2]++;
+		if( str[2] > '9') str[2] = '0';
+
+		str[3]++;
+		if( str[3] > '9') str[3] = '0';
+
+		str[4]++;
+		if( str[4] > '9') str[4] = '0';
+
+	}
 }
 
 /*

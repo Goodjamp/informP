@@ -34,7 +34,7 @@
 #define PIN_LD_3   GPIO_Pin_14
 #define PIN_LD_4   GPIO_Pin_9
 
-#define BUTTON_TIMER_PERIOD_UPDATE    50
+#define SCREEN_UPDATE_PERIOD    20
 
 typedef enum{
 	COLOR_GREEN = 0,
@@ -105,17 +105,20 @@ typedef enum{
 }USER_ACTION; // connected with Press Button
 
 
+//--------------------------------------------------------------------------
+//---------DISPLAY HAL PROCESSING FUNCTION PROTOTYPE------------------------
+//--------------------------------------------------------------------------
+void updateScreen(displayHandlerDef *displayHandler, uint16_t numScreen, uint8_t *str, uint16_t strSize, COLOR color, TX_ADDRESS txAddress);
+void refreshDisplays(void);
+
+//--------------------------------------------------------------------------
+//---------MENU PROCESSING FUNCTION PROTOTYPE-------------------------------
+//--------------------------------------------------------------------------
 uint16_t display_calc_address_oper_reg(S_display_address *ps_sensor_address, u16 adres_start);
 void userActionReaction(USER_ACTION inAction);
 void listBoxProcess(USER_ACTION inAction);
 void listBoxChangePar(void);
 void increaseWidjetP(void);
 void decreaseWidjetP(void);
-
-// display function prototype
-void updateScreen(displayHandlerDef *displayHandler, uint16_t numScreen, uint8_t *str, uint16_t strSize, COLOR color, TX_ADDRESS txAddress);
-void refreshDisplays(void);
-
-
 
 #endif // PROCESSING_DISPLAY_H_
