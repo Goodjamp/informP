@@ -74,8 +74,8 @@ int main(void)
 {
 	u8 k1;
 
-	t_processing_display((void*)&k1);
-	//t_processing_sensor((void*)&k1);
+	//t_processing_display((void*)&k1);
+	t_processing_sensor((void*)&k1);
 
 
 

@@ -168,10 +168,12 @@ actionButtonDef updateButtonCallBack( void ){
 			return;
 		}
 		// Call Action callback
+		/*
 		if( actionDescr[indexProc].timePosAction == BEFORE_PERIOD_AFTER)
 		{
 				// TO DO Call function processing Action
 		}
+		*/
 
 	}
 

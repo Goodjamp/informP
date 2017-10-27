@@ -21,33 +21,68 @@
 #define I2C1_SDA_AF_GPIO    GPIO_PinSource7  //PB7 ch1
 #define I2C1_SDA_PORT       GPIOB            // CSDA PORT
 
+
 typedef enum{
-	I2C_OK=0,
-	I2C_START_GEN_ERROR=1,
-	I2C_SEND_ADDRESS_ERROR=2,
-	I2C_SEND_BYTE_ERROR=3,
-	I2C_RECEIVE_BYTE_ERROR=4,
-	I2C_READ_ERROR=5,
-	I2C_WRITE_ERROR=6
-}I2C_ERROR;
+	I2C_TRANSACTION_TX,
+	I2C_TRANSACTION_RX,
+}I2C_TRANSACTION_TYPE;
+
+
+typedef enum{
+	I2C_OK,
+	I2C_TRANSACTION_PROCESSING,
+	I2C_TRANSACTION_ERROR,
+}I2C_STATUS;
+
+typedef enum{
+	I2C_TX_SB      = 0,
+	I2C_TX_ADDRESS = 1,
+	I2C_TX_TXE     = 2,
+	I2C_TX_BTF     = 3
+}I2C_TX_STATE;
+
+typedef enum{
+	I2C_RX_SB_F1      = 0,
+	I2C_RX_ADDRESS_F1 = 1,
+	I2C_RX_BTF_F1     = 2,
+	I2C_RX_SB_F2      = 3,
+	I2C_RX_ADDRESS_F2 = 4,
+	I2C_RX_RXE_F2     = 5,
+	I2C_RX_BTF_F2     = 6,
+	I2C_RX_RXE_F3     = 7,
+}I2C_RX_STATE;
+
+//
+typedef struct{
+
+}I2CInterruptStatusDef;
 
 
 typedef struct{
-	uint8_t  pid;
-	uint8_t  ver;
-}S_DidVer;
+	I2C_STATUS           transactionStatus; // Transaction status
+	I2C_TRANSACTION_TYPE transactionType;   // Type of transaction (Tx/Rx)
+	uint8_t              stateCnt;          // counter state of I2C transaction, point on current state (tx/rx - I2C_TX_STATE/I2C_RX_STATE)
+	I2C_TypeDef*         I2C_SEL;      //Selectrd I2C
+	uint8_t              addressDev;   //Slave address
+	uint8_t              addressReg;   //start register address for Tx/Rx data
+	uint8_t              numData;      //number of Tx/Rx data
+	uint8_t              *buffData;    //buffer for Tx/Rx data
+	uint16_t             cnt;          //counter Tx/Rx dataer
+}I2CProcessingDef;
 
 typedef struct{
-	uint16_t fI2C;
-}I2CConfig;
+	uint32_t fI2C;
+}I2CConfigDef;
 
 
-void 	  i2c_config(I2CConfig *configData);
-I2C_ERROR i2c_read_byte(I2C_TypeDef * I2C_SEL, u8 *read_byte);
-I2C_ERROR i2c_send_byte(I2C_TypeDef * I2C_SEL, u8 send_byte);
-I2C_ERROR i2c_gen_start_send_adres(I2C_TypeDef * I2C_SEL, u8 adres_send, u8 I2C_Direction);
-uint8_t  i2c_wait_set_flag(__IO uint16_t *reg, u32 bit, FlagStatus value_waite,u32 period_ms );
-I2C_ERROR i2c_read_data(void *I2C_SEL,uint8_t num_read, uint8_t address_dev, uint8_t address_reg, uint8_t *buff);
-I2C_ERROR i2c_write_data(void *I2C_SEL, uint8_t address_dev, uint8_t address_reg,uint8_t num_write, uint8_t *buff);
+I2C_STATUS I2CTxData(I2C_TypeDef* I2C_SEL, uint8_t address_dev, uint8_t address_reg, uint8_t num_read, uint8_t *buff);
+I2C_STATUS I2CRxData(I2C_TypeDef* I2C_SEL, uint8_t address_dev, uint8_t address_reg, uint8_t num_read, uint8_t *buff);
+
+
+I2C_STATUS  i2c_read_data(I2C_TypeDef* I2C_SEL_, uint8_t address_dev, uint8_t address_reg, uint8_t num_read,  uint8_t *buff);
+I2C_STATUS i2c_write_data(I2C_TypeDef* I2C_SEL_, uint8_t address_dev, uint8_t address_reg, uint8_t num_write, uint8_t *buff);
+
+
+
 
 #endif /* HP03SA_SOURCE_H_ */
