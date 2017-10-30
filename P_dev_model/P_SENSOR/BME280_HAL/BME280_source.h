@@ -29,10 +29,10 @@ typedef enum{
 	BME280_REG_CTRL_MES   = 0xF4,
 	BME280_REG_STATUS     = 0xF3,
 	BME280_REG_CTRL_HUM   = 0xF2,
-	BME280_REG_CALIB26_41 = 0xF0,
+	BME280_REG_CALIB26_41 = 0xE1,
 	BME280_REG_RESET      = 0xE0,
 	BME280_REG_ID         = 0xD0,
-	BME280_REG_CALIB00_25 = 0xA1,
+	BME280_REG_CALIB00_25 = 0x88,
 }BME280_REG;
 
 /*-----------------fields of register CTRL_HUM definition-----------------*/
@@ -88,6 +88,29 @@ copied to image registers and back to ‘0’ when the copying is done*/
 #define  CONFIG_FILTER_4    uint8_t(0x2<<2)
 #define  CONFIG_FILTER_8    uint8_t(0x3<<2)
 #define  CONFIG_FILTER_16   uint8_t(0x4<<2)
+
+#pragma pack(push,1)
+typedef struct{
+	uint16_t  dig_T1;
+	int16_t  dig_T2;
+	int16_t  dig_T3;
+	uint16_t  dig_P1;
+	int16_t  dig_P2;
+	int16_t  dig_P3;
+	int16_t  dig_P4;
+	int16_t  dig_P5;
+	int16_t  dig_P6;
+	int16_t  dig_P7;
+	int16_t  dig_P8;
+	int16_t  dig_P9;
+	uint8_t   dig_H1;
+	int16_t  dig_H2;
+	uint8_t   dig_H3;
+	int16_t  dig_H4;
+	int16_t  dig_H5;
+	int8_t   dig_H6;
+}BME280_calibCoef;
+#pragma pack(pop)
 
 
 #endif

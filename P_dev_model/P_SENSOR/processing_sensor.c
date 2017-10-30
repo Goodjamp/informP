@@ -14,36 +14,57 @@
 
 
 #include "stm32f10x.h"
+#include "stm32f10x_gpio.h"
 
-#include "i2c_source.h"
+#include "i2c_user_interface.h"
 #include "DS1621_source.h"
-#include "BME280_source.h"
+#include "BME280_user_interfase.h"
 #include "funct.h"
 #include "processing_sensor_extern.h"
 #include "processing_sensor.h"
 #include "processing_mem_map_extern.h"
 
-
-/* @brief
- *
- */
 extern S_address_oper_data s_address_oper_data;
-
 DS1621MessStatus mesStatus;
 xSemaphoreHandle semaphoreUpdateFRQ;
 uint16_t mesTemperature;
-//
 interfaceAddressDef ds1621Sensor = {
 		.I2Cdef 	 = (void*)DS1321Interface,
 		.addressMS4B = DS1621Address
 };
 
+void i2c_initGpio(void){
 
-void initI2C(void){
-	I2CConfigDef i2cInit = {
-			.fI2C = frqI2C
-	};
-	i2c_config(DS1321Interface, &i2cInit );
+	GPIO_InitTypeDef GPIO_InitStructure;
+	/*Camera I2C1 pins config*/
+	RCC_APB2PeriphClockCmd(RCC_APB2ENR_IOPBEN, ENABLE);
+
+	// config I2C CSCL GPIO
+	GPIO_InitStructure.GPIO_Pin = I2C1_SCL;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
+	/*Config CSL functions of I2C1*/
+	GPIO_Init(I2C1_SCL_PORT, &GPIO_InitStructure);
+
+	// config I2C CSDA GPIO
+	GPIO_InitStructure.GPIO_Pin = ( I2C1_SDA);
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(I2C1_SDA_PORT, &GPIO_InitStructure);
+	// Enable Alternate function
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+}
+
+TRANSACION_STATUS BMEReadData (uint8_t sensorAddress, uint8_t sensorReagister, uint8_t *data, uint8_t numData){
+	I2CRxData(I2C_SENSOR, sensorAddress, sensorReagister, numData, data);
+	return TRANSACION_STATUS_OK;
+}
+
+
+TRANSACION_STATUS BMEWriteData(uint8_t sensorAddress, uint8_t sensorReagister, uint8_t *data, uint8_t numData){
+	I2CTxData(I2C_SENSOR, sensorAddress, sensorReagister, numData, data);
+	return TRANSACION_STATUS_OK;
 }
 
 /* @brief
@@ -55,30 +76,26 @@ u16 sensor_calc_address_oper_reg(S_sensor_address *ps_sensor_address, u16 adres_
 	return adres_start;
 }
 
-
-/* @brief
- *
- */
-#define tempBuffSize   20
-struct{
-	uint16_t temperature[tempBuffSize];
-	uint8_t cnt;
-}rezMes;
+uint8_t dataArrayTx[] = {60};
+uint8_t addressRegTx = 0XF2;
+uint8_t dataArrayRx[] = {0, 0};
+uint8_t addressRegRx = 0XD0;
 
 
-uint8_t devAddress = 0b1110111;
-uint8_t regAddress1 = 0xF7;
-uint8_t regAddress2 = 0xD0;
-uint8_t TXBuff1[4];
-uint8_t TXBuff2[4];
+//I2C_STATUS I2CConfig( I2C_DEF i2cIn ,I2C_configDef *config)
+void i2c_init(void){
+	I2C_configDef i2c_configParamiters = {
+			.frequencyI2C = I2C_SENSOR_FRQ_HZ
+	};
+	I2CConfig(I2C_SENSOR, &i2c_configParamiters);
+}
 
 void t_processing_sensor(void *pvParameters){
 	//S_sensor_user_config *s_FRQConfig =(S_sensor_user_config*)pvParameters;
-	initI2C();
-	//I2C_TypeDef* I2C_SEL, uint8_t address_dev, uint8_t address_reg, uint8_t num_read, uint8_t *buff
-	//I2CTxData(DS1321Interface, devAddress, regAddress, sizeof(TXBuff), TXBuff);
-	I2CTxData(DS1321Interface, devAddress, regAddress1, sizeof(TXBuff1), TXBuff1);
-	I2CRxData(DS1321Interface, devAddress, regAddress2, sizeof(TXBuff2), TXBuff2);
+	i2c_init();
+	I2CRxData(I2C_SENSOR, BME280_ADDRESS_HIGHT, addressRegRx, sizeof(dataArrayRx), dataArrayRx);
+	I2CTxData(I2C_SENSOR, BME280_ADDRESS_HIGHT, addressRegTx, sizeof(dataArrayTx), dataArrayTx);
+
 	//i2c_write_data(DS1321Interface, devAddress<<1, regAddress, sizeof(TXBuff), TXBuff);
 	//ds16211SHOT(&ds1621Sensor);
 	//ds1621StartMess(&ds1621Sensor);

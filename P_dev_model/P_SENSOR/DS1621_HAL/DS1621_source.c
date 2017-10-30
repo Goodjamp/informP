@@ -13,7 +13,7 @@
 DS1621status ds1621GetConfig(interfaceAddressDef *interfaceAddress, uint8_t *DSConfig){
 	if( i2c_read_data(interfaceAddress->I2Cdef,
 			DS1621_ADDRESS | interfaceAddress->addressMS4B,
-			DS1621ComandAccessConfig, 1,DSConfig) != I2C_OK)
+			DS1621ComandAccessConfig, 1,DSConfig) != I2C_STATUS_OK)
 	{
 		return DS1621_STATUS_BUSS_ERROR;
 	}
@@ -23,7 +23,7 @@ DS1621status ds1621GetConfig(interfaceAddressDef *interfaceAddress, uint8_t *DSC
 DS1621status ds1621SetConfig(interfaceAddressDef *interfaceAddress, uint8_t *DSConfig){
 	if( i2c_write_data(interfaceAddress->I2Cdef,
 			DS1621_ADDRESS | interfaceAddress->addressMS4B,
-			DS1621ComandAccessConfig, 1,DSConfig) != I2C_OK)
+			DS1621ComandAccessConfig, 1,DSConfig) != I2C_STATUS_OK)
 	{
 		return DS1621_STATUS_BUSS_ERROR;
 	}
@@ -103,7 +103,7 @@ DS1621status ds1621ReadTemp(interfaceAddressDef *interfaceAddress, uint16_t *tem
 			DS1621_ADDRESS | interfaceAddress->addressMS4B,
 			DS1621ComandReadTemperature,
 			2,
-			(uint8_t*)temperature_C) != I2C_OK)
+			(uint8_t*)temperature_C) != I2C_STATUS_OK)
 	{
 		return DS1621_STATUS_BUSS_ERROR;
 	}
@@ -118,7 +118,7 @@ DS1621status ds1621MesDone(interfaceAddressDef *interfaceAddress, DS1621MessStat
 			DS1621_ADDRESS | interfaceAddress->addressMS4B,
 			DS1621ComandAccessConfig,
 			1,
-			&configReg) != I2C_OK)
+			&configReg) != I2C_STATUS_OK)
 	{
 		return DS1621_STATUS_BUSS_ERROR;
 	}
@@ -133,7 +133,7 @@ DS1621status ds1621StartMess(interfaceAddressDef *interfaceAddress){
 			DS1621_ADDRESS | interfaceAddress->addressMS4B,
 			DS1621ComandStartConvertT,
 			0,
-			(uint8_t*)0) != I2C_OK)
+			(uint8_t*)0) != I2C_STATUS_OK)
 	{
 		return DS1621_STATUS_BUSS_ERROR;
 	}

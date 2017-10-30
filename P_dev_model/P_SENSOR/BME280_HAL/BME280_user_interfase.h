@@ -11,8 +11,8 @@
 #ifndef BME280_USER_INTERFASE_H_
 #define BME280_USER_INTERFASE_H_
 
-#define BME280_address_low   (uint8_t)0x76
-#define BME280_address_hight (uint8_t)0b77
+#define BME280_ADDRESS_LOW   (uint8_t)0x76
+#define BME280_ADDRESS_HIGHT (uint8_t)0x77
 
 // list of measurement value
 typedef enum{
@@ -32,12 +32,12 @@ typedef enum{
 }MES_MODE_DEF;
 
 typedef enum{
-	OVERSEMPL_DISABLE,
-	OVERSEMPL_2,
-	OVERSEMPL_4,
-	OVERSEMPL_8,
-	OVERSEMPL_16
-}OVERSEMPL_DEF;
+	OVERSEMPLE_DISABLE,
+	OVERSEMPLE_2,
+	OVERSEMPLE_4,
+	OVERSEMPLE_8,
+	OVERSEMPLE_16
+}OVERSEMPLE_DEF;
 
 typedef enum{
 	FILTER_DISABLE,
@@ -74,17 +74,28 @@ typedef struct{
 typedef void(*bme280MesCallbackDef)(BME280_STATUS rezMesStatus,float rezMesTemperature,float rezMesPressure, float rezMesHumidity);
 
 //BME280 configuration functions
-BME280_STATUS BME280_initBME280      (BME280Handler *handler, uint8_t address);
-BME280_STATUS BME280_setMesCallBack  (bme280MesCallbackDef mesCallbak);
-BME280_STATUS BME280_setValueMesState(BME280Handler *handler, MES_VALUE_DEF mesValue, MES_STAT_DEF newMesState);
-BME280_STATUS BME280_setOverSample   (BME280Handler *handler, MES_VALUE_DEF mesValue, OVERSEMPL_DEF overSample);
-BME280_STATUS BME280_setFilterPar    (BME280Handler *handler, MES_VALUE_DEF mesValue, FILTER_DEF filterPar);
-BME280_STATUS BME280_setMesDelay     (BME280Handler *handler, MEASUREMENT_DELAY_DEF mesDelay);
+BME280_STATUS BME280_init               (BME280Handler *handler, uint8_t address);
+BME280_STATUS BME280_setValueMesState   (BME280Handler *handler, MES_VALUE_DEF mesValue, MES_MODE_DEF newMesState);
+BME280_STATUS BME280_setOverSample      (BME280Handler *handler, MES_VALUE_DEF mesValue, OVERSEMPLE_DEF overSample);
+BME280_STATUS BME280_setFilterParameters(BME280Handler *handler, MES_VALUE_DEF mesValue, FILTER_DEF filterPar);
+BME280_STATUS BME280_setMesDelay        (BME280Handler *handler, MEASUREMENT_DELAY_DEF mesDelay);
+BME280_STATUS BME280_setMesCallBack     (bme280MesCallbackDef mesCallbak);
 // Measurement control functions
-BME280_STATUS BME280_Mes             (BME280Handler *handler, float *rezMesTemperature, float *rezMesPressure, float *rezMesHumidity);
-BME280_STATUS BME280_startContiniousMes   (BME280Handler *handler, MES_STATE_DEF newMesState);
+BME280_STATUS BME280_forcedMes          (BME280Handler *handler, float *rezMesTemperature, float *rezMesPressure, float *rezMesHumidity);
+BME280_STATUS BME280_startContiniousMes (BME280Handler *handler, MES_STATE_DEF newMesState);
 // Information functions
-BME280_STATUS BME280_getStatus       (BME280Handler *handler);
+BME280_STATUS BME280_getStatus          (BME280Handler *handler);
+
+//-------------------------user implementation  function----------------------
+typedef enum{
+	TRANSACION_STATUS_OK,
+	TRANSACION_STATUS_ERROR
+}TRANSACION_STATUS;
+
+TRANSACION_STATUS BMEReadData (uint8_t sensorAddress, uint8_t sensorReagister, uint8_t *data, uint8_t numData);
+TRANSACION_STATUS BMEWriteData(uint8_t sensorAddress, uint8_t sensorReagister, uint8_t *data, uint8_t numData);
+
+
 
 
 #endif
