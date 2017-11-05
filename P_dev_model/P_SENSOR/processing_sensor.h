@@ -12,14 +12,8 @@
 
 #include "i2c_user_interface.h"
 
-// TODO delete area-------------------------------
-#define DS1321Interface  I2C1
-#define frqI2C           (uint32_t)400000
-#define DS1621Address    (uint8_t)0b000
-//------------------------------------------------
-
 #define I2C_SENSOR        I2C_1
-#define I2C_SENSOR_FRQ_HZ 9000
+#define I2C_SENSOR_FRQ_HZ 88888
 
 #define I2C1_SCL            GPIO_Pin_6       //PB6 ch1
 #define I2C1_SCL_AF_GPIO    GPIO_PinSource6  //PB8 ch1

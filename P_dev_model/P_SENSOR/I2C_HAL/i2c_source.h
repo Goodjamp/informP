@@ -47,6 +47,7 @@ typedef struct{
 	I2C_TypeDef*         I2C_SEL;           // I2C pointer
 	I2C_STATUS           transactionStatus; // transaction status
 	I2C_TRANSACTION_TYPE transactionType;   // type of transaction (Tx/Rx)
+	uint32_t             I2C_periodUs;
 	uint8_t              stateCnt;          // counter state of I2C transaction, point on current state (tx/rx - I2C_TX_STATE/I2C_RX_STATE)
 	uint8_t              addressDev;   // slave address
 	uint8_t              addressReg;   // start register address for Tx/Rx data
@@ -56,7 +57,7 @@ typedef struct{
 }I2CProcessingDef;
 
 
-I2C_STATUS  i2c_read_data(I2C_TypeDef* I2C_SEL_, uint8_t address_dev, uint8_t address_reg, uint8_t num_read,  uint8_t *buff);
+I2C_STATUS i2c_read_data(I2C_TypeDef* I2C_SEL_, uint8_t address_dev, uint8_t address_reg, uint8_t num_read,  uint8_t *buff);
 I2C_STATUS i2c_write_data(I2C_TypeDef* I2C_SEL_, uint8_t address_dev, uint8_t address_reg, uint8_t num_write, uint8_t *buff);
 
 

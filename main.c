@@ -26,6 +26,7 @@
 #include "processing_simple_gpio.h"
 #include "processing_reset_control.h"
 #include "HIDInterface.h"
+#include "debugStuff.h"
 
 #include "GPSprocessing.h"
 
@@ -62,7 +63,7 @@ S_config_moduls s_config_moduls; // глобальная структура настроек МОДУЛЕЙ устрой
 
 void delay_loop(){
 	u32 coutner=0;
-	while(coutner<1000000){
+	while(coutner<1000){
 		coutner++;
 	}
 }
@@ -73,9 +74,9 @@ S_modbus_tsk_par s_modbus_tsk_par[NUM_PORT_MODBUS];
 int main(void)
 {
 	u8 k1;
-
+   debugPinConfig();
 	//t_processing_display((void*)&k1);
-	t_processing_sensor((void*)&k1);
+	//t_processing_sensor((void*)&k1);
 
 
 
@@ -206,7 +207,7 @@ int main(void)
 	}
 #endif
 
-#ifdef DEV_6
+#ifdef DEV_6 // FRQ processing
 #if (TASK_PRIORITY(DEV_1)<MIN_T_PRIORITY)||(TASK_PRIORITY(DEV_1)>MAX_T_PRIORITY)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
@@ -215,7 +216,7 @@ int main(void)
 	}
 #endif
 
-#ifdef DEV_7
+#ifdef DEV_7 // GPS processing
 #if (TASK_PRIORITY(DEV_1)<MIN_T_PRIORITY)||(TASK_PRIORITY(DEV_1)>MAX_T_PRIORITY)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
@@ -224,16 +225,16 @@ int main(void)
 	}
 #endif
 
-#ifdef DEV_8
+#ifdef DEV_8 // sensor processing
 #if (TASK_PRIORITY(DEV_1)<MIN_T_PRIORITY)||(TASK_PRIORITY(DEV_1)>MAX_T_PRIORITY)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
 	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_8).state){// если в конфигурации поточный модуль выключен
-		//xTaskCreate(  TASK_PROCESSING(DEV_8), ( const char * ) TASK_IDENT(DEV_8), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_8), TASK_PRIORITY(DEV_8), NULL );
+		xTaskCreate(  TASK_PROCESSING(DEV_8), ( const char * ) TASK_IDENT(DEV_8), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_8), TASK_PRIORITY(DEV_8), NULL );
 	}
 #endif
 
-#ifdef DEV_9
+#ifdef DEV_9 // display processing
 #if (TASK_PRIORITY(DEV_1)<MIN_T_PRIORITY)||(TASK_PRIORITY(DEV_1)>MAX_T_PRIORITY)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
@@ -296,13 +297,9 @@ int main(void)
 	}
 #endif
 
-	//xTaskCreate( tskTS, ( const char * ) "M1", 50, NULL, mainQUEUE_RECEIVE_TASK_PRIORITY, NULL );
-	//xTaskCreate( t_tsk_BLINK, ( const char * ) "M1", 50, NULL, mainQUEUE_RECEIVE_TASK_PRIORITY, NULL );
-
 // задача управления процесом програмной презагрузки и световой индикации режима работы
 	xTaskCreate(  t_processing_reset_control, ( const char * ) "WatcDogTask", 70,	NULL, 4, NULL );
 
-	//--------------НУ ..... ЗАПУСКАЮ ПЛАНИРОВЩИК-------------И ПОЛЕТЕЛИ!!!!!!!!!!-----------------------------
 	vTaskStartScheduler();
 
 	return 0;

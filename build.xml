@@ -80,6 +80,7 @@
       <includepath path="P_dev_model/P_DISPLAY/MAX7219/inc"/>
       <includepath path="P_dev_model/P_DISPLAY/MAX7219"/>
       <includepath path="P_dev_model/P_SENSOR/BME280_HAL"/>
+      <includepath path="debugStuff"/>
       
       <!-- arm-none-eabi-gcc compiler arguments -->
       <compilerarg value="-mcpu=cortex-m3"/>

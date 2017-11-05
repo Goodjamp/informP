@@ -26,6 +26,7 @@
 						<entry flags="" kind="includePath" name="BASE_SYSTEM_STM_FUN/Processing_Source"/>
 						<entry flags="" kind="includePath" name="cmsis"/>
 						<entry flags="" kind="includePath" name="cmsis_boot"/>
+						<entry flags="" kind="includePath" name="debugStuff"/>
 						<entry flags="" kind="includePath" name="FreeRTOS_Source"/>
 						<entry flags="" kind="includePath" name="FreeRTOS_Source/include"/>
 						<entry flags="" kind="includePath" name="FreeRTOS_Source/portable/GCC/ARM_CM3"/>
@@ -74,6 +75,7 @@
 		<pathentry include="D:/CooCox/INFORM_P/informP/BASE_SYSTEM_STM_FUN/Processing_Source" kind="inc" path="" system="true"/>
 		<pathentry include="D:/CooCox/INFORM_P/informP/cmsis" kind="inc" path="" system="true"/>
 		<pathentry include="D:/CooCox/INFORM_P/informP/cmsis_boot" kind="inc" path="" system="true"/>
+		<pathentry include="D:/CooCox/INFORM_P/informP/debugStuff" kind="inc" path="" system="true"/>
 		<pathentry include="D:/CooCox/INFORM_P/informP/FreeRTOS_Source" kind="inc" path="" system="true"/>
 		<pathentry include="D:/CooCox/INFORM_P/informP/FreeRTOS_Source/include" kind="inc" path="" system="true"/>
 		<pathentry include="D:/CooCox/INFORM_P/informP/FreeRTOS_Source/portable/GCC/ARM_CM3" kind="inc" path="" system="true"/>

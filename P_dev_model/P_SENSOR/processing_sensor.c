@@ -23,21 +23,24 @@
 #include "processing_sensor_extern.h"
 #include "processing_sensor.h"
 #include "processing_mem_map_extern.h"
+#include "debugStuff.h"
 
 extern S_address_oper_data s_address_oper_data;
 DS1621MessStatus mesStatus;
 xSemaphoreHandle semaphoreUpdateFRQ;
-uint16_t mesTemperature;
-interfaceAddressDef ds1621Sensor = {
-		.I2Cdef 	 = (void*)DS1321Interface,
-		.addressMS4B = DS1621Address
-};
 
-void i2c_initGpio(void){
+//---------------------------------I2C user implementation functions-----------------------
+void i2cInitGpio(void){
 
 	GPIO_InitTypeDef GPIO_InitStructure;
-	/*Camera I2C1 pins config*/
+	/*I2C1 pins config*/
+
+
+	RCC_APB2PeriphResetCmd(RCC_APB2ENR_IOPBEN, ENABLE);
+	RCC_APB2PeriphResetCmd(RCC_APB2ENR_IOPBEN, DISABLE);
+
 	RCC_APB2PeriphClockCmd(RCC_APB2ENR_IOPBEN, ENABLE);
+
 
 	// config I2C CSCL GPIO
 	GPIO_InitStructure.GPIO_Pin = I2C1_SCL;
@@ -53,20 +56,40 @@ void i2c_initGpio(void){
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(I2C1_SDA_PORT, &GPIO_InitStructure);
 	// Enable Alternate function
+
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 }
 
+uint32_t i2cgetTimeMs(void)
+{
+	//return 0;
+	return xTaskGetTickCount();
+}
+
+//-----------------------------------sensor user implementftion functions------------------------------
 TRANSACION_STATUS BMEReadData (uint8_t sensorAddress, uint8_t sensorReagister, uint8_t *data, uint8_t numData){
-	I2CRxData(I2C_SENSOR, sensorAddress, sensorReagister, numData, data);
+	if(i2cRxData(I2C_SENSOR, sensorAddress, sensorReagister, numData, data) != I2C_STATUS_OK)
+	{
+		return TRANSACION_STATUS_ERROR;
+	};
 	return TRANSACION_STATUS_OK;
 }
 
 
 TRANSACION_STATUS BMEWriteData(uint8_t sensorAddress, uint8_t sensorReagister, uint8_t *data, uint8_t numData){
-	I2CTxData(I2C_SENSOR, sensorAddress, sensorReagister, numData, data);
+	if( i2cTxData(I2C_SENSOR, sensorAddress, sensorReagister, numData, data) != I2C_STATUS_OK)
+	{
+		return TRANSACION_STATUS_ERROR;
+	};
 	return TRANSACION_STATUS_OK;
 }
 
+
+uint32_t  sensorGetTime(void)
+{
+	//return 0;
+	return xTaskGetTickCount();
+}
 /* @brief
  *
  */
@@ -78,23 +101,34 @@ u16 sensor_calc_address_oper_reg(S_sensor_address *ps_sensor_address, u16 adres_
 
 uint8_t dataArrayTx[] = {60};
 uint8_t addressRegTx = 0XF2;
-uint8_t dataArrayRx[] = {0, 0};
-uint8_t addressRegRx = 0XD0;
+uint8_t dataArrayRx[1] = {0};
+uint8_t addressRegRx = 0X88;
 
 
-//I2C_STATUS I2CConfig( I2C_DEF i2cIn ,I2C_configDef *config)
 void i2c_init(void){
 	I2C_configDef i2c_configParamiters = {
 			.frequencyI2C = I2C_SENSOR_FRQ_HZ
 	};
-	I2CConfig(I2C_SENSOR, &i2c_configParamiters);
+	i2cConfig(I2C_SENSOR, &i2c_configParamiters);
 }
+
+
 
 void t_processing_sensor(void *pvParameters){
 	//S_sensor_user_config *s_FRQConfig =(S_sensor_user_config*)pvParameters;
+	float rezMesHumidity;
+	float rezMesTemperature;
+	float rezMesPressure;
+	BME280Handler sensorHandler;
+
 	i2c_init();
-	I2CRxData(I2C_SENSOR, BME280_ADDRESS_HIGHT, addressRegRx, sizeof(dataArrayRx), dataArrayRx);
-	I2CTxData(I2C_SENSOR, BME280_ADDRESS_HIGHT, addressRegTx, sizeof(dataArrayTx), dataArrayTx);
+	BME280_init(&sensorHandler, BME280_ADDRESS_HIGHT);
+	BME280_setValueMesState(&sensorHandler, MES_VALUE_TEMPERATURE, MES_STATE_ENABLE);
+	BME280_setValueMesState(&sensorHandler, MES_VALUE_PRESSURE, MES_STATE_ENABLE);
+	BME280_setValueMesState(&sensorHandler, MES_VALUE_HUMIDITY, MES_STATE_ENABLE);
+	BME280_setOverSample(&sensorHandler, MES_VALUE_TEMPERATURE, OVERSEMPLE_8);
+
+
 
 	//i2c_write_data(DS1321Interface, devAddress<<1, regAddress, sizeof(TXBuff), TXBuff);
 	//ds16211SHOT(&ds1621Sensor);
@@ -102,6 +136,12 @@ void t_processing_sensor(void *pvParameters){
 
 	while(1){
 
+		if (BME280_forcedMes(&sensorHandler, &rezMesTemperature, &rezMesPressure, &rezMesHumidity) == BME280_STATUS_COMUNICATION_ERROR)
+		{
+			vTaskDelay(10);
+			i2c_init();
+		}
+		//vTaskDelay(10);
 
 		/*
 		if(ds1621MesDone(&ds1621Sensor, &mesStatus) == DS1621_STATUS_BUSS_ERROR){
@@ -124,4 +164,5 @@ void t_processing_sensor(void *pvParameters){
 		vTaskDelay(20);
 		*/
 	}
+	//xTaskGetTickCount();
 }
