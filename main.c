@@ -3,6 +3,8 @@
 
 */
 /* Kernel includes. */
+#include "misc.h"
+
 #include <stdlib.h>
 #include <stddef.h>
 #include "stm32f10x.h"
@@ -298,7 +300,9 @@ int main(void)
 #endif
 
 // задача управления процесом програмной презагрузки и световой индикации режима работы
-	xTaskCreate(  t_processing_reset_control, ( const char * ) "WatcDogTask", 70,	NULL, 4, NULL );
+	//xTaskCreate(  t_processing_reset_control, ( const char * ) "WatcDogTask", 70,	NULL, 4, NULL );
+
+	NVIC_SetPriorityGrouping(NVIC_PriorityGroup_4);
 
 	vTaskStartScheduler();
 
@@ -326,6 +330,7 @@ void vApplicationStackOverflowHook( xTaskHandle *pxTask, signed char *pcTaskName
 	/* Run time stack overflow checking is performed if
 	configconfigCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2.  This hook
 	function is called if a stack overflow is detected. */
+	return;
 	for( ;; );
 }
 /*-----------------------------------------------------------*/

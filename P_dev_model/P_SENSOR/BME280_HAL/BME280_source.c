@@ -31,6 +31,8 @@ static const uint8_t shiftListOfOversemVal[] = {
 		[MES_VALUE_PRESSURE]    = (uint8_t)PRESSURE_OVERSAMPLING_FIELD_SHIFT,
 };
 
+// t_fine carries fine temperature as global value
+BME280_S32_t t_fine;
 
 static BME280_STATUS updateRegister(uint8_t deviceAddres, uint8_t regAddres, uint8_t data, uint8_t dataMask){
 	uint8_t bufferDataTx;
@@ -136,7 +138,7 @@ BME280_STATUS BME280_setMesDelay(BME280Handler *handler, MEASUREMENT_DELAY_DEF m
 
 
 BME280_STATUS BME280_forcedMes(BME280Handler *handler, float *rezMesTemperature, float *rezMesPressure, float *rezMesHumidity){
-	uint8_t dataRx[SIZE_OF_REZ_BYTES] = {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, };
+	uint8_t dataRx[SIZE_OF_REZ_BYTES];
 	int32_t rezADC;
 	int32_t  rezMesTemperatureInt;    // Returns temperature in DegC, resolution is 0.01 DegC
 	uint32_t rezMesHumidityUInt;      // Returns humidity in %RH as unsigned 32 bit integer in Q22.10 format
@@ -146,6 +148,7 @@ BME280_STATUS BME280_forcedMes(BME280Handler *handler, float *rezMesTemperature,
 		return handler->sensorStatus;
 	}
 	handler->sensorStatus = BME280_STATUS_BUSY;
+
 	// Start measurement
 	if( (handler->sensorStatus = updateRegister(handler->selfAddress,
 			BME280_REG_CTRL_MES,
@@ -154,6 +157,7 @@ BME280_STATUS BME280_forcedMes(BME280Handler *handler, float *rezMesTemperature,
 	{
 		return handler->sensorStatus = BME280_STATUS_COMUNICATION_ERROR;
 	}
+
 	// wait for measurement complete
 	while(1){
 		if ( BMEReadData( handler->selfAddress, BME280_REG_STATUS, dataRx, 1) == TRANSACION_STATUS_ERROR )
@@ -168,30 +172,33 @@ BME280_STATUS BME280_forcedMes(BME280Handler *handler, float *rezMesTemperature,
 		}
 		// wait for results of measurement copied to register
 	}
+
 	// Read results of measurement
 	if( BMEReadData( handler->selfAddress, BME280_REG_PRES_MLSB, dataRx, sizeof(dataRx)) == TRANSACION_STATUS_ERROR )
 	{
 		return handler->sensorStatus = BME280_STATUS_COMUNICATION_ERROR;
 	}
+
     //Compensation Temperature
 	rezADC =  dataRx[TEMP_MSB]<<12 | dataRx[TEMP_LSB]<<4 | dataRx[TEMP_XLSB];
 	rezMesTemperatureInt = BME280_compensate_T_int32(handler, rezADC);
 	(*rezMesTemperature) = rezMesTemperatureInt * TEMPERATURE_CALC;
+
 	//Compensation Pressure
 	rezADC = dataRx[PRESS_MSB]<<12 | dataRx[PRESS_LSB]<<4 | dataRx[PRESS_XLSB];
 	rezMesPressureUInt = BME280_compensate_P_int64(handler, rezADC);//rezMesPressureInt
 	(*rezMesPressure) = rezMesPressureUInt/PRESSURE_CALC;
+
 	//Compensation Humidity
 	rezADC =  dataRx[HUM_MSB]<<8 | dataRx[HUM_LSB];
 	rezMesHumidityUInt = bme280_compensate_H_int32(handler, rezADC);
 	(*rezMesHumidity) = rezMesHumidityUInt/HUMIDITY_CALC;
+
 	return handler->sensorStatus = BME280_STATUS_OK;
 }
 
 
 // Returns temperature in DegC, resolution is 0.01 DegC. Output value of “5123” equals 51.23 DegC.
-// t_fine carries fine temperature as global value
-BME280_S32_t t_fine;
 static BME280_S32_t BME280_compensate_T_int32(BME280Handler *handler, BME280_S32_t adc_T)
 {
 	BME280_S32_t var1, var2, T;

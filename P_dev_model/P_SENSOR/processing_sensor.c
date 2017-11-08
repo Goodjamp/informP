@@ -90,6 +90,8 @@ uint32_t  sensorGetTime(void)
 	//return 0;
 	return xTaskGetTickCount();
 }
+
+
 /* @brief
  *
  */
@@ -113,20 +115,21 @@ void i2c_init(void){
 }
 
 
+BME280Handler sensorHandler;
 
 void t_processing_sensor(void *pvParameters){
 	//S_sensor_user_config *s_FRQConfig =(S_sensor_user_config*)pvParameters;
 	float rezMesHumidity;
 	float rezMesTemperature;
 	float rezMesPressure;
-	BME280Handler sensorHandler;
+
 
 	i2c_init();
 	BME280_init(&sensorHandler, BME280_ADDRESS_HIGHT);
 	BME280_setValueMesState(&sensorHandler, MES_VALUE_TEMPERATURE, MES_STATE_ENABLE);
 	BME280_setValueMesState(&sensorHandler, MES_VALUE_PRESSURE, MES_STATE_ENABLE);
 	BME280_setValueMesState(&sensorHandler, MES_VALUE_HUMIDITY, MES_STATE_ENABLE);
-	BME280_setOverSample(&sensorHandler, MES_VALUE_TEMPERATURE, OVERSEMPLE_8);
+	BME280_setOverSample(&sensorHandler,    MES_VALUE_TEMPERATURE, OVERSEMPLE_8);
 
 
 
@@ -138,7 +141,7 @@ void t_processing_sensor(void *pvParameters){
 
 		if (BME280_forcedMes(&sensorHandler, &rezMesTemperature, &rezMesPressure, &rezMesHumidity) == BME280_STATUS_COMUNICATION_ERROR)
 		{
-			vTaskDelay(10);
+			vTaskDelay(30);
 			i2c_init();
 		}
 		//vTaskDelay(10);

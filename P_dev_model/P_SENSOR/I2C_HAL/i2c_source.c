@@ -50,10 +50,8 @@ static void startInitI2C(I2C_TypeDef *selI2C){
 }
 
 
-
 static void startTransactionI2C(I2C_DEF  i2cIn, uint8_t address_dev, uint8_t address_reg,
 		                          uint8_t num_read, uint8_t *buff, I2C_TRANSACTION_TYPE typeTransaction){
-
 	I2CProcessing[i2cIn].transactionStatus = I2C_STATUS_TRANSACTION_PROCESSING;
 	I2CProcessing[i2cIn].transactionType = typeTransaction;
 	I2CProcessing[i2cIn].addressDev = address_dev;
@@ -63,6 +61,7 @@ static void startTransactionI2C(I2C_DEF  i2cIn, uint8_t address_dev, uint8_t add
 	I2CProcessing[i2cIn].cnt = 0;
 	// Start Tx data
 	I2C_Cmd(I2CProcessing[i2cIn].I2C_SEL, ENABLE);
+	I2C_AcknowledgeConfig(I2CProcessing[i2cIn].I2C_SEL, ENABLE);
 	I2C_ITConfig(I2CProcessing[i2cIn].I2C_SEL, I2C_IT_EVT, ENABLE);
 	I2C_GenerateSTART(I2CProcessing[i2cIn].I2C_SEL, ENABLE);
 }
@@ -77,7 +76,7 @@ static inline bool clearI2CComunication(I2C_DEF  i2cIn, uint16_t I2C_SR1Field){
 	I2CProcessing[i2cIn].transactionStatus = I2C_STATUS_TRANSACTION_ERROR;
 	I2C_ITConfig(I2CProcessing[i2cIn].I2C_SEL, I2C_IT_BUF, DISABLE);
 	I2C_ITConfig(I2CProcessing[i2cIn].I2C_SEL, I2C_IT_EVT, DISABLE);
-	I2C_GenerateSTART(I2CProcessing[i2cIn].I2C_SEL, DISABLE);
+	//I2C_GenerateSTART(I2CProcessing[i2cIn].I2C_SEL, DISABLE);
 	I2C_GenerateSTOP(I2CProcessing[i2cIn].I2C_SEL, DISABLE);
 	I2C_Cmd(I2CProcessing[i2cIn].I2C_SEL, DISABLE);
 	if( I2CProcessing[i2cIn].I2C_SEL == I2C1 )
@@ -143,7 +142,6 @@ I2C_STATUS i2cTxData(I2C_DEF i2cIn, uint8_t address_dev, uint8_t address_reg, ui
 	while( (I2CProcessing[i2cIn].transactionStatus == I2C_STATUS_TRANSACTION_PROCESSING) ||
 		   (I2C_ReadRegister(I2CProcessing[i2cIn].I2C_SEL, I2C_Register_CR1) & I2C_CR1_STOP) )
 	{
-
 		// user time check function
 		if( i2cgetTimeMs() >= maxTimeTransaction )
 		{
@@ -174,11 +172,10 @@ I2C_STATUS i2cRxData(I2C_DEF i2cIn, uint8_t address_dev, uint8_t address_reg, ui
 	{
 		return I2CProcessing[i2cIn].transactionStatus;
 	}
+	//I2C_AcknowledgeConfig(I2CProcessing[i2cIn].I2C_SEL, ENABLE);
 	startTransactionI2C(i2cIn, address_dev, address_reg, num_read, buff, I2C_TRANSACTION_RX);
-	I2C_AcknowledgeConfig(I2CProcessing[i2cIn].I2C_SEL, ENABLE);
 	while( I2CProcessing[i2cIn].transactionStatus == I2C_STATUS_TRANSACTION_PROCESSING )
 	{
-
 		// user time check function
 		if( i2cgetTimeMs() >= maxTimeTransaction )
 		{
@@ -221,9 +218,9 @@ static inline void I2CProcessingInterruptTx(I2C_DEF  i2cIn){
 		{
 			return;
 		};
-		I2C_GenerateSTART(I2CProcessing[i2cIn].I2C_SEL, DISABLE);
+		//I2C_GenerateSTART(I2CProcessing[i2cIn].I2C_SEL, DISABLE);
 		I2C_Send7bitAddress(I2CProcessing[i2cIn].I2C_SEL, (uint8_t)(I2CProcessing[i2cIn].addressDev<<1), I2C_Direction_Transmitter);
-		I2CProcessing[i2cIn].stateCnt++;
+		I2CProcessing[i2cIn].stateCnt = I2C_TX_ADDRESS;
 		break;
 	case I2C_TX_ADDRESS:
 		if( !clearI2CComunication(i2cIn, I2C_SR1_ADDR))
@@ -235,7 +232,7 @@ static inline void I2CProcessingInterruptTx(I2C_DEF  i2cIn){
 		I2C_ITConfig(I2CProcessing[i2cIn].I2C_SEL, I2C_IT_BUF, ENABLE);
 		// Send address register
 		I2C_SendData(I2CProcessing[i2cIn].I2C_SEL, I2CProcessing[i2cIn].addressReg);
-		I2CProcessing[i2cIn].stateCnt++;
+		I2CProcessing[i2cIn].stateCnt = I2C_TX_TXE;
 		break;
 	case I2C_TX_TXE:
 		if( !clearI2CComunication(i2cIn, I2C_SR1_TXE))
@@ -246,7 +243,7 @@ static inline void I2CProcessingInterruptTx(I2C_DEF  i2cIn){
 		if(I2CProcessing[i2cIn].cnt >= I2CProcessing[i2cIn].numData)
 		{
 			I2C_ITConfig(I2CProcessing[i2cIn].I2C_SEL, I2C_IT_BUF, DISABLE);
-			I2CProcessing[i2cIn].stateCnt++;
+			I2CProcessing[i2cIn].stateCnt = I2C_TX_BTF;
 			break;
 		}
 		I2C_SendData(I2CProcessing[i2cIn].I2C_SEL, I2CProcessing[i2cIn].buffData[I2CProcessing[i2cIn].cnt]);
@@ -273,48 +270,43 @@ static inline void I2CProcessingInterruptTx(I2C_DEF  i2cIn){
 static inline void I2CProcessingInterruptRx(I2C_DEF  i2cIn){
 	switch(I2CProcessing[i2cIn].stateCnt){
 	case I2C_RX_SB_F1:
-		debugPin_1_Set;
-		debugPin_2_Set;
-		I2C_GenerateSTART(I2CProcessing[i2cIn].I2C_SEL, DISABLE);
+		//I2C_GenerateSTART(I2CProcessing[i2cIn].I2C_SEL, DISABLE);
 		// first interrupt should be completed SB generation
 		if( !clearI2CComunication(i2cIn, I2C_SR1_SB))
 		{
 			return;
 		};
 		I2C_Send7bitAddress(I2CProcessing[i2cIn].I2C_SEL, (uint8_t)(I2CProcessing[i2cIn].addressDev<<1), I2C_Direction_Transmitter);
-		I2CProcessing[i2cIn].stateCnt++;
+		I2CProcessing[i2cIn].stateCnt = I2C_RX_ADDRESS_F1;
 		break;
 	case I2C_RX_ADDRESS_F1:
-		I2C_GenerateSTART(I2CProcessing[i2cIn].I2C_SEL, DISABLE);
+		//I2C_GenerateSTART(I2CProcessing[i2cIn].I2C_SEL, DISABLE);
 		if( !clearI2CComunication(i2cIn, I2C_SR1_ADDR))
 		{
-			debugPin_1_Clear;
 			return;
 		};
 		I2C_ReadRegister(I2CProcessing[i2cIn].I2C_SEL, I2C_Register_SR2);
 		// Send start address register
 		I2C_SendData(I2CProcessing[i2cIn].I2C_SEL, I2CProcessing[i2cIn].addressReg);
-		I2CProcessing[i2cIn].stateCnt++;
+		I2CProcessing[i2cIn].stateCnt = I2C_RX_BTF_F1;
 		break;
 	case I2C_RX_BTF_F1:
-		debugPin_2_Clear;
 		if( !clearI2CComunication(i2cIn, I2C_SR1_BTF))
 		{
-			debugPin_1_Clear;
 			return;
 		};
 		I2C_ReceiveData(I2CProcessing[i2cIn].I2C_SEL);
 		I2C_GenerateSTART(I2CProcessing[i2cIn].I2C_SEL, ENABLE);
-		I2CProcessing[i2cIn].stateCnt++;
+		I2CProcessing[i2cIn].stateCnt = I2C_RX_SB_F2;
 		break;
 	case I2C_RX_SB_F2:
 		if( !clearI2CComunication(i2cIn, I2C_SR1_SB))
 		{
 			return;
 		};
-		I2C_GenerateSTART(I2CProcessing[i2cIn].I2C_SEL, DISABLE);
+		//I2C_GenerateSTART(I2CProcessing[i2cIn].I2C_SEL, DISABLE);
 		I2C_Send7bitAddress(I2CProcessing[i2cIn].I2C_SEL, (uint8_t)(I2CProcessing[i2cIn].addressDev<<1), I2C_Direction_Receiver);
-		I2CProcessing[i2cIn].stateCnt++;
+		I2CProcessing[i2cIn].stateCnt = I2C_RX_ADDRESS_F2;
 		break;
 	case I2C_RX_ADDRESS_F2:
 		if( !clearI2CComunication(i2cIn, I2C_SR1_ADDR))
@@ -343,7 +335,7 @@ static inline void I2CProcessingInterruptRx(I2C_DEF  i2cIn){
 		I2C_ReadRegister(I2CProcessing[i2cIn].I2C_SEL, I2C_Register_SR2);
 		// Enable buffer interrupt
 		I2C_ITConfig(I2CProcessing[i2cIn].I2C_SEL, I2C_IT_BUF, ENABLE);
-		I2CProcessing[i2cIn].stateCnt++;
+		I2CProcessing[i2cIn].stateCnt = I2C_RX_RXE_F2;
 		break;
 	case I2C_RX_RXE_F2:
 		if( !clearI2CComunication(i2cIn, I2C_SR1_RXNE))
@@ -362,7 +354,7 @@ static inline void I2CProcessingInterruptRx(I2C_DEF  i2cIn){
 		if( (I2CProcessing[i2cIn].numData - I2CProcessing[i2cIn].cnt) <= 3 )
 		{
 			I2C_ITConfig(I2CProcessing[i2cIn].I2C_SEL, I2C_IT_BUF, DISABLE);
-			I2CProcessing[i2cIn].stateCnt++;
+			I2CProcessing[i2cIn].stateCnt = I2C_RX_BTF_F2;
 		}
 		break;
 	case I2C_RX_BTF_F2: // in RX mode, I2C_RX_BTF flag set in case of DR not empty and shift reg not empty
@@ -376,7 +368,7 @@ static inline void I2CProcessingInterruptRx(I2C_DEF  i2cIn){
 		I2C_GenerateSTOP(I2CProcessing[i2cIn].I2C_SEL, ENABLE);
 		I2CProcessing[i2cIn].buffData[I2CProcessing[i2cIn].cnt++] = I2C_ReceiveData(I2CProcessing[i2cIn].I2C_SEL);
 		I2C_ITConfig(I2CProcessing[i2cIn].I2C_SEL, I2C_IT_BUF, ENABLE);
-		I2CProcessing[i2cIn].stateCnt++;
+		I2CProcessing[i2cIn].stateCnt = I2C_RX_RXE_F3;
 		break;
 	case I2C_RX_RXE_F3:
 		if( !clearI2CComunication(i2cIn, I2C_SR1_RXNE))
