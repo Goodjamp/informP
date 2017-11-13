@@ -14,6 +14,8 @@
 #include "usb_lib.h"
 #include "usb_istr.h"
 
+#include "debugStuff.h"
+
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -50,15 +52,6 @@ void EP2_OUT_Callback(void)
 {
   USB_SIL_Read(EP2_OUT, Receive_Buffer);
 
-  if(Receive_Buffer[1] == 1)
-  {
-	  GPIO_SetBits(GPIOA, GPIO_Pin_1);
-  }
-  else
-  {
-	  GPIO_ResetBits(GPIOA, GPIO_Pin_1);
-  }
-
   SetEPRxStatus(ENDP2, EP_RX_VALID);
 
 }
@@ -78,8 +71,9 @@ void EP1_IN_Callback(void)
 
 void EP2_IN_Callback(void)
 {
+	debugPin_1_Set;
 	PrevXferComplete[ENDP2] = 1;
-	GPIOA->ODR ^= GPIO_ODR_ODR1;
+	debugPin_1_Clear;
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

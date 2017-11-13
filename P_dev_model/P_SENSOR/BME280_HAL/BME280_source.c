@@ -165,12 +165,11 @@ BME280_STATUS BME280_forcedMes(BME280Handler *handler, float *rezMesTemperature,
 			return handler->sensorStatus = BME280_STATUS_COMUNICATION_ERROR;
 		}
 
-		// wait for measurement complete
-		if( !(dataRx[0] & STATUS_MEASURING))
+		// wait for measurement and copy complete
+		if( !(dataRx[0] & (STATUS_MEASURING | STATUS_IM_UPDATE)))
 		{
 			break;
 		}
-		// wait for results of measurement copied to register
 	}
 
 	// Read results of measurement

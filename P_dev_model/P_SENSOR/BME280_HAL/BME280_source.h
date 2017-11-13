@@ -82,7 +82,7 @@ typedef enum{
                                      (X == OVERSEMPLE_8 )|| \
                                      (X == OVERSEMPLE_16)
 
-#define  CTRL_MEAS_OSRS_FIELD_MASK                          0x7
+#define  CTRL_MEAS_OSRS_FIELD_MASK                    0x7
 //---shit of oversampling field for measurement value
 #define  HUMIDITY_OVERSAMPLING_FIELD_SHIFT            0x0
 #define  PRESSURE_OVERSAMPLING_FIELD_SHIFT            0x2
@@ -108,7 +108,7 @@ typedef enum{
     CTRL_MEAS_MODE_NORMAL = (uint8_t)0x3
 }CTRL_MEAS_MODE_DEF;
 #define  CTRL_MEAS_MODE_FIELD_MASK            0x3
-#define  CTRL_MEAS_MODE_FIELD_SHIFT           0x5
+#define  CTRL_MEAS_MODE_FIELD_SHIFT           0x0
 
 
 /*-----------------fields of register CONFIG definition-----------------*/

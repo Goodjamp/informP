@@ -15,6 +15,7 @@
 
 #include "stm32f10x.h"
 #include "stm32f10x_gpio.h"
+#include "HIDInterface.h"
 
 #include "i2c_user_interface.h"
 #include "DS1621_source.h"
@@ -116,6 +117,7 @@ void i2c_init(void){
 
 
 BME280Handler sensorHandler;
+uint8_t usbTxBuffer[8]= {0,0,0,0,0,0,0,0};
 
 void t_processing_sensor(void *pvParameters){
 	//S_sensor_user_config *s_FRQConfig =(S_sensor_user_config*)pvParameters;
@@ -129,7 +131,7 @@ void t_processing_sensor(void *pvParameters){
 	BME280_setValueMesState(&sensorHandler, MES_VALUE_TEMPERATURE, MES_STATE_ENABLE);
 	BME280_setValueMesState(&sensorHandler, MES_VALUE_PRESSURE, MES_STATE_ENABLE);
 	BME280_setValueMesState(&sensorHandler, MES_VALUE_HUMIDITY, MES_STATE_ENABLE);
-	BME280_setOverSample(&sensorHandler,    MES_VALUE_TEMPERATURE, OVERSEMPLE_8);
+	//BME280_setOverSample(&sensorHandler,    MES_VALUE_TEMPERATURE, OVERSEMPLE_8);
 
 
 
@@ -138,12 +140,18 @@ void t_processing_sensor(void *pvParameters){
 	//ds1621StartMess(&ds1621Sensor);
 
 	while(1){
-
+/*
 		if (BME280_forcedMes(&sensorHandler, &rezMesTemperature, &rezMesPressure, &rezMesHumidity) == BME280_STATUS_COMUNICATION_ERROR)
 		{
-			vTaskDelay(30);
+			vTaskDelay(0);
 			i2c_init();
 		}
+		usbTxBuffer[1] = (uint8_t)(rezMesTemperature);
+		usbTxBuffer[2] = (uint8_t)( (rezMesTemperature - usbTxBuffer[1])*100 );
+		usbTxBuffer[4] = (uint8_t)rezMesHumidity;
+*/
+		while( txDataToHost(1, usbTxBuffer, sizeof(usbTxBuffer) ) == 0){}
+		//vTaskDelay(010);
 		//vTaskDelay(10);
 
 		/*

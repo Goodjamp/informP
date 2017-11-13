@@ -10,7 +10,7 @@
 #define USB_USER_SETINGS_H_
 
 /* EP_NUM */
-#define EP_NUM     (4)
+#define EP_NUM     (2)
 #define EP_NUM_INTERFACE_1     (4)
 #define EP_NUM_INTERFACE_2     (2)
 

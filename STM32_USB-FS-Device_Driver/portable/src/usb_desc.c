@@ -56,8 +56,8 @@ const sDeviceDescriptor CustomHID_DeviceDescriptor = {
 	.bDeviceSubClass = 0x00,
 	.bDeviceProtocol = 0x00,
 	.bMaxPacketSize = 0x40,
-	.idVendor = 0x0581,
-	.idProduct = 0x4d0f,
+	.idVendor = 0x0483,
+	.idProduct = 0x5711,
 	.bcdDevice = 0x0200,   // diff
 	.iManufacturer = 0x01,
 	.iProduct = 0x02,
@@ -95,7 +95,7 @@ const sUSBHIDDescriptor CustomHID_ConfigDescriptor = {
 									.bNumEndpoints = EP_NUM_INTERFACE_1,
 									.bInterfaceClass = 0x03,    /* bInterfaceClass: HID */
 									.bInterfaceSubClass = 0x00,
-									.bInterfaceProtocol = 0x02,
+									.bInterfaceProtocol = 0x02, // ?
 									.iInterface = 0x04,
 		},
 		/********USB HID descriptor***************/
@@ -105,7 +105,7 @@ const sUSBHIDDescriptor CustomHID_ConfigDescriptor = {
 									.bcdHID = 0x0111,
 									.bCountryCode = 0x00,
 									.bNumDescriptors = 0x01,   /* bNumDescriptors: Number of HID class descriptors to follow */
-									.bDescriptorType1 = 0x22,
+									.bDescriptorType1 = 0x22, // ?
 									.wDescriptorLength = sizeof(CustomHID_ReportDescriptor), /*  Total length of Report descriptor */
 		},
 		/********USB EndPoint descriptor***************/
@@ -131,7 +131,7 @@ const sUSBHIDDescriptor CustomHID_ConfigDescriptor = {
 									.bEndpointAddress = 0x82,   /* bEndpointAddress: Endpoint Address (IN) */
 									.bmAttributes = 0x03,       /* bmAttributes: Interrupt endpoint */
 									.wMaxPacketSize = 0x0A,   /* wMaxPacketSize: size Bytes max */
-									.bInterval =  10,           /* bInterval: Polling Interval, ms */
+									.bInterval =  200,           /* bInterval: Polling Interval, ms */
 		},
 		.userDesc.EndPointDesc[3] = {
 									.bLength = sizeof(sEndPointDescriptor),          /* bLength: Endpoint Descriptor size */
@@ -139,7 +139,7 @@ const sUSBHIDDescriptor CustomHID_ConfigDescriptor = {
 									.bEndpointAddress = 0x02,   /* bEndpointAddress: Endpoint Address (OUT) */
 									.bmAttributes = 0x03,       /* bmAttributes: Interrupt endpoint */
 									.wMaxPacketSize = 0x0A,   /* wMaxPacketSize: size Bytes max */
-									.bInterval = 10,           /* bInterval: Polling Interval, ms */
+									.bInterval = 200,           /* bInterval: Polling Interval, ms */
 		},
 };
 

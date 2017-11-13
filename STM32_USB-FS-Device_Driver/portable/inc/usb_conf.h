@@ -60,8 +60,8 @@
 /* IMR_MSK */
 /* mask defining which events has to be handled */
 /* by the device application software */
-// | CNTR_SUSPM
-#define IMR_MSK (CNTR_CTRM  | CNTR_WKUPM  | CNTR_ERRM  | CNTR_SOFM \
+//
+#define IMR_MSK (CNTR_CTRM  | CNTR_WKUPM  | CNTR_ERRM  | CNTR_SOFM | CNTR_SUSPM\
                  | CNTR_ESOFM | CNTR_RESETM )
 
 /* CTR service routines */
