@@ -10,9 +10,9 @@
  */
 
 
-
-#include "fifo_.h"
 #include "stdio.h"
+#include "fifo_.h"
+
 
 
 FIFO_STATUS fifoInit(hFIFO inFifo, uint16_t fifoSize, uint8_t itemtSize, uint8_t *buffAddress) {

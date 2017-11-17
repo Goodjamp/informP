@@ -78,9 +78,9 @@ int main(void)
 	u8 k1;
    debugPinConfig();
 	//Run HID (usb)
-	USB_HIDInit();
+	//USB_HIDInit();
 	//t_processing_display((void*)&k1);
-	t_processing_sensor((void*)&k1);
+	//t_processing_sensor((void*)&k1);
 
 
 
@@ -118,7 +118,7 @@ int main(void)
 	}
 
 	//Run HID (usb)
-	USB_HIDInit();
+	//USB_HIDInit();
 
 	/*******************************************************************************/
 	//---------------гюосяйюч гюдювх опнрнйнкнб янцкюямн мюярпней--------------------

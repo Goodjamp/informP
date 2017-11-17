@@ -19,7 +19,7 @@
 
 #include "i2c_user_interface.h"
 #include "DS1621_source.h"
-#include "BME280_user_interfase.h"
+#include "BME280_user_interface.h"
 #include "funct.h"
 #include "processing_sensor_extern.h"
 #include "processing_sensor.h"

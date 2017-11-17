@@ -1,6 +1,5 @@
-/**
- ******************************************************************************
- * @file    HardwareInit.h
+/********************************************************************************
+ * @file    lcdHWInterface.h
  * @author  Gerasimchuk A.
  * @version V1.0.0
  * @date    23-November-2016
@@ -18,13 +17,7 @@
 #define LD_MIN_us       1
 #define LD_LENGT_uS     5
 
-
-// Number of SPI
-#define NUM_SPI		   2
-
-// Macros definition for enable GPIO
-//#define ENABLE_GPIO(X)  ENABLE_GPIO_(X)
-//#define ENABLE_GPIO_(X) RCC_APB2PeriphClockCmd(RCC_APB2Periph_##X,  ENABLE);
+#define DISPLAY_SPI  SPI2
 
 // ----------SPI1 pin/port definition---------
 #define SPI1_GPIO_SCK_ENABLE  RCC_APB2Periph_GPIOA
@@ -48,31 +41,21 @@
 #define SPI2_GPIO_MISO        GPIOB
 #define SPI2_GPIO_MISO_PIN    GPIO_Pin_14
 
+// ----------LD pin/port definition---------
+#define PORT_LD_1  GPIOB
+#define PORT_LD_2  GPIOB
+#define PORT_LD_3  GPIOB
+#define PORT_LD_4  GPIOB
 
-// SPI Interrupt callback function prototype
-typedef void (*pfspiCallback)(void);
-
-typedef enum {
-	HARDWARE_INIT_STATUS_OK,
-	HARDWARE_INIT_STATUS_ERROR_GPIO,
-	HARDWARE_INIT_STATUS_ERROR_SPI,
-}HARDWARE_INIT_STATUS;
+#define PIN_LD_1   GPIO_Pin_12
+#define PIN_LD_2   GPIO_Pin_8
+#define PIN_LD_3   GPIO_Pin_14
+#define PIN_LD_4   GPIO_Pin_9
 
 
-/* @brief
- * */
-typedef enum {
-	TX_ADDRESS_ONE = 0x0,
-	TX_ADDRESS_ALL = 0x1F,
-}TX_ADDRESS;
 
 typedef struct{
 	GPIO_TypeDef* port;
 	uint16_t     pin;
 }LDDescr;
-
-
-DISPLAY_STATUS displayTxData(displayHandlerDef *displayHandler, uint16_t orderNumberDispl, uint8_t numData, TX_ADDRESS txAddress);
-void initDisplay(displayHandlerDef *displayHandler, LDDescr *LDList, uint16_t numScreen, SPI_TypeDef *selSPI);
-
 #endif

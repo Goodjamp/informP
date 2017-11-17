@@ -9,57 +9,56 @@
 
 #include "stddef.h"
 
-#include "stmMaxHardwareInit.h"
-
 #include "stm32f10x_rcc.h"
 #include "stm32f10x_gpio.h"
 #include "stm32f10x_spi.h"
 #include "stm32f10x_tim.h"
 
-#include "max7219.h"
+#include "lcdHWInterface.h"
 
-pfspiCallback spiCallback[NUM_SPI] = {[0 ... NUM_SPI - 1] = NULL};
 
-struct {
-	uint16_t numScreen;
-	LDDescr *ListOfLD;
-	SPI_TypeDef *sellSPI;
-} LDGenDef;
 
-displayHandlerDef *displayIntarface;
+#include "LCD.h"
 
-volatile struct {
-	enum {
-		LD_FREE,
-		LD_BUSY
-	} state;
-	displayHandlerDef *displayHandler;
-	uint16_t numLD;
-	TX_ADDRESS address;
-} ldStatusDef =
-{
-		.state = LD_FREE
+// ------------------------definition for screen----------------------
+static LDDescr LDList[NUMBER_STRING] = {
+		[SCREEN_1] = {
+				.port = PORT_LD_1,
+				.pin =  PIN_LD_1
+				},
+		[SCREEN_2] = {
+				.port = PORT_LD_2,
+				.pin =  PIN_LD_2
+				},
+		[SCREEN_3] = {
+				.port = PORT_LD_3,
+				.pin =  PIN_LD_3
+				},
+		[SCREEN_4] = {
+				.port = PORT_LD_4,
+				.pin =  PIN_LD_4
+				},
 };
 
 
+static volatile struct {
+	uint16_t numLD;
+	TX_ADDRESS address;
+} ldTxDef;
+
+
+
 // Static functions prototype definition
-static HARDWARE_INIT_STATUS enableGPIO(GPIO_TypeDef *GPIOx);
-static HARDWARE_INIT_STATUS enableSPI(SPI_TypeDef *sellSPI);
-HARDWARE_INIT_STATUS configSPI(SPI_TypeDef *sellSPI, pfspiCallback pfCallback);
-static void displayInitGPIOLd(GPIO_TypeDef* ldGpio, uint16_t ldPin);
+static void enableGPIO(GPIO_TypeDef *GPIOx);
+static void enableSPI(SPI_TypeDef *sellSPI);
+static void configSPI(SPI_TypeDef *sellSPI);
+static void configGPIOLd(GPIO_TypeDef* ldGpio, uint16_t ldPin);
 static void configTimer(void);
 static void generateLdPuls(void);
-static void interruptSPICallback_Intarface(void);
-static void displayInterruptTx(displayHandlerDef *displayHandler);
+static void spiInterruptTx(void);
 
 
-
-static HARDWARE_INIT_STATUS enableGPIO(GPIO_TypeDef *GPIOx)
-{
-	if(!IS_GPIO_ALL_PERIPH(GPIOx))
-	{
-		return HARDWARE_INIT_STATUS_ERROR_GPIO;
-	}
+static void enableGPIO(GPIO_TypeDef *GPIOx){
 	if(GPIOx == GPIOA)
 	{
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA,  ENABLE);
@@ -82,14 +81,12 @@ static HARDWARE_INIT_STATUS enableGPIO(GPIO_TypeDef *GPIOx)
 	}
 	else
 	{
-		return HARDWARE_INIT_STATUS_ERROR_GPIO;
+		return;
 	}
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO,  ENABLE);
-	return HARDWARE_INIT_STATUS_OK;
 }
 
-static HARDWARE_INIT_STATUS enableSPI(SPI_TypeDef *sellSPI)
-{
+static void enableSPI(SPI_TypeDef *sellSPI){
 	GPIO_InitTypeDef gpioSPI_SCK_init;
 	GPIO_InitTypeDef gpioSPI_MOSI_init;
 	// SCK pin init
@@ -120,29 +117,12 @@ static HARDWARE_INIT_STATUS enableSPI(SPI_TypeDef *sellSPI)
 		GPIO_Init(SPI2_GPIO_MOSI, &gpioSPI_MOSI_init);
 		NVIC_EnableIRQ(SPI2_IRQn);
 	}
-	else
-	{
-		return HARDWARE_INIT_STATUS_ERROR_SPI;
-	}
-	return  HARDWARE_INIT_STATUS_OK;
 }
 
-HARDWARE_INIT_STATUS configSPI(SPI_TypeDef *sellSPI, pfspiCallback pfCallback)
-{
+static void configSPI(SPI_TypeDef *sellSPI){
 	SPI_InitTypeDef spiInitTypedef;
-	if(enableSPI(sellSPI) == HARDWARE_INIT_STATUS_ERROR_SPI)
-	{
-		return HARDWARE_INIT_STATUS_ERROR_SPI;
-	}
-	// Set SPI interrupt callback function
-	switch((uint32_t)sellSPI){
-		case (uint32_t)SPI1: spiCallback[0] = pfCallback;
-				   break;
-		case (uint32_t)SPI2: spiCallback[1] = pfCallback;
-				   break;
-		default: return HARDWARE_INIT_STATUS_ERROR_SPI;
-	}
-	if(sellSPI)
+	enableSPI(sellSPI);
+
 	spiInitTypedef.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_256;
 	spiInitTypedef.SPI_CPHA = SPI_CPHA_1Edge;
 	spiInitTypedef.SPI_CPOL = SPI_CPOL_Low;
@@ -156,11 +136,9 @@ HARDWARE_INIT_STATUS configSPI(SPI_TypeDef *sellSPI, pfspiCallback pfCallback)
 	SPI_Init(sellSPI, &spiInitTypedef);
 	SPI_I2S_ITConfig(sellSPI, SPI_I2S_IT_RXNE, ENABLE);
 	SPI_Cmd(sellSPI,ENABLE);
-	return HARDWARE_INIT_STATUS_OK;
 }
 
-void SPI1_IRQHandler(void)
-{
+void SPI1_IRQHandler(void){
 	volatile uint16_t readData;
 	if(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) != SET)
 	{
@@ -168,16 +146,12 @@ void SPI1_IRQHandler(void)
 	}
 	SPI_I2S_ClearFlag(SPI1, SPI_I2S_FLAG_RXNE);
 	SPI_I2S_ClearFlag(SPI2, SPI_I2S_FLAG_RXNE);
-	readData = SPI_I2S_ReceiveData(SPI2);
+	SPI_I2S_ReceiveData(SPI2);
 	// Call Callback function
-	if(spiCallback != NULL)
-	{
-		spiCallback[0]();
-	}
+	spiInterruptTx();
 }
 
-void SPI2_IRQHandler(void)
-{
+void SPI2_IRQHandler(void){
 	volatile uint16_t readData;
 	if(SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_RXNE) != SET)
 	{
@@ -186,10 +160,7 @@ void SPI2_IRQHandler(void)
 	SPI_I2S_ClearFlag(SPI2, SPI_I2S_FLAG_RXNE);
 	readData = SPI_I2S_ReceiveData(SPI2);
 	// Call Callback function
-	if(spiCallback != NULL)
-	{
-		spiCallback[1]();
-	}
+	spiInterruptTx();
 }
 
 /*
@@ -199,13 +170,9 @@ void SPI2_IRQHandler(void)
  * \param[out] HARDWARE_INIT_STATUS result status
  *
  */
-static void displayInitGPIOLd(GPIO_TypeDef* ldGpio, uint16_t ldPin)
-{
+static void configGPIOLd(GPIO_TypeDef* ldGpio, uint16_t ldPin){
 	GPIO_InitTypeDef gpioLdInit;
-	if(enableGPIO(ldGpio) != HARDWARE_INIT_STATUS_OK)
-	{
-		return;// HARDWARE_INIT_STATUS_ERROR_GPIO;
-	}
+	enableGPIO(ldGpio);
 	gpioLdInit.GPIO_Speed = GPIO_Speed_10MHz;
 	gpioLdInit.GPIO_Mode  = GPIO_Mode_Out_PP;
 	gpioLdInit.GPIO_Pin   = ldPin;
@@ -242,32 +209,29 @@ static void configTimer(void){
   * @param
   * @retval
   */
-void TIM2_IRQHandler(void)
-{
+void TIM2_IRQHandler(void){
 	if(TIM_GetFlagStatus(LD_TIMER, TIM_FLAG_Update) != SET){
 		return;
 	}
 	TIM_ClearFlag(LD_TIMER, TIM_FLAG_Update);
 	TIM_Cmd(LD_TIMER, DISABLE);
 
-	if(ldStatusDef.address == TX_ADDRESS_ONE)
+	if(ldTxDef.address == TX_ADDRESS_ONE)
 	{
-		GPIO_ResetBits(LDGenDef.ListOfLD[ldStatusDef.numLD].port, LDGenDef.ListOfLD[ldStatusDef.numLD].pin);
+		GPIO_ResetBits(LDList[ldTxDef.numLD].port, LDList[ldTxDef.numLD].pin);
 	}
 	else
 	{
 		uint16_t cnt = 0;
-		for(;cnt<LDGenDef.numScreen; cnt++ )
+		for(; cnt < NUMBER_STRING; cnt++ )
 		{
-			GPIO_ResetBits(LDGenDef.ListOfLD[cnt].port, LDGenDef.ListOfLD[cnt].pin);
+			GPIO_ResetBits(LDList[cnt].port, LDList[cnt].pin);
 		}
 	}
 	TIM_Cmd(LD_TIMER, DISABLE);
 	TIM_SetCounter(LD_TIMER, 0);
 
-	displayInterruptTx(ldStatusDef.displayHandler);
-
-	ldStatusDef.state = LD_FREE;
+	spiInterruptTx();
 }
 
 /**
@@ -276,53 +240,36 @@ void TIM2_IRQHandler(void)
   * @retval
   */
 static void generateLdPuls(void){
-	if(ldStatusDef.state == LD_BUSY)
+
+	if(ldTxDef.address == TX_ADDRESS_ONE)
 	{
-		return;
-	}
-	ldStatusDef.state = LD_BUSY;
-	if(ldStatusDef.address == TX_ADDRESS_ONE)
-	{
-		GPIO_SetBits(LDGenDef.ListOfLD[ldStatusDef.numLD].port, LDGenDef.ListOfLD[ldStatusDef.numLD].pin);
+		GPIO_SetBits(LDList[ldTxDef.numLD].port, LDList[ldTxDef.numLD].pin);
 	}
 	else
 	{
 		uint16_t cnt = 0;
-		for(;cnt < LDGenDef.numScreen; cnt++ )
+		for(;cnt < NUMBER_STRING; cnt++ )
 		{
-			GPIO_SetBits(LDGenDef.ListOfLD[cnt].port, LDGenDef.ListOfLD[cnt].pin);
+			GPIO_SetBits(LDList[cnt].port, LDList[cnt].pin);
 		}
 	}
 	TIM_Cmd(LD_TIMER, ENABLE);
 }
 
 
-//              SPI CALLBACK function
 /**
   * @brief
   * @param
   * @retval
   */
-static void interruptSPICallback_Intarface(void)
-{
-	displayInterruptTx(displayIntarface);
-}
-
-//              INTERFACE FUCTION
-/**
-  * @brief
-  * @param
-  * @retval
-  */
-static void displayInterruptTx(displayHandlerDef *displayHandler)
-{
+static void spiInterruptTx(void){
 	uint16_t nextSumbol;
-	txState txState = displayTxCallback(displayIntarface, &nextSumbol);
+	txState txState = getNextData(&nextSumbol);
 
 	switch(txState)
 	{
 	case TX_DATA:
-		SPI_I2S_SendData(LDGenDef.sellSPI, nextSumbol);
+		SPI_I2S_SendData(DISPLAY_SPI, nextSumbol);
 		break;
 	case GEN_LD:
 		generateLdPuls();
@@ -335,50 +282,35 @@ static void displayInterruptTx(displayHandlerDef *displayHandler)
 }
 
 
-
-//-----------------------------------USER AREA-------------------------------------------
 /**
   * @brief
   * @param
   * @retval
   */
-DISPLAY_STATUS displayTxData(displayHandlerDef *displayHandler, uint16_t orderNumberDispl, uint8_t numData, TX_ADDRESS txAddress){
-
-	if(displayTx(displayHandler, numData) != DISPLAY_OK)
-	{
-		return DISPLAY_BUSY;
-	};
-
-	ldStatusDef.address = txAddress;
-	ldStatusDef.numLD = orderNumberDispl;
-	ldStatusDef.displayHandler = displayHandler;
-
-	displayInterruptTx(displayHandler);
-	return DISPLAY_BUSY;
-}
-
-/**
-  * @brief
-  * @param
-  * @retval
-  */
-void initDisplay(displayHandlerDef *displayHandler, LDDescr *LDList, uint16_t numScreen, SPI_TypeDef *selSPI)
-{
+void hwInterfaceInit(void){
 	uint16_t cnt = 0;
-	// Config display driver
-	LDGenDef.sellSPI = selSPI;
-	LDGenDef.ListOfLD = LDList;
-	LDGenDef.numScreen = numScreen;
 
 	// Config peripherals
-	displayIntarface = displayHandler;
-	for(;cnt < LDGenDef.numScreen; cnt++)
+	for(;cnt < NUMBER_STRING; cnt++)
 	{
-		displayInitGPIOLd(LDGenDef.ListOfLD[cnt].port, LDGenDef.ListOfLD[cnt].pin);
+		configGPIOLd(LDList[cnt].port, LDList[cnt].pin);
 	}
 	configTimer();
-	configSPI(selSPI, interruptSPICallback_Intarface);
+	configSPI(DISPLAY_SPI);
 
 }
 
+
+/**
+  * @brief
+  * @param
+  * @retval
+  */
+void hwInterfaceTx(uint16_t orderNumberDispl, TX_ADDRESS txAddress){
+
+	ldTxDef.address = txAddress;
+	ldTxDef.numLD   = orderNumberDispl;
+    // Start transmit data
+	spiInterruptTx();
+}
 

@@ -8,7 +8,7 @@
 #include "stdint.h"
 
 #include "BME280_source.h"
-#include "BME280_user_interfase.h"
+#include "BME280_user_interface.h"
 
 
 // static function prototype
@@ -50,6 +50,7 @@ static BME280_STATUS updateRegister(uint8_t deviceAddres, uint8_t regAddres, uin
 	{
 		return BME280_STATUS_COMUNICATION_ERROR;
 	}
+	/*
 	// read reg for compare writed data and data from sensor
 	if(  BMEReadData( deviceAddres, regAddres, &bufferDataRx, 1) )
 	{
@@ -60,7 +61,7 @@ static BME280_STATUS updateRegister(uint8_t deviceAddres, uint8_t regAddres, uin
 	{
 		return BME280_STATUS_COMUNICATION_ERROR;
 	}
-
+*/
 	return BME280_STATUS_OK;
 }
 

@@ -12,15 +12,13 @@
 
 #include "stdint.h"
 
-#ifdef STM32F10X_MD_VL
-	#include "stm32f10x.h"
-#endif
-#include "stm32f10x_gpio.h"
-#include "stm32f10x_rcc.h"
-#include "stm32f10x_spi.h"
+
 
 #define NUM_MAX_DIGITS     8
 
+/* @brief Description video bufer for one MAX7219
+ * */
+typedef uint16_t displayBuffDef[NUM_MAX_DIGITS];
 
 /**
   * @brief  Set configuration data
@@ -67,7 +65,6 @@ typedef enum{
 	SCAN_LIM_6,
 	SCAN_LIM_7,
 }maxScanLimDef;
-typedef uint8_t maxConfigScanLin;
 
 
 typedef enum{
@@ -101,60 +98,15 @@ typedef enum{
 }maxTestDef;
 
 
-/* @brief
- * */
-typedef enum {
-	DISPLAY_OK,
-	DISPLAY_BUSY,
-	DISPLAY_ERROR_INIT,
-	DISPLAY_ERROR_TX_NUM
-}DISPLAY_STATUS;
-
-
-typedef enum{
-	TX_DATA,
-	GEN_LD,
-	TX_COMPLITE
-}txState;
-
-/* @brief Description video bufer for one MAX7219
- * */
-typedef uint16_t displayBuffDef[NUM_MAX_DIGITS];
-
-/* @brief
- * */
-typedef struct{
-	uint16_t         dataCnt;   // Data transmit counter  (set user according number of max chips per display)
-	uint8_t          digitCnt;  // digit transmit counter (count to max number of digits NUM_MAX_DIGITS)
-	uint8_t          txSize;    // number of maxBuffTypedef (the same as number of MAX chips per display)
-	displayBuffDef  *txData;    // pointer on the buffer for Tx data
-}displayTxHandlerDef;
-
-/* @brief
- * */
-typedef struct{
-	DISPLAY_STATUS       status;
-	displayTxHandlerDef  txBuff;
-}displayHandlerDef;
-
-txState displayTxCallback(displayHandlerDef *displayHandler, uint16_t *nexSymbol);
-DISPLAY_STATUS displayTx(displayHandlerDef *displayHandler, uint8_t numData);
-DISPLAY_STATUS displayInterfaceInit( displayHandlerDef *displayHandler, displayBuffDef *displayBuff);
-DISPLAY_STATUS displayIntarfaceGetStatus(displayHandlerDef const *max7219Interface);
-
-
 // Update screen function
-void displaySet7Segment(displayHandlerDef  *displayIntarface, uint8_t numMax, uint8_t data, uint8_t numDig);
-void displaySet8x8Matrix(displayHandlerDef *displayIntarface, uint8_t numMax, uint8_t data);
-
-
-// Config display function
-void displayClearBuff(displayHandlerDef *displayIntarface, uint8_t numMax);
-void displaySetConfig(displayHandlerDef        *displayIntarface, uint8_t numMax,  maxComandDef maxComand, uint8_t data);
-void displaySetConfigMulti(displayHandlerDef   *displayIntarface, uint8_t sizeBuff, maxComandDef maxComand, uint8_t data);
-void displayConfigDecodeMode(displayHandlerDef *displayIntarface, uint8_t numMax, uint8_t data);
-void displayConfigIntensity(displayHandlerDef * displayIntarface, uint8_t numMax, maxIntensityDef data);
-void displayConfigWorkMode(displayHandlerDef   *displayIntarface, uint8_t numMax, shutDownDef data);
-void displayConfigScanLimit(displayHandlerDef  *displayIntarface, uint8_t numMax, maxScanLimDef data);
+void displayClearBuff(displayBuffDef *displayBuffer, uint8_t numMax);
+void displaySet7Segment(displayBuffDef *displayBuffer, uint8_t numMax, uint8_t data, uint8_t numDig);
+void displaySet8x8Matrix(displayBuffDef *displayBuffer, uint8_t numMax, uint8_t data);
+void displaySetConfig(displayBuffDef *displayBuffer, uint8_t numMax,  maxComandDef maxComand, uint8_t data);
+void displaySetConfigMulti(displayBuffDef *displayBuffer, uint8_t sizeBuff, maxComandDef maxComand, uint8_t data);
+void displayConfigDecodeMode(displayBuffDef *displayBuffer, uint8_t numMax, uint8_t data);
+void displayConfigIntensity(displayBuffDef *displayBuffer, uint8_t numMax, maxIntensityDef data);
+void displayConfigWorkMode(displayBuffDef *displayBuffer, uint8_t numMax, shutDownDef data);
+void displayConfigScanLimit(displayBuffDef *displayBuffer, uint8_t numMax, maxScanLimDef data);
 
 #endif

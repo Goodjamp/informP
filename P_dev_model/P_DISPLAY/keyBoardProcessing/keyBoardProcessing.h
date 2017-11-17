@@ -1,14 +1,14 @@
 /**
  ******************************************************************************
- * @file    buttonProcessing.h
+ * @file    bkeyBoardProcessing..h
  * @author  Gerasimchuk A.
  * @version V1.0.0
  * @date    23-September-2016
  * @brief
  */
 
-#ifndef BUTTONPROCESSING_H_
-#define BUTTONPROCESSING_H_
+#ifndef KEYBOARDPROCESSING_H_
+#define KEYBOARDPROCESSING_H_
 
 #include "stdint.h"
 #include "stdbool.h"
@@ -29,8 +29,8 @@
 #define ACTION_TEST_PERIOD_AFTER   200
 
 typedef enum{
-	BUTTON_MODE = 0,
-	BUTTON_SEL  = 1
+	KEY_MODE = 0,
+	KEY_SEL  = 1
 }buttonDef;
 
 typedef enum{
@@ -50,12 +50,7 @@ typedef enum{
 	AFTER_PERIOD_AFTER
 }posActionDef;
 
-#define NUM_OF_BUTTO                  2
-#define BUTTON_MODE_PORT       GPIOA
-#define BUTTON_MODE_PIN        GPIO_Pin_5
 
-#define BUTTON_SEL_PORT       GPIOA
-#define BUTTON_SEL_PIN        GPIO_Pin_5
 
 uint32_t buttonTimerID;
 
@@ -67,14 +62,6 @@ typedef struct{
 	posActionDef timePosAction;   //position of start action: before periodAfter or after of periodAfter
 }actionDescrDef;
 
-// Button low lewel description (port, pin, state)
-typedef struct{
-	buttonState pressF;
-	uint8_t pressStateCnt;
-	uint8_t buttonMask;
-	GPIO_TypeDef *portButton;
-	uint16_t     pinButton;
-}buttonProcesH;
 
 //
 typedef struct{
@@ -82,7 +69,10 @@ typedef struct{
 	uint8_t actionCntAfter;
 }actionProcessingDef;
 
-void buttonGpioConfig(void);
-actionButtonDef updateButtonCallBack( void );
+actionButtonDef keyUpdate( void );
+
+//-------------------------user implementation  functions----------------------
+void keyHWConfig(void);
+uint16_t keyGetMask(void);
 
 #endif

@@ -29,14 +29,3 @@ void debugPinConfig(void){
 	GPIO_Init(debugPort2, &initGpio);
 }
 
-
-#define COUNTSTORE_SIZE   100
-uint32_t countStore[COUNTSTORE_SIZE];
-uint8_t cntCounStore;
-
-void updteCountStore(void){
-	if(cntCounStore >= COUNTSTORE_SIZE)
-		cntCounStore = 0;
-	countStore[cntCounStore] = xTaskGetTickCount();
-	cntCounStore++;
-}

@@ -179,7 +179,6 @@ I2C_STATUS i2cRxData(I2C_DEF i2cIn, uint8_t address_dev, uint8_t address_reg, ui
 		// user time check function
 		if( i2cgetTimeMs() >= maxTimeTransaction )
 		{
-			updteCountStore();
 			// timeout stop transaction
 			I2CProcessing[i2cIn].transactionStatus = I2C_STATUS_TRANSACTION_ERROR;
 			break;

@@ -94,7 +94,7 @@ BME280_STATUS BME280_startContiniousMes (BME280Handler *handler, MES_STATE_DEF n
 BME280_STATUS BME280_getStatus          (BME280Handler *handler);
 
 
-//-------------------------user implementation  function----------------------
+//-------------------------user implementation  functions----------------------
 typedef enum{
 	TRANSACION_STATUS_OK,
 	TRANSACION_STATUS_ERROR

@@ -76,11 +76,13 @@
       <includepath path="P_dev_model/P_SENSOR/I2C_HAL"/>
       <includepath path="P_dev_model/P_SENSOR/DS1621_HAL"/>
       <includepath path="P_dev_model/P_DISPLAY"/>
-      <includepath path="P_dev_model/P_DISPLAY/MAX7219/fifo_/inc"/>
       <includepath path="P_dev_model/P_DISPLAY/MAX7219/inc"/>
       <includepath path="P_dev_model/P_DISPLAY/MAX7219"/>
       <includepath path="P_dev_model/P_SENSOR/BME280_HAL"/>
       <includepath path="debugStuff"/>
+      <includepath path="P_dev_model/P_DISPLAY/fifo_"/>
+      <includepath path="P_dev_model/P_DISPLAY/fifo_/inc"/>
+      <includepath path="P_dev_model/P_DISPLAY/keyBoardProcessing"/>
       
       <!-- arm-none-eabi-gcc compiler arguments -->
       <compilerarg value="-mcpu=cortex-m3"/>
