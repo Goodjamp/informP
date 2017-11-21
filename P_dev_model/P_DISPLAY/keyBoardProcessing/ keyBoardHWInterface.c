@@ -21,12 +21,15 @@ const static keyDescDef keyDesc[NUMBER_OF_BUTTON] = {
 				.keyPin  = BUTTON_MODE_PIN,
 				.keyMask = (uint16_t)(1<<KEY_MODE),
 		},
-		[KEY_SEL] = {
+		[KEY_SELL] = {
 				.keyPort = BUTTON_SEL_PORT,
 				.keyPin  = BUTTON_SEL_PIN,
-				.keyMask = (uint16_t)(1<<KEY_SEL),
+				.keyMask = (uint16_t)(1<<KEY_SELL),
 		}
 };
+
+volatile static uint8_t bounsCnt[NUMBER_OF_BUTTON];
+
 
 
 static void enableGPIO(GPIO_TypeDef *GPIOx){
@@ -62,7 +65,7 @@ void keyHWConfig(void){
 	GPIO_InitTypeDef gpioConfig;
 
 	enableGPIO(keyDesc[KEY_MODE].keyPort);
-	enableGPIO(keyDesc[KEY_SEL].keyPort);
+	enableGPIO(keyDesc[KEY_SELL].keyPort);
 
 	gpioConfig.GPIO_Mode = GPIO_Mode_IPU;
 	gpioConfig.GPIO_Speed = GPIO_Speed_2MHz;
@@ -71,9 +74,21 @@ void keyHWConfig(void){
 	GPIO_Init(keyDesc[KEY_MODE].keyPort, &gpioConfig);
 
 
-	gpioConfig.GPIO_Pin = keyDesc[KEY_SEL].keyPin;
-	GPIO_Init(keyDesc[KEY_SEL].keyPort, &gpioConfig);
+	gpioConfig.GPIO_Pin = keyDesc[KEY_SELL].keyPin;
+	GPIO_Init(keyDesc[KEY_SELL].keyPort, &gpioConfig);
 }
+
+void keyClear(uint16_t mask){
+	uint8_t cnt;
+	for(cnt = 0; cnt < NUMBER_OF_BUTTON; cnt++)
+	{
+		if(keyDesc[cnt].keyMask == mask)
+		{
+			bounsCnt[cnt] = 0;
+		}
+	}
+}
+
 
 
 uint16_t keyGetPressMask(void){
@@ -83,8 +98,17 @@ uint16_t keyGetPressMask(void){
 	{
 		if( GPIO_ReadInputDataBit(keyDesc[cnt].keyPort, keyDesc[cnt].keyPin) )
 		{
-			mask |= keyDesc[cnt].keyMask;
+			bounsCnt[cnt] = 0;
+			continue;
 		}
+        // bouns filter
+		if(bounsCnt[cnt] >= BOUNS_PERIOD)
+		{
+			mask |= keyDesc[cnt].keyMask;
+			continue;
+		}
+		bounsCnt[cnt]++;
+
 	}
 	return mask;
 }

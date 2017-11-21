@@ -19,6 +19,8 @@
 #define BUTTON_SEL_PORT       GPIOC
 #define BUTTON_SEL_PIN        GPIO_Pin_13
 
+#define BOUNS_PERIOD         10
+
 
 // structure descried one action
 typedef struct{

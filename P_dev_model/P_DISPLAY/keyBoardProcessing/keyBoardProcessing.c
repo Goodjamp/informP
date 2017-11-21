@@ -6,120 +6,92 @@
  * @brief
  */
 #include "stdint.h"
-#include "stdio.h"
+#include "stdbool.h"
 
 #include "stm32f10x_rcc.h"
 #include "stm32f10x_gpio.h"
 
 #include "keyBoardProcessing.h"
+#include "LCD.h"
 
+
+
+const actionDescrDef actionDescr[] = {
+	[ACTION_MODE] = {
+		.comboButtonMask = 1 << KEY_MODE,
+		.numPeriod = 2,
+		.periodForAction   = {ACTION_MODE_PERIOD,400},
+	},
+	[ACTION_SELL] = {
+		.comboButtonMask = 1 << KEY_SELL,
+		.numPeriod = 1,
+		.periodForAction   = {ACTION_SELL_PERIOD},
+	},
+	[ACTION_TEST] = {
+		.comboButtonMask = ( 1 << KEY_MODE | 1 << KEY_SELL),
+		.numPeriod = 1,
+		.periodForAction   = {ACTION_TEST_PERIOD},
+
+	},
+};
 
 
 // Action processing
 struct{
-	actionProcessingDef actionProcessing[NUMBER_OF_ACTION];
-	uint8_t actionIndex;
-	bool    actionProcess;
-}actionProcessing;
+	uint16_t cnt;
+	uint8_t  index;
+	bool     detect;
+}actionProces;
 
-const actionDescrDef actionDescr[] = {
-	[ACTION_MODE] = {
-		.periodBefore    = ACTION_MODE_PERIOD_BEFORE,
-		.periodAfter     = ACTION_MODE_PERIOD_AFTER,
-		.comboButtonMask = 1 << KEY_MODE,
-		.timePosAction   = BEFORE_PERIOD_AFTER
-	},
-	[ACTION_SEL] = {
-		.periodBefore    = ACTION_SELL_PERIOD_BEFORE,
-		.periodAfter     = ACTION_SELL_PERIOD_AFTER,
-		.comboButtonMask = 1 << KEY_SEL,
-		.timePosAction   = BEFORE_PERIOD_AFTER
-	},
-	[ACTION_TEST_] = {
-		.periodBefore    = ACTION_TEST_PERIOD_BEFORE,
-		.periodAfter     = ACTION_TEST_PERIOD_AFTER,
-		.comboButtonMask = ( 1 << KEY_MODE | 1 << KEY_SEL),
-		.timePosAction   = AFTER_PERIOD_AFTER
-	},
-};
-
-/*
-const uint16_t buttonAction[] = {
-
-};
-*/
 
 actionButtonDef keyUpdate( void ){
-	uint8_t cnt = 0;
-	uint8_t pressButtonMask = 0;
-//	low level processing button (pin level change detect)
+    uint8_t cnt;
+	uint16_t mask = keyGetPressMask();
 
-//	HIGHT level  processing Action (after detection Action)
-	if( actionProcessing.actionProcess )
-	{
-		uint8_t indexProc = actionProcessing.actionIndex;
-		if(actionDescr[indexProc].comboButtonMask != pressButtonMask)
-		{
-			actionProcessing.actionProcess = false;
-			actionProcessing.actionProcessing[indexProc].actionCntAfter = 0;
-			actionProcessing.actionProcessing[indexProc].actionCntBefore = 0;
-		}
-		else
-		{
-			if( actionProcessing.actionProcessing[indexProc].actionCntAfter <= actionDescr[indexProc].periodAfter )
-			{
-				actionProcessing.actionProcessing[indexProc].actionCntAfter++;
-				return;
-			}
-			//
-			if( actionDescr[indexProc].timePosAction == AFTER_PERIOD_AFTER)
-			{
-					// TO DO Call function processing Action
-			}
-			// clear last Action
-			actionProcessing.actionProcess = false;
-			actionProcessing.actionProcessing[indexProc].actionCntAfter = 0;
-			actionProcessing.actionProcessing[indexProc].actionCntBefore = 0;
-			return;
-		}
 
-	}
+	// detect action
+	actionProces.detect = false;
 
-// MEDIUM  level  processing Action
-	actionProcessing.actionProcess = false;
-	for(cnt =0; cnt < NUMBER_OF_ACTION; cnt++)
-	{
-		// find equal button combo template
-		if(pressButtonMask == actionDescr[cnt].comboButtonMask)
-		{
-			actionProcessing.actionProcessing[cnt].actionCntBefore++;
-			actionProcessing.actionProcess = true;
-			actionProcessing.actionIndex = cnt;
-		}
-		else
-		{
-			actionProcessing.actionProcessing[cnt].actionCntBefore = 0;
-		}
-	}
+    for(cnt = 0; cnt < sizeof(actionDescr)/sizeof(actionDescr[0]); cnt++)
+    {
+        if(mask != actionDescr[cnt].comboButtonMask)
+        	continue;
 
-	if(actionProcessing.actionProcess)
-	{
-		if( (actionProcessing.actionProcessing[actionProcessing.actionIndex].actionCntBefore-1) <= actionDescr[actionProcessing.actionIndex].periodBefore)
-		{
-			return;
-		}
-		// Call Action callback
-		/*
-		if( actionDescr[indexProc].timePosAction == BEFORE_PERIOD_AFTER)
-		{
-				// TO DO Call function processing Action
-		}
-		*/
+        if( actionProces.index != cnt)
+        {
+        	actionProces.index = cnt;
+        	actionProces.cnt = 0;
+        }
+        actionProces.detect = true;
+        actionProces.cnt++;
+    }
 
-	}
+
+    if( actionProces.detect )
+    {
+    	if(actionProces.cnt >= actionDescr[actionProces.index].periodForAction[actionDescr[actionProces.index].numPeriod - 1] ) // action was detected !!
+    	{
+            //TO DO call callback function
+    		//clear processing
+            actionProces.cnt = 0;
+    	}
+    }
+    else if( !actionProces.detect && ( actionProces.cnt > 0) )
+    {
+    	cnt = 0;
+    	// finde nearest time period
+    	while( ( cnt < actionDescr[actionProces.index].numPeriod ) && (actionDescr[actionProces.index].periodForAction[cnt] < actionProces.cnt ) )
+    	{
+            cnt++;
+    	}
+    	if( cnt != 0 ) //
+    	{
+    		actionProces.cnt++;
+    	}
+    	actionProces.cnt = 0;
+    }
 
 }
-
 
 
 

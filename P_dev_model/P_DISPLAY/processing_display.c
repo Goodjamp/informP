@@ -54,6 +54,7 @@ const char *paramitersSymbols[] = {
   * @param
   * @retval
   */
+/*
 void userActionReaction(USER_ACTION inAction){
 // menuDescription
 	if(menuDescription.listBoxSellFlag){
@@ -116,7 +117,7 @@ void decreaseWidjetP(void){
 	}
 	menuDescription.widjetCnt--;
 }
-
+*/
 
 /**
   * @brief
@@ -139,9 +140,12 @@ void t_processing_display(void *pvParameters){
 	  - start config ALL display (mean ALL chips in ALL screen)
 	 */
 	displayInit( &myDisplay );
+	keyHWConfig();
 
 	COLOR currentCollor = COLOR_RED;
 	while(1){
+		vTaskDelay(5);
+		keyUpdate();
 		//displayWrite(&myDisplay, SCREEN_3, str, strlen((const char*)str), currentCollor, TX_ADDRESS_ONE);
 	}
 }

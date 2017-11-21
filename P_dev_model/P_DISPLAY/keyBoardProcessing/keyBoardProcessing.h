@@ -17,20 +17,15 @@
 // Number of different action (selected, set, set test mode and so on)
 #define NUMBER_OF_ACTION   3
 
+#define MAX_NUM_PERIOD       3
 
-//--------ACTION MODE--------------------
-#define ACTION_MODE_PERIOD_BEFORE    2
-#define ACTION_MODE_PERIOD_AFTER     10
-//--------ACTION SELL--------------------
-#define ACTION_SELL_PERIOD_BEFORE    2
-#define ACTION_SELL_PERIOD_AFTER     10
-//--------ACTION TEST--------------------
-#define ACTION_TEST_PERIOD_BEFORE    3
-#define ACTION_TEST_PERIOD_AFTER   200
+#define ACTION_MODE_PERIOD   40
+#define ACTION_SELL_PERIOD   40
+#define ACTION_TEST_PERIOD   400
 
 typedef enum{
 	KEY_MODE = 0,
-	KEY_SEL  = 1
+	KEY_SELL  = 1
 }buttonDef;
 
 typedef enum{
@@ -40,15 +35,11 @@ typedef enum{
 
 typedef enum{
 	ACTION_MODE,
-	ACTION_SEL,
-	ACTION_TEST_,
+	ACTION_SELL,
+	ACTION_TEST,
 	ACTION_NO_DETECT
 }actionButtonDef;
 
-typedef enum{
-	BEFORE_PERIOD_AFTER,
-	AFTER_PERIOD_AFTER
-}posActionDef;
 
 
 
@@ -56,23 +47,18 @@ uint32_t buttonTimerID;
 
 // structure descried one action
 typedef struct{
-	uint8_t periodBefore;    // duration before detect Action
-	uint8_t periodAfter;     // duration after detect Action
-	uint8_t comboButtonMask; // flags buttons press
-	posActionDef timePosAction;   //position of start action: before periodAfter or after of periodAfter
+	uint8_t  comboButtonMask; // flags buttons press
+	uint8_t  numPeriod;
+	uint16_t periodForAction[MAX_NUM_PERIOD];
 }actionDescrDef;
 
 
-//
-typedef struct{
-	uint8_t actionCntBefore;
-	uint8_t actionCntAfter;
-}actionProcessingDef;
-
 actionButtonDef keyUpdate( void );
+actionButtonDef key1Update( void );
 
 //-------------------------user implementation  functions----------------------
 void keyHWConfig(void);
-uint16_t keyGetMask(void);
+uint16_t keyGetPressMask(void);
+void keyClear(uint16_t mask);
 
 #endif

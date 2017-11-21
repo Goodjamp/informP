@@ -54,13 +54,6 @@ typedef enum{
 #define isDIASPALY_ACTION(X) (( X == ACTION_USER)|| \\
 							  ( X == ACTION_TIMER) )
 
-typedef enum{
-	ACTION_ENTER,
-	ACTION_ESC,
-	ACTION_SELL,
-	ACTION_TEST
-}USER_ACTION; // relation to Press Button
-
 
 
 
@@ -68,10 +61,10 @@ typedef enum{
 //---------MENU PROCESSING FUNCTION PROTOTYPE-------------------------------
 //--------------------------------------------------------------------------
 uint16_t display_calc_address_oper_reg(S_display_address *ps_sensor_address, u16 adres_start);
-void userActionReaction(USER_ACTION inAction);
-void listBoxProcess(USER_ACTION inAction);
-void listBoxChangePar(void);
-void increaseWidjetP(void);
-void decreaseWidjetP(void);
+//void userActionReaction(USER_ACTION inAction);
+//void listBoxProcess(USER_ACTION inAction);
+//void listBoxChangePar(void);
+//void increaseWidjetP(void);
+//void decreaseWidjetP(void);
 
 #endif // PROCESSING_DISPLAY_H_
