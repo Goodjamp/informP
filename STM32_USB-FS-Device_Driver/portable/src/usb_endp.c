@@ -71,9 +71,7 @@ void EP1_IN_Callback(void)
 
 void EP2_IN_Callback(void)
 {
-	debugPin_1_Set;
 	PrevXferComplete[ENDP2] = 1;
-	debugPin_1_Clear;
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

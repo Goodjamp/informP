@@ -16,10 +16,15 @@
 #define DEV_7                TIME
 //#define DEV_1_BIT_STATUS_REG 1
 
-// Количекство статус-регистров FRQmetter
-#define NUM_REG_STATUS_TC       1
-// Общее количество регистров FRQmetter (имееться в виду регистров разных типов, без status регистра)
-#define NUM_REG_TC              1
+// Number of status registers TIME
+#define NUM_REG_STATUS_TIME       1
+// Total number of registers (without status registers)
+#define NUM_REG_TIME              8
+
+typedef enum {
+	TIME_STATUS_OK,
+	TIME_STATUS_ERROR
+}TIME_STATUS;
 
 
 #pragma pack(push,1)
@@ -33,6 +38,8 @@ typedef struct{
 	uint16_t  time_honour;  // time: honour
 	uint16_t  time_minute;  // time: minute
 	uint16_t  time_second;  // time: second
+	uint16_t  DATE;
+	uint16_t  TIME;
 } S_TIME_address;
 //--------------------------------------------------------------------------------------------------------------------------------------
 
@@ -46,6 +53,8 @@ typedef struct{
 	S_proces_object_modbus  time_honour;  // time: honour
 	S_proces_object_modbus  time_minute;  // time: minute
 	S_proces_object_modbus  time_second;  // time: second
+	S_proces_object_modbus  DATE;
+	S_proces_object_modbus  TIME;
 } S_TIME_oper_data;
 //--------------------------------------------------------------------------------------------------------------------------------------
 

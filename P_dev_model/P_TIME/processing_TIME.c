@@ -8,6 +8,8 @@
 #include "queue.h"
 #include "timers.h"
 
+#include "funct.h"
+#include "processing_mem_map_extern.h"
 #include "processing_USART.h"
 #include "USART_fifo_operation.h"
 #include "processing_TIME.h"
@@ -15,19 +17,32 @@
 #include "RTCProcessing.h"
 #include "GPSprocessing.h"
 
-uint8_t usartReadBuff[USART_READ_BUFF_SIZE];
-uint32_t timeUTC;
-struct tm timeUpdate;
-GPRMC_Def myGPRMC;
+extern S_address_oper_data s_address_oper_data;
 extern S_Task_parameters task_parameters[NUMBER_MY_PROCES];
+
+
+static uint8_t usartReadBuff[USART_READ_BUFF_SIZE];
+static uint32_t timeUTC;
+struct tm timeUpdate;
+static GPRMC_Def myGPRMC;
+static uint16_t statusTime;
 
 //---------Sattic function definition---------
 static void initUSARTGPS(void);
 
 
 uint16_t TIME_calc_address_oper_reg(S_TIME_address *ps_TIME_address, uint16_t adres_start){
-
-	return 0;
+	ps_TIME_address->status_TIME = adres_start;
+	ps_TIME_address->date_year   = ps_TIME_address->status_TIME + structFieldRegSize(S_TIME_address,status_TIME);
+	ps_TIME_address->date_month  = ps_TIME_address->date_year + structFieldRegSize(S_TIME_address,date_year);
+	ps_TIME_address->date_day    = ps_TIME_address->date_month + structFieldRegSize(S_TIME_address,date_month);
+	ps_TIME_address->time_honour = ps_TIME_address->date_day + structFieldRegSize(S_TIME_address,date_day);
+	ps_TIME_address->time_minute = ps_TIME_address->time_honour + structFieldRegSize(S_TIME_address,time_honour);
+	ps_TIME_address->time_second = ps_TIME_address->time_minute + structFieldRegSize(S_TIME_address,time_minute);
+	ps_TIME_address->DATE        = ps_TIME_address->time_second + structFieldRegSize(S_TIME_address,time_second);
+	ps_TIME_address->TIME        = ps_TIME_address->DATE + structFieldRegSize(S_TIME_address,DATE);
+	adres_start                  = ps_TIME_address->TIME + structFieldRegSize(S_TIME_address,TIME);
+	return adres_start;
 }
 
 // Config USART
@@ -102,6 +117,10 @@ void updateTime(void){
 }
 
 void t_processing_TIME(void *p_task_par){
+	statusTime = TIME_STATUS_ERROR;
+
+	processing_mem_map_write_s_proces_object_modbus(&statusTime, 1, s_address_oper_data.s_TIME_address.status_TIME);
+
 	initRTC();
 	initUSARTGPS();
     addGPSPars(GPRMC, &myGPRMC);

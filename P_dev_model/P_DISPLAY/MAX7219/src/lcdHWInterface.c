@@ -21,7 +21,7 @@
 #include "LCD.h"
 
 // ------------------------definition for screen----------------------
-static LDDescr LDList[NUMBER_STRING] = {
+static LDDescr LDList[NUMBER_LCD_STRING] = {
 		[SCREEN_1] = {
 				.port = PORT_LD_1,
 				.pin =  PIN_LD_1
@@ -139,26 +139,26 @@ static void configSPI(SPI_TypeDef *sellSPI){
 }
 
 void SPI1_IRQHandler(void){
-	volatile uint16_t readData;
+	volatile uint16_t rxData;
 	if(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) != SET)
 	{
 		return;
 	}
 	SPI_I2S_ClearFlag(SPI1, SPI_I2S_FLAG_RXNE);
-	SPI_I2S_ClearFlag(SPI2, SPI_I2S_FLAG_RXNE);
-	SPI_I2S_ReceiveData(SPI2);
+	SPI_I2S_ClearFlag(SPI1, SPI_I2S_FLAG_RXNE);
+	rxData = SPI_I2S_ReceiveData(SPI1);
 	// Call Callback function
 	spiInterruptTx();
 }
 
 void SPI2_IRQHandler(void){
-	volatile uint16_t readData;
+	volatile uint16_t rxData;
 	if(SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_RXNE) != SET)
 	{
 		return;
 	}
 	SPI_I2S_ClearFlag(SPI2, SPI_I2S_FLAG_RXNE);
-	readData = SPI_I2S_ReceiveData(SPI2);
+	rxData = SPI_I2S_ReceiveData(SPI2);
 	// Call Callback function
 	spiInterruptTx();
 }
@@ -223,7 +223,7 @@ void TIM2_IRQHandler(void){
 	else
 	{
 		uint16_t cnt = 0;
-		for(; cnt < NUMBER_STRING; cnt++ )
+		for(; cnt < NUMBER_LCD_STRING; cnt++ )
 		{
 			GPIO_ResetBits(LDList[cnt].port, LDList[cnt].pin);
 		}
@@ -248,7 +248,7 @@ static void generateLdPuls(void){
 	else
 	{
 		uint16_t cnt = 0;
-		for(;cnt < NUMBER_STRING; cnt++ )
+		for(;cnt < NUMBER_LCD_STRING; cnt++ )
 		{
 			GPIO_SetBits(LDList[cnt].port, LDList[cnt].pin);
 		}
@@ -291,7 +291,7 @@ void hwInterfaceInit(void){
 	uint16_t cnt = 0;
 
 	// Config peripherals
-	for(;cnt < NUMBER_STRING; cnt++)
+	for(;cnt < NUMBER_LCD_STRING; cnt++)
 	{
 		configGPIOLd(LDList[cnt].port, LDList[cnt].pin);
 	}

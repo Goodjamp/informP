@@ -23,4 +23,9 @@
 #define I2C1_SDA_AF_GPIO    GPIO_PinSource7  //PB7 ch1
 #define I2C1_SDA_PORT       GPIOB            // CSDA PORT
 
+typedef enum{
+	SENSOR_OK = 0,
+	SENSOR_ERROR
+}SENSOR_STATUS;
+
 #endif // PROCESSING_TC_SINAL

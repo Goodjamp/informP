@@ -7,11 +7,13 @@
  */
 #include "stdint.h"
 
-#include "keyBoardProcessing.h"
-#include "keyBoardHWInterface.h"
-
 #include "stm32f10x_gpio.h"
 #include "stm32f10x_rcc.h"
+
+#include "keyBoardProcessingUserInterface.h"
+#include "keyBoardHWInterface.h"
+
+
 
 
 //buttonProces buttonProces;

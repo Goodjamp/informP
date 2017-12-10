@@ -16,7 +16,7 @@ static BME280_STATUS updateRegister(uint8_t deviceAddres, uint8_t regAddres, uin
 static BME280_S32_t BME280_compensate_T_int32(BME280Handler *handler, BME280_S32_t adc_T);
 static BME280_U32_t BME280_compensate_P_int64(BME280Handler *handler, BME280_S32_t adc_P);
 static BME280_U32_t bme280_compensate_H_int32(BME280Handler *handler, BME280_S32_t adc_H);
-static bme280MesCallbackDef mesComlitCallback;
+//static bme280MesCallbackDef mesComlitCallback;
 
 
 static const uint8_t adresListOfOversem[] = {
@@ -36,7 +36,7 @@ BME280_S32_t t_fine;
 
 static BME280_STATUS updateRegister(uint8_t deviceAddres, uint8_t regAddres, uint8_t data, uint8_t dataMask){
 	uint8_t bufferDataTx;
-	uint8_t bufferDataRx;
+	//uint8_t bufferDataRx;
 	// read reg
 	if(  BMEReadData( deviceAddres, regAddres, &bufferDataTx, 1) )
 	{

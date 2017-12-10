@@ -21,6 +21,11 @@
 // Общее количество регистров FRQmetter (имееться в виду регистров разных типов, без status регистра)
 #define NUM_REG_TC              1
 
+typedef enum{
+	FRQ_STATUS_OK,
+	FRQ_STATUS_ERROR
+}FRQ_STATUS;
+
 
 #pragma pack(push,1)
 
@@ -43,7 +48,7 @@ typedef struct{
 //----------------------------- Конфигурация процесса FRQmetter--------------------------------------------------------------------------------
 typedef struct{
 	FunctionalState state;                           // состояние програмного модуля: ENABLE/DISABLE
-	uint16_t time_gist;                                    // время гистерезисса прийома FRQmetter
+	uint16_t time_gist;                              // время гистерезисса прийома FRQmetter
 }S_FRQmetter_user_config;
 //--------------------------------------------------------------------------------------------------------------------------------------
 #pragma pack(pop)

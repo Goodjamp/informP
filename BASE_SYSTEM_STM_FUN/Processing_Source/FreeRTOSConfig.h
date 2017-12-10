@@ -81,7 +81,7 @@
 #define configCPU_CLOCK_HZ				( 72000000UL )
 #define configTICK_RATE_HZ				( ( portTickType ) 1000 )
 #define configMAX_PRIORITIES			( ( unsigned portBASE_TYPE ) 5 )
-#define configMINIMAL_STACK_SIZE		( ( unsigned short ) 50 )
+#define configMINIMAL_STACK_SIZE		( ( unsigned short ) 100 )
 #define configTOTAL_HEAP_SIZE			( ( size_t ) ( 10 * 1100 ) )
 #define configMAX_TASK_NAME_LEN			( 10 )
 #define configUSE_TRACE_FACILITY		0
@@ -107,6 +107,7 @@
 #define configTIMER_QUEUE_LENGTH		5
 #define configTIMER_TASK_STACK_DEPTH	( configMINIMAL_STACK_SIZE )
 
+/**/
 /* Set the following definitions to 1 to include the API function, or zero
 to exclude the API function. */
 #define INCLUDE_vTaskPrioritySet		1

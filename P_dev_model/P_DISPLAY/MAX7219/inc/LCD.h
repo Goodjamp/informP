@@ -12,7 +12,7 @@
 #include "max7219.h"
 
 
-#define NUMBER_STRING  4
+#define NUMBER_LCD_STRING  4
 
 // max7219 Position matrix LCD in screen
 #define ORDER_NUM_MATRIX        0
@@ -89,6 +89,7 @@ typedef struct{
 	DISPLAY_STATUS   status;
 	uint16_t         dataCnt;   // Data transmit counter  (set user according number of max chips per display)
 	uint8_t          digitCnt;  // digit transmit counter (count to max number of digits NUM_MAX_DIGITS)
+	uint8_t          numForTx;  // number of data to Tx per one MAX
 	displayBuffDef   txData[MAX_PER_SCREEN];    // pointer on the buffer for Tx data
 }displayHandlerDef;
 

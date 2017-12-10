@@ -40,16 +40,6 @@
 /* Priorities at which the tasks are created. */
 #define mainQUEUE_RECEIVE_TASK_PRIORITY		1
 
-/* The rate at which data is sent to the queue, specified in milliseconds, and
-converted to ticks using the portTICK_RATE_MS constant. */
-#define mainQUEUE_SEND_FREQUENCY_MS			( 200 / portTICK_RATE_MS )
-
-/* The number of items the queue can hold.  This is 1 as the receive task
-will remove items as they are added, meaning the send task should always find
-the queue empty. */
-#define mainQUEUE_LENGTH					( 1 )
-
-//static void prvSetupHardware( void );
 
 //указатель на структуру с указателями на буфера приема и передачи USART. из processing_USART.с
 extern S_Task_parameters *ptask_parameters;
@@ -243,7 +233,7 @@ int main(void)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
 	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_9).state){// если в конфигурации поточный модуль выключен
-		xTaskCreate(  TASK_PROCESSING(DEV_9), ( const char * ) TASK_IDENT(DEV_9), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_9), TASK_PRIORITY(DEV_9), NULL );
+		xTaskCreate(  TASK_PROCESSING(DEV_9), ( const char * ) TASK_IDENT(DEV_9), 300,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_9), TASK_PRIORITY(DEV_9), NULL );
 	}
 #endif
 

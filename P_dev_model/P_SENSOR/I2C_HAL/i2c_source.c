@@ -100,13 +100,16 @@ I2C_STATUS i2cConfig( I2C_DEF i2cIn ,I2C_configDef *config){
 	//----CONFIG I2C1--------------------------------
 	I2C_InitTypeDef I2C_InitStruct;
 
+
+
 	RCC_APB1PeriphResetCmd(RCC_APB1Periph_I2C1, ENABLE);
 
-	i2cInitGpio();
+	i2cInitGpio(0);
 
 	RCC_APB1PeriphResetCmd(RCC_APB1Periph_I2C1, DISABLE);
 
 	startInitI2C(I2CProcessing[i2cIn].I2C_SEL);
+	i2cInitGpio(1);
 
 	I2CProcessing[i2cIn].I2C_periodUs = ( 10000000 * 9) / ( config->frequencyI2C );
 
@@ -143,6 +146,7 @@ I2C_STATUS i2cTxData(I2C_DEF i2cIn, uint8_t address_dev, uint8_t address_reg, ui
 		   (I2C_ReadRegister(I2CProcessing[i2cIn].I2C_SEL, I2C_Register_CR1) & I2C_CR1_STOP) )
 	{
 		// user time check function
+
 		if( i2cgetTimeMs() >= maxTimeTransaction )
 		{
 			// timeout stop transaction
@@ -177,6 +181,7 @@ I2C_STATUS i2cRxData(I2C_DEF i2cIn, uint8_t address_dev, uint8_t address_reg, ui
 	while( I2CProcessing[i2cIn].transactionStatus == I2C_STATUS_TRANSACTION_PROCESSING )
 	{
 		// user time check function
+
 		if( i2cgetTimeMs() >= maxTimeTransaction )
 		{
 			// timeout stop transaction
@@ -398,5 +403,5 @@ static inline void I2CProcessingInterruptRx(I2C_DEF  i2cIn){
 }
 
 
-I2C_STATUS  i2c_read_data(I2C_TypeDef* I2C_SEL_, uint8_t address_dev, uint8_t address_reg, uint8_t num_read,  uint8_t *buff){};
-I2C_STATUS i2c_write_data(I2C_TypeDef* I2C_SEL_, uint8_t address_dev, uint8_t address_reg, uint8_t num_write, uint8_t *buff){};
+I2C_STATUS  i2c_read_data(I2C_TypeDef* I2C_SEL_, uint8_t address_dev, uint8_t address_reg, uint8_t num_read,  uint8_t *buff){return 1;};
+I2C_STATUS i2c_write_data(I2C_TypeDef* I2C_SEL_, uint8_t address_dev, uint8_t address_reg, uint8_t num_write, uint8_t *buff){return 1;};

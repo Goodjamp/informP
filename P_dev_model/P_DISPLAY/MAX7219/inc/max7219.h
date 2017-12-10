@@ -16,6 +16,10 @@
 
 #define NUM_MAX_DIGITS     8
 
+
+#define MAX_NUM_DATA_SEND_FRAME       8
+#define MAX_NUM_DATA_SEND_COMMAND     1
+
 /* @brief Description video bufer for one MAX7219
  * */
 typedef uint16_t displayBuffDef[NUM_MAX_DIGITS];
@@ -27,6 +31,10 @@ typedef uint16_t displayBuffDef[NUM_MAX_DIGITS];
   */
 #define maxSetConfig_(X,Y)    ( ( (uint8_t)X<<8 ) | ( (uint8_t)Y ) )
 
+typedef enum{
+	LAYER_ORDER_FIRST,
+	LAYER_ORDER_SECOND
+}LAYER_ORDER;
 
 /*********************************************************************/
 /******************   MAX7219 COMAND LIST    *************************/
@@ -100,7 +108,7 @@ typedef enum{
 
 // Update screen function
 void displayClearBuff(displayBuffDef *displayBuffer, uint8_t numMax);
-void displaySet7Segment(displayBuffDef *displayBuffer, uint8_t numMax, uint8_t data, uint8_t numDig);
+void displaySet7Segment(displayBuffDef *displayBuffer, uint8_t numMax, uint8_t data, uint8_t numDig, LAYER_ORDER layerOrder);
 void displaySet8x8Matrix(displayBuffDef *displayBuffer, uint8_t numMax, uint8_t data);
 void displaySetConfig(displayBuffDef *displayBuffer, uint8_t numMax,  maxComandDef maxComand, uint8_t data);
 void displaySetConfigMulti(displayBuffDef *displayBuffer, uint8_t sizeBuff, maxComandDef maxComand, uint8_t data);
@@ -108,5 +116,6 @@ void displayConfigDecodeMode(displayBuffDef *displayBuffer, uint8_t numMax, uint
 void displayConfigIntensity(displayBuffDef *displayBuffer, uint8_t numMax, maxIntensityDef data);
 void displayConfigWorkMode(displayBuffDef *displayBuffer, uint8_t numMax, shutDownDef data);
 void displayConfigScanLimit(displayBuffDef *displayBuffer, uint8_t numMax, maxScanLimDef data);
+void displayConfigTestMode(displayBuffDef *displayBuffer, uint8_t numMax, maxTestDef data);
 
 #endif

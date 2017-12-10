@@ -18,25 +18,29 @@
 //#define DEV_1_BIT_STATUS_REG 1
 
 // Количекство статус-регистров sensor
-#define NUM_REG_STATUS_TC       1
+#define NUM_REG_STATUS_sensor       1
 // Общее количество регистров sensor (имееться в виду регистров разных типов, без status регистра)
-#define NUM_REG_TC              1
+#define NUM_REG_sensor              3
 
 
 #pragma pack(push,1)
 
 //-----------------------------Адреса оперативных регистров процесса sensor---------------------------------------------------------------
 typedef struct{
-	uint16_t  status_sensor; // статус регистры sensor
-	uint16_t  rez_sensor;  // адрес в памяти МК регистров состояния sensor
+	uint16_t  status_sensor;   // статус регистры sensor
+	uint16_t  rezTemperature;  // address in memory map rez measure temperature*10
+	uint16_t  rezHumidity;     // address in memory map rez measure humidity *10
+	uint16_t  rezPressure;     // address in memory map rez measure Pressure *10
 } S_sensor_address;
 //--------------------------------------------------------------------------------------------------------------------------------------
 
 
 //----------------------------- Оперативные регистры процесса sensor------------------------------------------------------------------------
 typedef struct{
-	S_proces_object_modbus  status_sensor; // статус регистры sensor
-	S_proces_object_modbus  rez_sensor;    // measurement result
+	S_proces_object_modbus  status_sensor;  // status register
+	S_proces_object_modbus  rezTemperature; // measurement result measure temperature*10
+	S_proces_object_modbus  rezHumidity;    // measurement result measure humidity*10
+	S_proces_object_modbus  rezPressure;    // measurement result measure Pressure*10
 } S_sensor_oper_data;
 //--------------------------------------------------------------------------------------------------------------------------------------
 

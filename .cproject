@@ -38,6 +38,7 @@
 						<entry flags="" kind="includePath" name="P_dev_model/P_DISPLAY/keyBoardProcessing"/>
 						<entry flags="" kind="includePath" name="P_dev_model/P_DISPLAY/MAX7219"/>
 						<entry flags="" kind="includePath" name="P_dev_model/P_DISPLAY/MAX7219/inc"/>
+						<entry flags="" kind="includePath" name="P_dev_model/P_DISPLAY/menuProcessing"/>
 						<entry flags="" kind="includePath" name="P_dev_model/P_FRQmetter_signal"/>
 						<entry flags="" kind="includePath" name="P_dev_model/P_SENSOR"/>
 						<entry flags="" kind="includePath" name="P_dev_model/P_SENSOR/BME280_HAL"/>
@@ -89,6 +90,7 @@
 		<pathentry include="D:/CooCox/INFORM_P/informP/P_dev_model/P_DISPLAY/keyBoardProcessing" kind="inc" path="" system="true"/>
 		<pathentry include="D:/CooCox/INFORM_P/informP/P_dev_model/P_DISPLAY/MAX7219" kind="inc" path="" system="true"/>
 		<pathentry include="D:/CooCox/INFORM_P/informP/P_dev_model/P_DISPLAY/MAX7219/inc" kind="inc" path="" system="true"/>
+		<pathentry include="D:/CooCox/INFORM_P/informP/P_dev_model/P_DISPLAY/menuProcessing" kind="inc" path="" system="true"/>
 		<pathentry include="D:/CooCox/INFORM_P/informP/P_dev_model/P_FRQmetter_signal" kind="inc" path="" system="true"/>
 		<pathentry include="D:/CooCox/INFORM_P/informP/P_dev_model/P_SENSOR" kind="inc" path="" system="true"/>
 		<pathentry include="D:/CooCox/INFORM_P/informP/P_dev_model/P_SENSOR/BME280_HAL" kind="inc" path="" system="true"/>

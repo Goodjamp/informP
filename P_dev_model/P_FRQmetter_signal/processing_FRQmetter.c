@@ -27,6 +27,7 @@
 extern S_address_oper_data s_address_oper_data;
 
 xSemaphoreHandle semaphoreUpdateFRQ;
+static uint16_t status;
 
 
 struct{
@@ -51,17 +52,6 @@ static void frqGPIOConfig(void){
     timGpioInit.GPIO_Speed = GPIO_Speed_50MHz;
     timGpioInit.GPIO_Pin = FREQ_INPUT_PIN;
     GPIO_Init(GPIOA,&timGpioInit);
-
-/*    timGpioInit.GPIO_Mode = GPIO_Mode_Out_PP;
-    timGpioInit.GPIO_Speed = GPIO_Speed_50MHz;
-    timGpioInit.GPIO_Pin = GPIO_Pin_3;
-    GPIO_Init(GPIOA,&timGpioInit);
-
-    timGpioInit.GPIO_Mode = GPIO_Mode_Out_PP;
-    timGpioInit.GPIO_Speed = GPIO_Speed_50MHz;
-    timGpioInit.GPIO_Pin = GPIO_Pin_4;
-    GPIO_Init(GPIOA,&timGpioInit);*/
-
 }
 
 static uint16_t frqTIMCalcPSC(void){
@@ -140,7 +130,6 @@ void TIM1_CC_IRQHandler(void)
 	frqRezMes.f_ICinterrupt = 1;
 	frqRezMes.inputCaptureCNT = FREQ_TIMER->CCR1;
 	xSemaphoreGiveFromISR(semaphoreUpdateFRQ, &temp);
-	//GPIOA->ODR ^= GPIO_ODR_ODR3;
 }
 
 
@@ -173,7 +162,7 @@ static void logFRQ(uint32_t newCNT, uint16_t newF){
 u16 FRQmetter_calc_address_oper_reg(S_FRQmetter_address *ps_FRQmetter_address, u16 adres_start){
 	ps_FRQmetter_address->status_FRQmetter = adres_start;
 	ps_FRQmetter_address->rez_FRQmetter = ps_FRQmetter_address->status_FRQmetter + structFieldRegSize(S_FRQmetter_oper_data,status_FRQmetter);
-	return adres_start;
+	return ps_FRQmetter_address->rez_FRQmetter + structFieldRegSize(S_FRQmetter_oper_data,rez_FRQmetter);
 }
 
 
@@ -184,12 +173,15 @@ void t_processing_FRQmetter(void *pvParameters){
 	uint32_t totatalCNT;
 	uint16_t frq;
 	S_FRQmetter_user_config *s_FRQConfig =(S_FRQmetter_user_config*)pvParameters;
+
+	status = FRQ_STATUS_ERROR;
+	processing_mem_map_write_s_proces_object_modbus(&status, 1, s_address_oper_data.s_FRQmetter_address.status_FRQmetter);
+
 	//if user disabled FRQ
 	if(s_FRQConfig->state == DISABLE) return;
 	//	Configure all peripherals
 	frqGPIOConfig();
 	frqTIMConfigure(); //8842
-
 	vSemaphoreCreateBinary(semaphoreUpdateFRQ);
 	//xQueueSendToBackFromISR()
 	while(1){
@@ -199,10 +191,13 @@ void t_processing_FRQmetter(void *pvParameters){
 			totatalCNT = frqRezMes.updateCNT * TIM_MAX_CNT + frqRezMes.inputCaptureCNT;
 			frq = ((float)(frqRezMes.df/(float)totatalCNT)*1000);
 			if((frq < FRQ_MAX) && (frq > FRQ_MIN)){
+				status = FRQ_STATUS_OK;
+				processing_mem_map_write_s_proces_object_modbus(&status, 1, s_address_oper_data.s_FRQmetter_address.status_FRQmetter);
 				processing_mem_map_write_s_proces_object_modbus(&frq, 1, s_address_oper_data.s_FRQmetter_address.rez_FRQmetter);
 			}
-			else{// ERROR
-
+			else{
+				status = FRQ_STATUS_ERROR;
+				processing_mem_map_write_s_proces_object_modbus(&status, 1, s_address_oper_data.s_FRQmetter_address.status_FRQmetter);
 			}
 			logFRQ(totatalCNT, frq);
 			frqRezMes.updateCNT = 0;

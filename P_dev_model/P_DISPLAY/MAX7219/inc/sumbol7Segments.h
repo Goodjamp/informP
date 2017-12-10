@@ -123,7 +123,28 @@ const symbol7SegmentsTypedef symbols7Segments[] = {\
 		/*******        F       *******/
 				.symbol = 'F',
 				            //.abcdefg
-	            .segments = 0b01010111,
+	            .segments = 0b01000111,
+
+		},
+		{
+		/*******        E       *******/
+				.symbol = 'E',
+				            //.abcdefg
+	            .segments = 0b01001111,
+
+		},
+		{
+		/*******        r       *******/
+				.symbol = 'r',
+				            //.abcdefg
+	            .segments = 0b01000110,
+
+		},
+		{
+		/*******        O       *******/
+				.symbol = 'O',
+				            //.abcdefg
+	            .segments = 0b01111110,
 
 		},
 		{
@@ -146,7 +167,7 @@ const symbol7SegmentsTypedef symbols7Segments[] = {\
 const symbol7SegmentsTypedef error7Segments = {
 		/*******        _       *******/
 				.symbol = '_',
-			    .segments = 0b00001000,
+			    .segments = 0b00000000,
 
 		};
 

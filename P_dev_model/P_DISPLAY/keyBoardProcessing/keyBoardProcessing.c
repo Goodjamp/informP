@@ -8,11 +8,8 @@
 #include "stdint.h"
 #include "stdbool.h"
 
-#include "stm32f10x_rcc.h"
-#include "stm32f10x_gpio.h"
-
 #include "keyBoardProcessing.h"
-#include "LCD.h"
+#include "keyBoardProcessingUserInterface.h"
 
 
 
@@ -40,17 +37,34 @@ const actionDescrDef actionDescr[] = {
 struct{
 	uint16_t cnt;
 	uint8_t  index;
+	uint16_t deadTimeRevCnt;
 	bool     detect;
 }actionProces;
 
 
-actionButtonDef keyUpdate( void ){
+void keyboardInit( void ){
+	keyHWConfig();
+}
+
+void keyPause(uint16_t pause){
+	actionProces.cnt = 0;
+	actionProces.deadTimeRevCnt = pause;
+	actionProces.detect = false;
+}
+
+
+actionDetect keyUpdate(volatile uint8_t *actionNum, volatile uint8_t *timePeriodNumber ){
     uint8_t cnt;
+    actionDetect rezButProcessing = ACTION_NO_DETECT;
 	uint16_t mask = keyGetPressMask();
-
-
 	// detect action
 	actionProces.detect = false;
+	// if pause set
+	if(actionProces.deadTimeRevCnt > 0)
+	{
+		actionProces.deadTimeRevCnt--;
+		return 	rezButProcessing;
+	}
 
     for(cnt = 0; cnt < sizeof(actionDescr)/sizeof(actionDescr[0]); cnt++)
     {
@@ -71,9 +85,12 @@ actionButtonDef keyUpdate( void ){
     {
     	if(actionProces.cnt >= actionDescr[actionProces.index].periodForAction[actionDescr[actionProces.index].numPeriod - 1] ) // action was detected !!
     	{
-            //TO DO call callback function
+            // return detected action and period
+    		*actionNum        = actionProces.index;
+    		*timePeriodNumber = actionDescr[actionProces.index].numPeriod - 1;
     		//clear processing
             actionProces.cnt = 0;
+            rezButProcessing = 	ACTION_DETECT;
     	}
     }
     else if( !actionProces.detect && ( actionProces.cnt > 0) )
@@ -86,11 +103,15 @@ actionButtonDef keyUpdate( void ){
     	}
     	if( cnt != 0 ) //
     	{
-    		actionProces.cnt++;
-    	}
+    	    // return detected action and period
+    	    *actionNum        = actionProces.index;
+    	    *timePeriodNumber = cnt-1;
+    	    rezButProcessing = 	ACTION_DETECT;
+        }
+    	//clear processing
     	actionProces.cnt = 0;
     }
-
+    return 	rezButProcessing;
 }
 
 

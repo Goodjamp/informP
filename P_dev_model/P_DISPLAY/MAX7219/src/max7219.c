@@ -38,12 +38,19 @@ void displayClearBuff(displayBuffDef *displayBuffer, uint8_t numMax){
   * @param
   * @retval None
   */
-void displaySet7Segment(displayBuffDef *displayBuffer, uint8_t numMax, uint8_t data, uint8_t numDig)
+void displaySet7Segment(displayBuffDef *displayBuffer, uint8_t numMax, uint8_t data, uint8_t numDig, LAYER_ORDER layerOrder)
 {
 	uint8_t cnt = 0;
 	for(;cnt < sizeof(symbols7Segments)/sizeof(symbols7Segments[0]); cnt++){
 		if( data == symbols7Segments[cnt].symbol){
-			displayBuffer[numMax][numDig] = maxSetConfig_( (numDig + 1), symbols7Segments[cnt].segments);
+			if(layerOrder == LAYER_ORDER_FIRST)
+			{
+			    displayBuffer[numMax][numDig] = maxSetConfig_( (numDig + 1), symbols7Segments[cnt].segments);
+			}
+			else
+			{
+				displayBuffer[numMax][numDig] |= maxSetConfig_( (numDig + 1), symbols7Segments[cnt].segments);
+			}
 			return;
 		}
 	}
@@ -119,8 +126,16 @@ void displayConfigIntensity(displayBuffDef *displayBuffer, uint8_t numMax, maxIn
 	displayBuffer[numMax][0] = maxSetConfig_(INTENSITY, data);
 }
 
+
+void displayConfigScanLimit(displayBuffDef *displayBuffer, uint8_t numMax, maxScanLimDef data)
+{
+	displayBuffer[numMax][0] = maxSetConfig_(SCAN_LIMIT, data);
+}
+
+
+
 /**
-  * @brief Set SHUTDOWN/NORMAL_OPERATION for selected digits
+  * @brief Set SHUTDOWN/NORMAL_OPERATION
   * @param
   * [displayIntarface] - pointer on the display interface (display - serial connection of few (from one to ...) MAX7219 chips)
   * [numMax]           - order number of MAX7219 in display
@@ -133,7 +148,18 @@ void displayConfigWorkMode(displayBuffDef *displayBuffer, uint8_t numMax, shutDo
 }
 
 
-void displayConfigScanLimit(displayBuffDef *displayBuffer, uint8_t numMax, maxScanLimDef data)
+/**
+  * @brief Set DISPLAY_TEST_NORMAL_OPERATION/DISPLAY_TEST_DISPLAY_TEST_MODE
+  * @param
+  * [displayIntarface] - pointer on the display interface (display - serial connection of few (from one to ...) MAX7219 chips)
+  * [numMax]           - order number of MAX7219 in display
+  * [data]             - new mode for selected numMax. ref to the "shutDownDef"
+  * @retval None
+  */
+void displayConfigTestMode(displayBuffDef *displayBuffer, uint8_t numMax, maxTestDef data)
 {
-	displayBuffer[numMax][0] = maxSetConfig_(SCAN_LIMIT, data);
+	displayBuffer[numMax][0] = maxSetConfig_(DISPLAY_TEST, data);
 }
+
+
+
