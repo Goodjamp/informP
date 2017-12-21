@@ -10,6 +10,9 @@
 #define PROCESSING_TIME_H_
 
 
+#define SECOND_EVENT_BIT (uint8_t)(1<<0)
+#define ALARM_EVENT_BITS  (uint8_t)(1<<1)
+
 #define gpsUSARTSpeed      9600
 #define gpsUSARTStopBits   1
 #define gpsUSARTParity     0

@@ -11,19 +11,13 @@
 
 #include "max7219.h"
 
-
-#define NUMBER_LCD_STRING  4
-
+#define NUMBER_OF_LCD_STRING    4
 // max7219 Position matrix LCD in screen
 #define ORDER_NUM_MATRIX        0
 // max7219 Position 7-SEGMENTS LCD in screen
 #define ORDER_NUM_7SEG          1
-// Number of 7 segments indicators
-#define NUMBER_7_SEGMENTS_IND   4
 // Number of 7 M
 #define MAX_PER_SCREEN          2
-
-#define SCREEN_UPDATE_PERIOD    20
 
 typedef enum{
 	COLOR_GREEN = 0,
@@ -33,19 +27,19 @@ typedef enum{
 
 typedef enum{
 	DISPLAY_BRIGHTNES_3 = 0,
-	DISPLAY_BRIGHTNES_5,
-	DISPLAY_BRIGHTNES_7,
-	DISPLAY_BRIGHTNES_9,
-	DISPLAY_BRIGHTNES_11,
-	DISPLAY_BRIGHTNES_15,
-	DISPLAY_BRIGHTNES_17,
-	DISPLAY_BRIGHTNES_19,
-	DISPLAY_BRIGHTNES_21,
-	DISPLAY_BRIGHTNES_23,
-	DISPLAY_BRIGHTNES_25,
-	DISPLAY_BRIGHTNES_27,
-	DISPLAY_BRIGHTNES_29,
-	DISPLAY_BRIGHTNES_31,
+	DISPLAY_BRIGHTNES_5,  //1
+	DISPLAY_BRIGHTNES_7,  //2
+	DISPLAY_BRIGHTNES_9,  //3
+	DISPLAY_BRIGHTNES_11, //4 -
+	DISPLAY_BRIGHTNES_15, //5
+	DISPLAY_BRIGHTNES_17, //6
+	DISPLAY_BRIGHTNES_19, //7
+	DISPLAY_BRIGHTNES_21, //8 -
+	DISPLAY_BRIGHTNES_23, //9
+	DISPLAY_BRIGHTNES_25, //10
+	DISPLAY_BRIGHTNES_27, //11
+	DISPLAY_BRIGHTNES_29, //12
+	DISPLAY_BRIGHTNES_31, //13
 }DISPLAY_BRIGHTNES;
 
 /* @brief
@@ -82,22 +76,29 @@ typedef enum{
 	TX_COMPLITE
 }txState;
 
+typedef struct{
+	uint8_t brightnes;
+	COLOR   color[NUMBER_OF_LCD_STRING];
+
+}displayCurrentSetings;
 
 /* @brief
  * */
 typedef struct{
-	DISPLAY_STATUS   status;
-	uint16_t         dataCnt;   // Data transmit counter  (set user according number of max chips per display)
-	uint8_t          digitCnt;  // digit transmit counter (count to max number of digits NUM_MAX_DIGITS)
-	uint8_t          numForTx;  // number of data to Tx per one MAX
-	displayBuffDef   txData[MAX_PER_SCREEN];    // pointer on the buffer for Tx data
+	displayCurrentSetings currentSettings;
+	const uint8_t *       brightnesList;
+	DISPLAY_STATUS        status;
+	uint16_t              dataCnt;   // Data transmit counter  (set user according number of max chips per display)
+	uint8_t               digitCnt;  // digit transmit counter (count to max number of digits NUM_MAX_DIGITS)
+	uint8_t               numForTx;  // number of data to Tx per one MAX
+	displayBuffDef        txData[MAX_PER_SCREEN];    // pointer on the buffer for Tx data
 }displayHandlerDef;
 
 
 //--------------------------------------------------------------------------
 //---------DISPLAY HAL PROCESSING FUNCTION PROTOTYPE------------------------
 //--------------------------------------------------------------------------
-DISPLAY_STATUS displayInit( displayHandlerDef *displayHandler);
+DISPLAY_STATUS displayInit( displayHandlerDef *displayHandlerIn, const uint8_t* brightnesPar);
 void displayWrite(displayHandlerDef *displayHandlerIn, uint16_t numScreen, uint8_t *str, uint16_t strSize, COLOR color, TX_ADDRESS txAddress);
 void displaySetDefConfig(displayHandlerDef *displayHandler);
 void displayClear(displayHandlerDef *displayHandlerIn, uint16_t numScreen, TX_ADDRESS txAddress);

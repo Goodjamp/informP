@@ -103,9 +103,14 @@
 
 /* Software timer definitions. */
 #define configUSE_TIMERS				1
-#define configTIMER_TASK_PRIORITY		( 3 )
+#define configTIMER_TASK_PRIORITY		( 4 )
 #define configTIMER_QUEUE_LENGTH		5
 #define configTIMER_TASK_STACK_DEPTH	( configMINIMAL_STACK_SIZE )
+#define INCLUDE_xTimerPendFunctionCall  1
+
+/* Event Group definition */
+#define INCLUDE_xEventGroupSetBitFromISR 1
+
 
 /**/
 /* Set the following definitions to 1 to include the API function, or zero

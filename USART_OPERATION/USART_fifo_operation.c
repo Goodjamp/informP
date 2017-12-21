@@ -161,7 +161,7 @@ int ReadUSART(struct point_wrdirobject *pwrdirobject, unsigned char *buffer,int 
 	int n = 0; // time counter
 	int	SymbRead, Numost = 0;
 	//	int	npr;
-	int endtimesec = 30000; //the endtimesec need too ReadCom parameters
+	int endtimesec = 30000; //the end time sec need too ReadCom parameters
 	unsigned char *timebuf;
 	timebuf = buffer;
 	start_counter = counter_ms; // время входа в функцию считівания

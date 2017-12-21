@@ -6,6 +6,7 @@
  *      Versin: 1
  */
 #include "processing_simple_gpio.h"
+#include "debugStuff.h"
 
 
 //------- функция work_user_init -------------

@@ -21,7 +21,7 @@
 #include "LCD.h"
 
 // ------------------------definition for screen----------------------
-static LDDescr LDList[NUMBER_LCD_STRING] = {
+static LDDescr LDList[NUMBER_OF_LCD_STRING] = {
 		[SCREEN_1] = {
 				.port = PORT_LD_1,
 				.pin =  PIN_LD_1
@@ -223,7 +223,7 @@ void TIM2_IRQHandler(void){
 	else
 	{
 		uint16_t cnt = 0;
-		for(; cnt < NUMBER_LCD_STRING; cnt++ )
+		for(; cnt < NUMBER_OF_LCD_STRING; cnt++ )
 		{
 			GPIO_ResetBits(LDList[cnt].port, LDList[cnt].pin);
 		}
@@ -248,7 +248,7 @@ static void generateLdPuls(void){
 	else
 	{
 		uint16_t cnt = 0;
-		for(;cnt < NUMBER_LCD_STRING; cnt++ )
+		for(;cnt < NUMBER_OF_LCD_STRING; cnt++ )
 		{
 			GPIO_SetBits(LDList[cnt].port, LDList[cnt].pin);
 		}
@@ -291,7 +291,7 @@ void hwInterfaceInit(void){
 	uint16_t cnt = 0;
 
 	// Config peripherals
-	for(;cnt < NUMBER_LCD_STRING; cnt++)
+	for(;cnt < NUMBER_OF_LCD_STRING; cnt++)
 	{
 		configGPIOLd(LDList[cnt].port, LDList[cnt].pin);
 	}

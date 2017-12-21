@@ -12,16 +12,26 @@
 #include "processing_display_extern.h"
 #include "menuProcessing.h"
 
-#define MAX_NUM_PAR            6
+#define LCD_UPDATE_HIGHT_MS 600
+#define LCD_UPDATE_LOW_MS   400
 
-#define BUTTON_PROCESSING_MS   5
-#define LCD_UPDATE_MS          500
+//---------------------------USER STRING LCD PARAMITERS-------------------------
+//MAX length of LCD string
+#define LCD_STR_LENGTH         20
+//------------------------------USER KEYS PARAMITERS----------------------------
 #define ACTION_QUEUE_QANTITY   5
 #define ACTION_QUEUE_PAYLOAD   2
+#define MAX_NUM_PAR            6
+#define BUTTON_PROCESSING_MS   5
+#define BUTTON_ESC_PERIOD_MS   8000
+//-----------------------------Brightness adjustment
+#define BRIGHTNES_STEP         10
+#define BRIGHTNES_MAX          30
 
 typedef enum{
 	event_KEY,
-	event_DISPLAY
+	event_DISPLAY,
+	event_Brightnes
 }actionTypeDef;
 
 typedef enum{
@@ -32,6 +42,11 @@ typedef enum{
 	PAR_TIME,
 	PAR_FRQ
 }paramOrderDef;
+
+typedef enum{
+	BLINK_STATE_HIGHT,
+	BLINK_STATE_LOW
+}BLINK_STATE;
 
 //#pragma pack(push,1)
 typedef struct{

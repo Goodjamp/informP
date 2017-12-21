@@ -20,53 +20,31 @@ typedef struct{
 struct{
 	uint8_t       widjetCnt;           // ordering number selected widget
 	listBoxDef    listBox[NUM_OF_LISBOX]; // pointer on the list of ListBox
-	uint8_t       brightnes;           // global brightness
-	DISPLAY_STATE displayState;        // display state: test, work
+	DISPLAY_MENU displayState;        // display state: test, work
 }menuDescription = {
 		.widjetCnt = 0,
-		.displayState = DISPLAY_STATE_WORK,
+		.displayState = DISPLAY_MENU_WORK,
 
 };
 
-
-void menulisBoxSetNumItem(uint8_t orderNumber, uint8_t numItem){
-	menuDescription.listBox[orderNumber].numItem = numItem;
-}
-
-void menuBrightnesSet(uint8_t numStrinLCD, uint8_t brightnes){
-	menuDescription.brightnes = brightnes;
-}
-
-/**
-  * @brief  Action on change display
-  * @param
-  * @retval
-  */
-void menuUpdate(menuActionListDef inAction){
-	switch(menuDescription.displayState){
-	case DISPLAY_STATE_WORK:
-		mainMenuUpdate(inAction);
-		break;
-	case DISPLAY_STATE_UDJUSTMENT:
-		adjustmentMenuUpdate(inAction);
-		break;
-	case DISPLAY_STATE_TEST:
-		testMenuUpdate(inAction);
-		break;
-	}
-}
+static void increaseWidjetP(void);
+static void increaseListBoxItem(void);
+static void mainMenuUpdate(menuActionListDef inAction);
+static void adjustmentMenuUpdate(menuActionListDef inAction);
+static void testMenuUpdate(menuActionListDef inAction);
+static void updateBrightnes(void);
 
 
 void mainMenuUpdate(menuActionListDef inAction){
 	switch(inAction){
 	    case MENU_ACTION_ENTER:
-	    	menuDescription.displayState = DISPLAY_STATE_UDJUSTMENT;
+	    	menuDescription.displayState = DISPLAY_MENU_UDJUSTMENT;
 	    	break;
 	    case MENU_ACTION_SELL:
 	    	updateBrightnes();
 	    	break;
 	    case MENU_ACTION_TEST:
-	    	menuDescription.displayState = DISPLAY_STATE_TEST;
+	    	menuDescription.displayState = DISPLAY_MENU_TEST;
 	    	break;
 	    default: break;
 	};
@@ -82,10 +60,10 @@ void adjustmentMenuUpdate(menuActionListDef inAction){
 	    	increaseListBoxItem();
 	    	break;
 	    case MENU_ACTION_ESC:
-	    	menuDescription.displayState = DISPLAY_STATE_WORK;
+	    	menuDescription.displayState = DISPLAY_MENU_WORK;
 	    	break;
 	    case MENU_ACTION_TEST:
-	    	menuDescription.displayState = DISPLAY_STATE_TEST;
+	    	menuDescription.displayState = DISPLAY_MENU_TEST;
 	    	break;
 	    default: break;
 	};
@@ -93,22 +71,15 @@ void adjustmentMenuUpdate(menuActionListDef inAction){
 
 
 void testMenuUpdate(menuActionListDef inAction){
-    if( inAction == MENU_ACTION_ESC)
-    {
-    	menuDescription.displayState = DISPLAY_STATE_WORK;
-    }
+
+   menuDescription.displayState = DISPLAY_MENU_WORK;
+
 }
 
 
 void updateBrightnes(void){
-	menuDescription.brightnes += BRIGHTNESS_STEP;
-	if( menuDescription.brightnes > BRIGHTNESS_MAX )
-	{
-		menuDescription.brightnes = BRIGHTNESS_MIN;
-	}
-    // TODO temporary decision call LCD function from menu function!!!!  Move this code to some LCD processing part!!
-	displaySetBrightnes(&myDisplay, menuDescription.brightnes, 0, TX_ADDRESS_ALL);
-	//-----------------------------------
+	// Call user implementation function
+	setBreightnes();
 }
 
 
@@ -131,6 +102,60 @@ void increaseListBoxItem(void){
 }
 
 
-uint8_t getListboxItemIndex(uint8_t orderNumberLisbox){
+/**
+  * @brief  Action on change display
+  * @param
+  * @retval
+  */
+void menuUpdate(menuActionListDef inAction){
+	switch(menuDescription.displayState){
+	case DISPLAY_MENU_WORK:
+		mainMenuUpdate(inAction);
+		break;
+	case DISPLAY_MENU_UDJUSTMENT:
+		adjustmentMenuUpdate(inAction);
+		break;
+	case DISPLAY_MENU_TEST:
+		testMenuUpdate(inAction);
+		break;
+	}
+}
+
+
+/**
+  * @brief  return current cursor position
+  * @param
+  * @retval
+  */
+uint8_t menuGetListboxItemIndex(uint8_t orderNumberLisbox){
 	return menuDescription.listBox[orderNumberLisbox].item;
+}
+
+/**
+  * @brief  return current cursor position
+  * @param
+  * @retval
+  */
+uint8_t menuGetListbox(void){
+	return menuDescription.widjetCnt;
+}
+
+
+/**
+  * @brief  return current menu
+  * @param
+  * @retval
+  */
+DISPLAY_MENU menuGetCurrentMenu(void){
+	return menuDescription.displayState;
+}
+
+
+/**
+  * @brief  set quantity of item in Listbox by the Listbox index
+  * @param
+  * @retval
+  */
+void menuSetLisBoxNumItem(uint8_t orderNumber, uint8_t numItem){
+	menuDescription.listBox[orderNumber].numItem = numItem;
 }

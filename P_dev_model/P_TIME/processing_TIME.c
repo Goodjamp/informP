@@ -1,12 +1,18 @@
-#include "stdio.h"
-#include "string.h"
+/********************************************************************************
+  * @file    processing_TIME.c
+  * @author  Gerasimchuk A.
+  * @version V1.0.0
+  * @date    19 jun 2017
+  * @brief
+  */
 #include "stdint.h"
+#include "stdbool.h"
+#include "string.h"
 #include "time.h"
 
 #include "FreeRTOS.h"
 #include "task.h"
-#include "queue.h"
-#include "timers.h"
+#include "event_groups.h"
 
 #include "funct.h"
 #include "processing_mem_map_extern.h"
@@ -14,18 +20,26 @@
 #include "USART_fifo_operation.h"
 #include "processing_TIME.h"
 #include "processing_TIME_extern.h"
-#include "RTCProcessing.h"
+#include "clockProcessing.h"
 #include "GPSprocessing.h"
 
+#include "debugStuff.h"
+
+
+//--------------USART---------------------------------------------
 extern S_address_oper_data s_address_oper_data;
 extern S_Task_parameters task_parameters[NUMBER_MY_PROCES];
-
+//event grup
+EventGroupHandle_t clockEventGroup;
+EventBits_t        rezWaiteEvent;
 
 static uint8_t usartReadBuff[USART_READ_BUFF_SIZE];
-static uint32_t timeUTC;
+static uint32_t timeSetUTC;
+static time_t timeGetUTC;
+struct tm *timeGet;
 struct tm timeUpdate;
 static GPRMC_Def myGPRMC;
-static uint16_t statusTime;
+static uint16_t registerValue;
 
 //---------Sattic function definition---------
 static void initUSARTGPS(void);
@@ -48,10 +62,10 @@ uint16_t TIME_calc_address_oper_reg(S_TIME_address *ps_TIME_address, uint16_t ad
 // Config USART
 static void initUSARTGPS(void){
     S_port_config portConfig={
-            .baudrate = gpsUSARTSpeed,
-            .stopbits = gpsUSARTStopBits,
-            .parity = gpsUSARTParity,
-            .amountbyte = gpsUSARTWordLengt,
+            .baudrate     = gpsUSARTSpeed,
+            .stopbits     = gpsUSARTStopBits,
+            .parity       = gpsUSARTParity,
+            .amountbyte   = gpsUSARTWordLengt,
             .controlpotok = 0
     };
     ConfigureUSART(&portConfig, gpsUSARTDef);
@@ -74,19 +88,25 @@ struct{
 	uint16_t cnt;
 }GPSdata;
 
-void secondRTCCallBack(void){
+void secondClockCallBack(uint32_t seconCnt){
+
+	BaseType_t pxHigherPriorityTaskWoken;
+
+	xEventGroupSetBitsFromISR(
+			clockEventGroup,
+			SECOND_EVENT_BIT,
+			&pxHigherPriorityTaskWoken
+    );
+
+}
+
+
+void alarmClockCallBack(uint32_t seconCnt){
 	// pass mutex, swithc task
 
 }
 
-/*
- * 1 - set current date/time with block all tasks
- * 2 - update time without block task.
- *
- *
- */
-
-void updateTime(void){
+bool updateTime(void){
 	uint8_t numRezRead = 0;
 	while(1)
 	{
@@ -109,24 +129,53 @@ void updateTime(void){
 			timeUpdate.tm_min = myGPRMC.minutes;
 			timeUpdate.tm_sec = myGPRMC.seconds;
 			timeUpdate.tm_isdst = -1;
-			timeUTC = mktime(&timeUpdate);
-			setTime(timeUTC);
-			//break;
+			timeSetUTC = mktime(&timeUpdate);
+			clockSetTime(timeSetUTC);
+			return true;
 		}
 	}
+	return false;
 }
 
 void t_processing_TIME(void *p_task_par){
-	statusTime = TIME_STATUS_ERROR;
-
-	processing_mem_map_write_s_proces_object_modbus(&statusTime, 1, s_address_oper_data.s_TIME_address.status_TIME);
-
-	initRTC();
+	registerValue = TIME_STATUS_ERROR;
+	processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.status_TIME);
+	// create event group for processing clock event
+	clockEventGroup= xEventGroupCreate();
+	clockInit();
+	clockSetCallback(secondClockCallBack, alarmClockCallBack);
 	initUSARTGPS();
     addGPSPars(GPRMC, &myGPRMC);
     updateTime();
 	while(1){
+		rezWaiteEvent = xEventGroupWaitBits(
+				clockEventGroup,
+				SECOND_EVENT_BIT | ALARM_EVENT_BITS,
+				pdTRUE,
+				pdFALSE,
+				portMAX_DELAY
+				);
 
+		if( rezWaiteEvent & SECOND_EVENT_BIT ) // processing second event
+		{
+			// get curent time value
+			timeGetUTC = clockGetTime();
+			timeGet = gmtime(&timeGetUTC);
+			// update DATE
+			registerValue = (uint16_t)( ((timeGet->tm_mon + 1) << 8) | (uint8_t)(timeGet->tm_mday) );
+			processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.DATE);
+			// update TIME
+			registerValue = (uint16_t)( ((timeGet->tm_hour + 2) << 8) | (uint8_t)(timeGet->tm_min));
+			processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.TIME);
+			//Update status
+			registerValue = TIME_STATUS_OK;
+			processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.status_TIME);
+
+		}
+		else if( rezWaiteEvent & ALARM_EVENT_BITS ) // processing alarm event
+		{
+         // TODO how I can processing ALARM event without block of second event  ?? open question
+		}
 	}
 }
 

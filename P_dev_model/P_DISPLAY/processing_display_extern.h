@@ -33,9 +33,14 @@ typedef struct{
 //--------------------------------------------------------------------------------------------------------------------------------------
 
 
-//----------------------------- Конфигурация процесса sensor--------------------------------------------------------------------------------
+//----------------------------- DISPLAY thread configuration--------------------------------------------------------------------------------
 typedef struct{
-	FunctionalState state;                           // состояние програмного модуля: ENABLE/DISABLE
+	uint16_t state;                           // state of module: ENABLE/DISABLE
+	uint16_t numScreen;                       // number of screen connected to device
+	struct{                                   // configuration parameters of every screen
+		uint16_t numParamiterPerScreen;
+		uint8_t  listOfParamiters[6];
+	}screenConfig[4];
 }S_display_user_config;
 //--------------------------------------------------------------------------------------------------------------------------------------
 #pragma pack(pop)
