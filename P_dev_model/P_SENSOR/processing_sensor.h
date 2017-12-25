@@ -13,7 +13,7 @@
 #include "i2c_user_interface.h"
 
 #define I2C_SENSOR        I2C_1
-#define I2C_SENSOR_FRQ_HZ 400000
+#define I2C_SENSOR_FRQ_HZ 20000
 
 #define I2C1_SCL            GPIO_Pin_6       //PB6 ch1
 #define I2C1_SCL_AF_GPIO    GPIO_PinSource6  //PB8 ch1
@@ -22,9 +22,12 @@
 #define I2C1_SDA            GPIO_Pin_7       //PB7 ch1
 #define I2C1_SDA_AF_GPIO    GPIO_PinSource7  //PB7 ch1
 #define I2C1_SDA_PORT       GPIOB            // CSDA PORT
+// Transform atmospheric pressure from Pascal to mmHg
+#define PASCAL_TO_MMHG_COEF 0.00750062
 
 typedef enum{
 	SENSOR_OK = 0,
+	SENSOR_ALLARM,
 	SENSOR_ERROR
 }SENSOR_STATUS;
 

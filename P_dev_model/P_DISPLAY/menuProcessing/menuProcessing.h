@@ -9,8 +9,8 @@
 #define MENU_PROCESSING_H
 #include "stdint.h"
 
-#define NUM_OF_LISBOX      4
-
+#define DEFAULT_NUM_WIDGETS 4
+#define DEFAULT_CURSOR_POS  0
 
 typedef enum{
 	MENU_ACTION_ENTER,
@@ -46,7 +46,9 @@ typedef enum{
 //--------------------------------------------------------------------------
 void menuUpdate                 (menuActionListDef inAction);
 void menuSetLisBoxNumItem       (uint8_t orderNumber, uint8_t numItem);
+void menuSetNumWidgets          (uint8_t numWidgets);
 uint8_t menuGetListboxItemIndex (uint8_t orderNumberLisbox);
+uint8_t menuSetListboxItemIndex(uint8_t orderNumberLisbox, uint8_t newItemIndex);
 DISPLAY_MENU menuGetCurrentMenu (void);
 uint8_t menuGetListbox(void);
 // User implementation function

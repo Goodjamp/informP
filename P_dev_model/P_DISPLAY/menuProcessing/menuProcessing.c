@@ -10,6 +10,7 @@
 #include "menuProcessing.h"
 #include "keyBoardProcessingUserInterface.h"
 #include "LCD.h"
+#include "processing_display_extern.h"
 
 extern displayHandlerDef myDisplay;;
 
@@ -19,10 +20,12 @@ typedef struct{
 
 struct{
 	uint8_t       widjetCnt;           // ordering number selected widget
-	listBoxDef    listBox[NUM_OF_LISBOX]; // pointer on the list of ListBox
+	uint8_t       widgetNum;           // total number of screen
+	listBoxDef    listBox[NUMBER_OF_LCD_STRING]; // pointer on the list of ListBox
 	DISPLAY_MENU displayState;        // display state: test, work
 }menuDescription = {
-		.widjetCnt = 0,
+		.widgetNum = DEFAULT_NUM_WIDGETS,
+		.widjetCnt = DEFAULT_CURSOR_POS,
 		.displayState = DISPLAY_MENU_WORK,
 
 };
@@ -60,6 +63,7 @@ void adjustmentMenuUpdate(menuActionListDef inAction){
 	    	increaseListBoxItem();
 	    	break;
 	    case MENU_ACTION_ESC:
+	    	saveMenuConfigData();
 	    	menuDescription.displayState = DISPLAY_MENU_WORK;
 	    	break;
 	    case MENU_ACTION_TEST:
@@ -72,7 +76,11 @@ void adjustmentMenuUpdate(menuActionListDef inAction){
 
 void testMenuUpdate(menuActionListDef inAction){
 
-   menuDescription.displayState = DISPLAY_MENU_WORK;
+	switch(inAction){
+	    case MENU_ACTION_ESC:
+        menuDescription.displayState = DISPLAY_MENU_WORK;
+        break;
+	}
 
 }
 
@@ -85,7 +93,7 @@ void updateBrightnes(void){
 
 void increaseWidjetP(void){
 	menuDescription.widjetCnt++;
-	if( menuDescription.widjetCnt >= sizeof(menuDescription.listBox)/sizeof(menuDescription.listBox[0]) )
+	if( menuDescription.widjetCnt >= menuDescription.widgetNum )
 	{
 		menuDescription.widjetCnt = 0;
 		return;
@@ -123,13 +131,23 @@ void menuUpdate(menuActionListDef inAction){
 
 
 /**
-  * @brief  return current cursor position
+  * @brief  return current cursor position in selected screen
   * @param
   * @retval
   */
 uint8_t menuGetListboxItemIndex(uint8_t orderNumberLisbox){
 	return menuDescription.listBox[orderNumberLisbox].item;
 }
+
+/**
+  * @brief  set current cursor position in selected screen
+  * @param
+  * @retval
+  */
+uint8_t menuSetListboxItemIndex(uint8_t orderNumberLisbox, uint8_t newItemIndex){
+	return menuDescription.listBox[orderNumberLisbox].item = newItemIndex;
+}
+
 
 /**
   * @brief  return current cursor position
@@ -158,4 +176,13 @@ DISPLAY_MENU menuGetCurrentMenu(void){
   */
 void menuSetLisBoxNumItem(uint8_t orderNumber, uint8_t numItem){
 	menuDescription.listBox[orderNumber].numItem = numItem;
+}
+
+/**
+  * @brief  set quantity of item in Listbox by the Listbox index
+  * @param
+  * @retval
+  */
+void menuSetNumWidgets(uint8_t numWidgets){
+	menuDescription.widgetNum = numWidgets;
 }

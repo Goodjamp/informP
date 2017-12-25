@@ -12,21 +12,26 @@
 #include "processing_display_extern.h"
 #include "menuProcessing.h"
 
+
+//
 #define LCD_UPDATE_HIGHT_MS 600
 #define LCD_UPDATE_LOW_MS   400
-
-//---------------------------USER STRING LCD PARAMITERS-------------------------
 //MAX length of LCD string
 #define LCD_STR_LENGTH         20
-//------------------------------USER KEYS PARAMITERS----------------------------
+//USER KEYS PARAMITERS
 #define ACTION_QUEUE_QANTITY   5
 #define ACTION_QUEUE_PAYLOAD   2
-#define MAX_NUM_PAR            6
+//
 #define BUTTON_PROCESSING_MS   5
+
 #define BUTTON_ESC_PERIOD_MS   8000
-//-----------------------------Brightness adjustment
-#define BRIGHTNES_STEP         10
-#define BRIGHTNES_MAX          30
+
+#define FLASH_PAGE_MENU_DATA      125
+
+
+typedef struct{
+
+}menuConfigDataDef;
 
 typedef enum{
 	event_KEY,
@@ -36,7 +41,8 @@ typedef enum{
 
 typedef enum{
 	PAR_TEMPERATURE = 0,
-	PAR_PRESSURE,
+	PAR_PRESSURE_PA,
+	PAR_PRESSURE_MM,
 	PAR_HUMIDITY,
 	PAR_DATE ,
 	PAR_TIME,

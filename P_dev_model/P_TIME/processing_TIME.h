@@ -24,6 +24,8 @@
 #define gpsUSARTDef  USART3
 #define gpsUSARTNum       2
 
+#define SECONDS_PER_HOUR  3600
+
 void initTIME(void);
 
 

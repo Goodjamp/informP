@@ -96,8 +96,9 @@ u16 sensor_calc_address_oper_reg(S_sensor_address *ps_sensor_address, u16 adres_
 	ps_sensor_address->status_sensor = adres_start;
 	ps_sensor_address->rezTemperature = ps_sensor_address->status_sensor + structFieldRegSize(S_sensor_oper_data,status_sensor);
 	ps_sensor_address->rezHumidity    = ps_sensor_address->rezTemperature + structFieldRegSize(S_sensor_oper_data,rezTemperature);
-	ps_sensor_address->rezPressure    = ps_sensor_address->rezHumidity + structFieldRegSize(S_sensor_oper_data,rezHumidity);
-	adres_start = ps_sensor_address->rezPressure + structFieldRegSize(S_sensor_oper_data,rezPressure);
+	ps_sensor_address->rezPressure_mmHg    = ps_sensor_address->rezHumidity + structFieldRegSize(S_sensor_oper_data,rezHumidity);
+	ps_sensor_address->rezPressure_GPasc    = ps_sensor_address->rezPressure_mmHg + structFieldRegSize(S_sensor_oper_data,rezPressure_mmHg);
+	adres_start = ps_sensor_address->rezPressure_GPasc + structFieldRegSize(S_sensor_oper_data,rezPressure_GPasc);
 	return adres_start;
 }
 
@@ -113,10 +114,22 @@ void i2c_init(void){
 BME280Handler sensorHandler;
 
 void initBME280(void){
-	BME280_init(&sensorHandler, BME280_ADDRESS_HIGHT);
-	BME280_setValueMesState(&sensorHandler, MES_VALUE_TEMPERATURE, MES_STATE_ENABLE);
-	BME280_setValueMesState(&sensorHandler, MES_VALUE_PRESSURE, MES_STATE_ENABLE);
-	BME280_setValueMesState(&sensorHandler, MES_VALUE_HUMIDITY, MES_STATE_ENABLE);
+	if( BME280_init(&sensorHandler, BME280_ADDRESS_HIGHT) == BME280_STATUS_COMUNICATION_ERROR)
+	{
+		return BME280_STATUS_COMUNICATION_ERROR;
+	}
+	if( BME280_setValueMesState(&sensorHandler, MES_VALUE_TEMPERATURE, MES_STATE_ENABLE) == BME280_STATUS_COMUNICATION_ERROR)
+	{
+		return BME280_STATUS_COMUNICATION_ERROR;
+	}
+	if( BME280_setValueMesState(&sensorHandler, MES_VALUE_PRESSURE, MES_STATE_ENABLE) == BME280_STATUS_COMUNICATION_ERROR)
+	{
+		return BME280_STATUS_COMUNICATION_ERROR;
+	}
+	if( BME280_setValueMesState(&sensorHandler, MES_VALUE_HUMIDITY, MES_STATE_ENABLE) == BME280_STATUS_COMUNICATION_ERROR)
+	{
+		return BME280_STATUS_COMUNICATION_ERROR;
+	}
 }
 
 void t_processing_sensor(void *pvParameters){
@@ -129,24 +142,26 @@ void t_processing_sensor(void *pvParameters){
 	BME280_STATUS bmeRezMes;
 	uint16_t status;
 
-
 	i2c_init();
 	initBME280();
 
-	//i2c_write_data(DS1321Interface, devAddress<<1, regAddress, sizeof(TXBuff), TXBuff);
-	//ds16211SHOT(&ds1621Sensor);
-	//ds1621StartMess(&ds1621Sensor);
-
 	while(1){
-
+		debugPin_2_Set;
 		bmeRezMes = BME280_forcedMes(&sensorHandler, &rezMesTemperature, &rezMesPressure, &rezMesHumidity);
+		debugPin_2_Clear;
 
 		if (bmeRezMes == BME280_STATUS_COMUNICATION_ERROR)
 		{
 			status = SENSOR_ERROR;
 			processing_mem_map_write_s_proces_object_modbus((uint16_t*)&status, 1, s_address_oper_data.s_sensor_address.status_sensor);
-			vTaskDelay(10);
+
 			i2c_init();
+			//vTaskDelay(100);
+			debugPin_1_Set;
+			BME280_setValueMesState(&sensorHandler, MES_VALUE_TEMPERATURE, MES_STATE_ENABLE);
+			//initBME280();
+			debugPin_1_Clear;
+
 		}
 		else{
 			status = SENSOR_OK;
@@ -157,30 +172,13 @@ void t_processing_sensor(void *pvParameters){
 		    rezMes = rezMesHumidity*10;
 		    processing_mem_map_write_s_proces_object_modbus(&rezMes, 1, s_address_oper_data.s_sensor_address.rezHumidity);
 		    rezMes = rezMesPressure/100;
-		    processing_mem_map_write_s_proces_object_modbus(&rezMes, 1, s_address_oper_data.s_sensor_address.rezPressure);
+		    processing_mem_map_write_s_proces_object_modbus(&rezMes, 1, s_address_oper_data.s_sensor_address.rezPressure_GPasc);
+		    rezMes = (rezMesPressure * PASCAL_TO_MMHG_COEF);
+		    processing_mem_map_write_s_proces_object_modbus(&rezMes, 1, s_address_oper_data.s_sensor_address.rezPressure_mmHg);
+
 		}
 
         vTaskDelay(100);
-		/*
-		if(ds1621MesDone(&ds1621Sensor, &mesStatus) == DS1621_STATUS_BUSS_ERROR){
-			vTaskDelay(20);
-			continue;
-		}
-		if(mesStatus != DS1621_MESS_REDY){
-			vTaskDelay(20);
-			continue;
-		}
 
-		ds1621ReadTemp(&ds1621Sensor, &mesTemperature);
-		if(rezMes.cnt >= tempBuffSize){
-			rezMes.cnt  = 0;
-		}
-		rezMes.temperature[rezMes.cnt ] = mesTemperature;
-		rezMes.cnt++;
-		ds1621ClearDONE(&ds1621Sensor);
-		ds1621StartMess(&ds1621Sensor);
-		vTaskDelay(20);
-		*/
 	}
-	//xTaskGetTickCount();
 }

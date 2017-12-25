@@ -509,7 +509,7 @@ void t_Modbus_SLAVE(void *p_task_par) {
 		write_Usart_Buf(ptaskparameters->USARTx, buf_out_slave, num_TSTI,
 				ptaskparameters->WrUSART); // передача ответа или исключения
 
-		vTaskDelay(50);
+		vTaskDelay(10);
 	}
 }
 

@@ -27,17 +27,17 @@
 
 // Настройки джамперов
 // порты джамперов выбора режима конфигурации (по_умолчанию/пользовательская)
-#define PORT_JAMP1         GPIOA
+#define PORT_JAMP1         GPIOB
 
 // пины джамперов
-#define PIN_JAMP1           GPIO_Pin_3
+#define PIN_JAMP1           GPIO_Pin_0
 
 // Настройки светодиодовв индикации
 // порты светодиодов индикации
 #define PORT_IND_ERROR         GPIOB
 
 // пины светодиодов индикации
-#define PIN_IND_ERROR          GPIO_Pin_8
+#define PIN_IND_ERROR          GPIO_Pin_5
 
 
 // ---------- МАКРОСЫ ЧТЕНИЯ ДЖАМПЕРОВ --------------------------------------
@@ -46,7 +46,7 @@
 // ---------- МАКРОСЫ УПРАВЛЕНИЯ ИНДИКАЦИЕЙ --------------------------------------
 #define IND_OUT_INVERSE
 #ifdef IND_OUT_INVERSE
-// если управление инверсное (лог 0 соответствует ВКЛ релле)
+// если управление инверсное (лог 0 соответствует led on)
 #define IND_ERROR_RESET          GPIO_SetBits(PORT_IND_ERROR,PIN_IND_ERROR);
 #define IND_ERROR_SET            GPIO_ResetBits(PORT_IND_ERROR,PIN_IND_ERROR);
 #else

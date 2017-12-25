@@ -13,7 +13,7 @@
 
 #include "processing_mem_map.h"
 
-#define DEV_6                FRQmetter
+#define DEV_5                FRQmetter
 //#define DEV_1_BIT_STATUS_REG 1
 
 // Количекство статус-регистров FRQmetter
@@ -32,8 +32,8 @@ typedef enum{
 
 //-----------------------------Адреса оперативных регистров процесса FRQmetter---------------------------------------------------------------
 typedef struct{
-	uint16_t  status_FRQmetter; // статус регистры FRQmetter
-	uint16_t  rez_FRQmetter;  // адрес в памяти МК регистров состояния FRQmetter
+	uint16_t  status_FRQmetter;  // статус регистры FRQmetter
+	uint16_t  rez_FRQmetter;     // адрес в памяти МК регистров состояния FRQmetter
 } S_FRQmetter_address;
 //--------------------------------------------------------------------------------------------------------------------------------------
 
@@ -48,8 +48,8 @@ typedef struct{
 
 //----------------------------- Конфигурация процесса FRQmetter--------------------------------------------------------------------------------
 typedef struct{
-	FunctionalState state;                           // состояние програмного модуля: ENABLE/DISABLE
-	uint16_t time_gist;                              // время гистерезисса прийома FRQmetter
+	uint16_t state;           // state of module ENABLE/DISABLE
+	int16_t  frqCorrection;   // correction of measured frequency: 1 = 1/100 Hz
 }S_FRQmetter_user_config;
 //--------------------------------------------------------------------------------------------------------------------------------------
 #pragma pack(pop)

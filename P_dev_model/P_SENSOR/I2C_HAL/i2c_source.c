@@ -66,12 +66,26 @@ static void startTransactionI2C(I2C_DEF  i2cIn, uint8_t address_dev, uint8_t add
 	I2C_GenerateSTART(I2CProcessing[i2cIn].I2C_SEL, ENABLE);
 }
 
+#define SIZE_BUFF 10
+struct{
+ uint16_t resStatus[SIZE_BUFF];
+ uint16_t cnt;
+}I2Csr;
 
 static inline bool clearI2CComunication(I2C_DEF  i2cIn, uint16_t I2C_SR1Field){
-	if( (I2C_ReadRegister(I2CProcessing[i2cIn].I2C_SEL, I2C_Register_SR1)) & I2C_SR1Field )
+
+	I2Csr.resStatus[I2Csr.cnt] = I2C_ReadRegister(I2CProcessing[i2cIn].I2C_SEL, I2C_Register_SR1);
+
+	if( I2Csr.resStatus[I2Csr.cnt++] & I2C_SR1Field )
 	{
+		if(I2Csr.cnt >= SIZE_BUFF)
+			I2Csr.cnt = 0;
 		return true;
 	}
+
+	if(I2Csr.cnt >= SIZE_BUFF)
+		I2Csr.cnt = 0;
+
 	// FULL STOP I2C
 	I2CProcessing[i2cIn].transactionStatus = I2C_STATUS_TRANSACTION_ERROR;
 	I2C_ITConfig(I2CProcessing[i2cIn].I2C_SEL, I2C_IT_BUF, DISABLE);
@@ -176,7 +190,6 @@ I2C_STATUS i2cRxData(I2C_DEF i2cIn, uint8_t address_dev, uint8_t address_reg, ui
 	{
 		return I2CProcessing[i2cIn].transactionStatus;
 	}
-	//I2C_AcknowledgeConfig(I2CProcessing[i2cIn].I2C_SEL, ENABLE);
 	startTransactionI2C(i2cIn, address_dev, address_reg, num_read, buff, I2C_TRANSACTION_RX);
 	while( I2CProcessing[i2cIn].transactionStatus == I2C_STATUS_TRANSACTION_PROCESSING )
 	{
@@ -220,6 +233,7 @@ static inline void I2CProcessingInterruptTx(I2C_DEF  i2cIn){
 		// first interrupt should be completed SB generation
 		if( !clearI2CComunication(i2cIn, I2C_SR1_SB))
 		{
+
 			return;
 		};
 		//I2C_GenerateSTART(I2CProcessing[i2cIn].I2C_SEL, DISABLE);

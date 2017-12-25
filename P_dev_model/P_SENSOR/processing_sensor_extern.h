@@ -14,7 +14,7 @@
 
 #include "processing_mem_map.h"
 
-#define DEV_8                sensor
+#define DEV_7                sensor
 //#define DEV_1_BIT_STATUS_REG 1
 
 // Количекство статус-регистров sensor
@@ -27,28 +27,30 @@
 
 //-----------------------------Адреса оперативных регистров процесса sensor---------------------------------------------------------------
 typedef struct{
-	uint16_t  status_sensor;   // статус регистры sensor
-	uint16_t  rezTemperature;  // address in memory map rez measure temperature*10
-	uint16_t  rezHumidity;     // address in memory map rez measure humidity *10
-	uint16_t  rezPressure;     // address in memory map rez measure Pressure *10
+	uint16_t  status_sensor;     // статус регистры sensor
+	uint16_t  rezTemperature;    // address in memory map rez measure temperature*10
+	uint16_t  rezHumidity;       // address in memory map rez measure humidity *10
+	uint16_t  rezPressure_mmHg;  // measurement result Pressure mmHg
+	uint16_t  rezPressure_GPasc; // measurement result Pressure GPasc
 } S_sensor_address;
 //--------------------------------------------------------------------------------------------------------------------------------------
 
 
 //----------------------------- Оперативные регистры процесса sensor------------------------------------------------------------------------
 typedef struct{
-	S_proces_object_modbus  status_sensor;  // status register
-	S_proces_object_modbus  rezTemperature; // measurement result measure temperature*10
-	S_proces_object_modbus  rezHumidity;    // measurement result measure humidity*10
-	S_proces_object_modbus  rezPressure;    // measurement result measure Pressure*10
+	S_proces_object_modbus  status_sensor;     // status register
+	S_proces_object_modbus  rezTemperature;    // measurement result temperature*10
+	S_proces_object_modbus  rezHumidity;       // measurement result humidity*10
+	S_proces_object_modbus  rezPressure_mmHg;  // measurement result Pressure mmHg
+	S_proces_object_modbus  rezPressure_GPasc; // measurement result Pressure GPasc
 } S_sensor_oper_data;
 //--------------------------------------------------------------------------------------------------------------------------------------
 
 
 //----------------------------- Конфигурация процесса sensor--------------------------------------------------------------------------------
 typedef struct{
-	FunctionalState state;                           // состояние програмного модуля: ENABLE/DISABLE
-	uint16_t time_gist;                                    // время гистерезисса прийома sensor
+	uint16_t state;         // state of module ENABLE/DISABLE
+	uint16_t pressureSens;  // pressure sensitivity
 }S_sensor_user_config;
 //--------------------------------------------------------------------------------------------------------------------------------------
 #pragma pack(pop)

@@ -92,8 +92,9 @@ void init_timer(){
 
 void USART1_IRQHandler(void)
 {
-	unsigned char singlchar;
-	uint16_t	usingle;
+    uint16_t	usingle;
+    unsigned char singlchar;
+
 	//--Proveryaem TXE
 
 	if(USART_GetFlagStatus(USART1,USART_FLAG_TXE) == SET)

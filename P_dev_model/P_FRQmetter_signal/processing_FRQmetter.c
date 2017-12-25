@@ -28,6 +28,7 @@ extern S_address_oper_data s_address_oper_data;
 
 xSemaphoreHandle semaphoreUpdateFRQ;
 static uint16_t status;
+static S_FRQmetter_user_config *s_FRQConfig;
 
 
 struct{
@@ -60,7 +61,7 @@ static uint16_t frqTIMCalcPSC(void){
 	uint32_t FoscIdeal = (f50Hz*f50Hz*10000)/FRQ_ACCURACY - f50Hz;
 	RCC_GetClocksFreq(&rccClock);
 	uint32_t cnt=1;
-	for(;cnt<65535;cnt++){
+	for( ; cnt<65535 ; cnt++){
 		if( GET_TIM_F(rccClock)/cnt <= FoscIdeal)
 		{
 			return cnt-1;
@@ -86,6 +87,7 @@ static void frqTIMConfigure(void)
     timBaseInit.TIM_Period = TIM_MAX_CNT;
     timBaseInit.TIM_Prescaler = frqTIMCalcPSC()-1;
     timBaseInit.TIM_RepetitionCounter = 0;
+    // calculate variable for calculate frq
     double timFRQ =  GET_TIM_F(rccClock);
     double timPSC = timBaseInit.TIM_Prescaler+1;
     frqRezMes.df = timFRQ/timPSC;
@@ -140,7 +142,6 @@ void TIM1_UP_IRQHandler(void)
 {
 	TIM_ClearFlag(FREQ_TIMER,TIM_FLAG_Update);
 	frqRezMes.updateCNT++;
-	//GPIOA->ODR ^= GPIO_ODR_ODR4;
 }
 
 
@@ -166,43 +167,51 @@ u16 FRQmetter_calc_address_oper_reg(S_FRQmetter_address *ps_FRQmetter_address, u
 }
 
 
+
+
+static void updateFrqStatus(FRQ_STATUS newStatus){
+	uint16_t status = (uint16_t)newStatus;
+	processing_mem_map_write_s_proces_object_modbus(&status, 1, s_address_oper_data.s_FRQmetter_address.status_FRQmetter);
+}
+
 /* @brief
  *
  */
 void t_processing_FRQmetter(void *pvParameters){
 	uint32_t totatalCNT;
 	uint16_t frq;
-	S_FRQmetter_user_config *s_FRQConfig =(S_FRQmetter_user_config*)pvParameters;
+	s_FRQConfig =(S_FRQmetter_user_config*)pvParameters;
 
-	status = FRQ_STATUS_ERROR;
-	processing_mem_map_write_s_proces_object_modbus(&status, 1, s_address_oper_data.s_FRQmetter_address.status_FRQmetter);
+    // init state - ERROR (up to obtain first result)
+	updateFrqStatus(FRQ_STATUS_ERROR);
 
-	//if user disabled FRQ
-	if(s_FRQConfig->state == DISABLE) return;
 	//	Configure all peripherals
 	frqGPIOConfig();
 	frqTIMConfigure(); //8842
 	vSemaphoreCreateBinary(semaphoreUpdateFRQ);
 	//xQueueSendToBackFromISR()
 	while(1){
-			xSemaphoreTake(semaphoreUpdateFRQ,portMAX_DELAY );
 
-			frqRezMes.f_ICinterrupt = 0;
-			totatalCNT = frqRezMes.updateCNT * TIM_MAX_CNT + frqRezMes.inputCaptureCNT;
-			frq = ((float)(frqRezMes.df/(float)totatalCNT)*1000);
-			if((frq < FRQ_MAX) && (frq > FRQ_MIN)){
-				status = FRQ_STATUS_OK;
-				processing_mem_map_write_s_proces_object_modbus(&status, 1, s_address_oper_data.s_FRQmetter_address.status_FRQmetter);
-				processing_mem_map_write_s_proces_object_modbus(&frq, 1, s_address_oper_data.s_FRQmetter_address.rez_FRQmetter);
-			}
-			else{
-				status = FRQ_STATUS_ERROR;
-				processing_mem_map_write_s_proces_object_modbus(&status, 1, s_address_oper_data.s_FRQmetter_address.status_FRQmetter);
-			}
-			logFRQ(totatalCNT, frq);
-			frqRezMes.updateCNT = 0;
-			frqRezMes.inputCaptureCNT = 0;
-			//rezMesFRQ =
+		if(xSemaphoreTake(semaphoreUpdateFRQ,ERROR_TIMEOUT_MS ) == pdFALSE){
+            //error
+			updateFrqStatus(FRQ_STATUS_ERROR);
+			continue;
+		}
 
+		frqRezMes.f_ICinterrupt = 0;
+		totatalCNT = frqRezMes.updateCNT * TIM_MAX_CNT + frqRezMes.inputCaptureCNT;
+		// calculate frq + correction
+		frq = ((float)(frqRezMes.df/(float)totatalCNT)*1000);
+		frq = frq  + s_FRQConfig->frqCorrection*10;
+		if((frq < FRQ_MAX) && (frq > FRQ_MIN)){
+			updateFrqStatus(FRQ_STATUS_OK);
+			processing_mem_map_write_s_proces_object_modbus(&frq, 1, s_address_oper_data.s_FRQmetter_address.rez_FRQmetter);
+		}
+		else{
+			updateFrqStatus(FRQ_STATUS_ALLARM);
+		}
+		logFRQ(totatalCNT, frq);
+		frqRezMes.updateCNT = 0;
+		frqRezMes.inputCaptureCNT = 0;
 	}
 }

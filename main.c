@@ -224,7 +224,7 @@ int main(void)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
 	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_8).state){// если в конфигурации поточный модуль выключен
-		xTaskCreate(  TASK_PROCESSING(DEV_8), ( const char * ) TASK_IDENT(DEV_8), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_8), TASK_PRIORITY(DEV_8), NULL );
+		xTaskCreate(  TASK_PROCESSING(DEV_8), ( const char * ) TASK_IDENT(DEV_8), 300,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_8), TASK_PRIORITY(DEV_8), NULL );
 	}
 #endif
 
@@ -233,7 +233,7 @@ int main(void)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
 	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_9).state){// если в конфигурации поточный модуль выключен
-		xTaskCreate(  TASK_PROCESSING(DEV_9), ( const char * ) TASK_IDENT(DEV_9), 300,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_9), TASK_PRIORITY(DEV_9), NULL );
+		xTaskCreate(  TASK_PROCESSING(DEV_9), ( const char * ) TASK_IDENT(DEV_9), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_9), TASK_PRIORITY(DEV_9), NULL );
 	}
 #endif
 
@@ -322,7 +322,6 @@ void vApplicationStackOverflowHook( xTaskHandle *pxTask, signed char *pcTaskName
 	/* Run time stack overflow checking is performed if
 	configconfigCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2.  This hook
 	function is called if a stack overflow is detected. */
-	return;
 	for( ;; );
 }
 /*-----------------------------------------------------------*/

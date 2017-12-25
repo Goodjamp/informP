@@ -21,15 +21,19 @@
 
 #include "processing_mem_map.h"
 #include "processing_display.h"
+#include "processing_display_extern.h"
 #include "processing_mem_map_extern.h"
 
 #include "LCD.h"
 #include "keyBoardProcessingUserInterface.h"
 #include "menuProcessing.h"
 #include "lcdUpdate.h"
+#include "flash_operation.h"
 
 
 extern S_address_oper_data s_address_oper_data;
+// Config module pointer
+static S_display_user_config *displayUserConfig;
 
 displayHandlerDef myDisplay;
 //-----Queue for send action to menu
@@ -37,7 +41,7 @@ QueueHandle_t menuQueue;
 uint8_t lcdPeriodType;
 uint8_t *blinkStateP;
 uint8_t lcdStr[7];
-const static uint8_t brightnes[] = {DISPLAY_BRIGHTNES_3, DISPLAY_BRIGHTNES_11, DISPLAY_BRIGHTNES_21, DISPLAY_BRIGHTNES_31};
+const static uint8_t brightnes[] = {DISPLAY_BRIGHTNES_7, DISPLAY_BRIGHTNES_11, DISPLAY_BRIGHTNES_19, DISPLAY_BRIGHTNES_31};
 /*====================================BUTTON ================================================*/
 //-Button processing timer variables
 TimerHandle_t     keyTimerHandler;
@@ -86,7 +90,7 @@ void updateLcdVal(BLINK_STATE blinkState) {
 				        menuGetCurrentMenu(),
 				        (cnt == menuGetListbox() ) ? (true):(false),
 				        //TODO in next string I refer to the adjustment of display
-				        menuGetListboxItemIndex(cnt) )
+				        displayUserConfig->screenConfig[cnt].listOfParamiters[ menuGetListboxItemIndex(cnt)] )
 		    )
 			continue;
 
@@ -179,6 +183,75 @@ uint16_t display_calc_address_oper_reg(S_display_address *ps_sensor_address, u16
 }
 
 
+static void initUserMenu(S_display_user_config *configData){
+	// menu listboxs adjustment
+	menuSetNumWidgets(configData->numScreen);
+	menuSetLisBoxNumItem(0, configData->screenConfig[0].numParamiterPerScreen);
+	menuSetLisBoxNumItem(1, configData->screenConfig[1].numParamiterPerScreen);
+	menuSetLisBoxNumItem(2, configData->screenConfig[2].numParamiterPerScreen);
+	menuSetLisBoxNumItem(3, configData->screenConfig[3].numParamiterPerScreen);
+
+		displayInit( &myDisplay, brightnes );
+		keyboardInit();
+		initValueAddress();
+
+		//-------------------Init key processing timer and queue-------------------------------
+		keyTimerHandler =  xTimerCreate((const char*)"BUTTON TIMER",
+				                         BUTTON_PROCESSING_MS,
+				                         pdTRUE,
+		                                 (void *)0,
+		                                 butttonTimerFunctionCB);
+		lcdTimerHandler =  xTimerCreate((const char*)"LCD TIMER",
+				                         LCD_UPDATE_HIGHT_MS,
+	                                     pdTRUE,
+	                                     (void *)&lcdPeriodType,
+	                                     lcdTimerFunctionCB);
+		escTimerHandler = xTimerCreate((const char*)"LCD TIMER",
+				                         BUTTON_ESC_PERIOD_MS,
+	                                     pdFALSE,
+	                                     (void *)0,
+	                                     escTimerFunctionCB);
+		menuQueue = xQueueCreate( ACTION_QUEUE_QANTITY, sizeof(actionQueueMember) );
+	   // Start key processing timer
+		xTimerStart( keyTimerHandler, 0 );
+		// Start lcd processing timer
+		xTimerStart( lcdTimerHandler, 0 );
+
+}
+
+static void welcomeScreen(void){
+	uint8_t str[] = "*8888";
+	displayWrite(&myDisplay, SCREEN_4, str, strlen((const char*)str), COLOR_RED, TX_ADDRESS_ALL);
+	vTaskDelay(2000);
+	displayClear(&myDisplay, 0, TX_ADDRESS_ALL);
+}
+
+static void getLastMenuData(void){
+	uint8_t cnt;
+	uint8_t cursorPos[NUMBER_OF_LCD_STRING];
+	memcpy(cursorPos, (void*)(PAGE(FLASH_PAGE_MENU_DATA)),  sizeof(cursorPos));
+	for(cnt=0; cnt < NUMBER_OF_LCD_STRING;cnt++)
+	{
+		if( displayUserConfig->screenConfig[cnt].numParamiterPerScreen <= cursorPos[cnt])
+		{
+			continue;
+		}
+		menuSetListboxItemIndex(cnt, cursorPos[cnt]);
+	}
+}
+
+void saveMenuConfigData(void){
+	uint8_t cnt;
+	uint8_t cursorPos[NUMBER_OF_LCD_STRING];
+	for(cnt=0; cnt < NUMBER_OF_LCD_STRING;cnt++)
+	{
+		cursorPos[cnt] = menuGetListboxItemIndex(cnt);
+	}
+	FLASH_OPERATION_erase_page(FLASH_PAGE_MENU_DATA);
+	FLASH_OPERATION_write_flash_page_16b( (uint16_t*)cursorPos, sizeof(cursorPos)/sizeof(uint16_t), (uint16_t)FLASH_PAGE_MENU_DATA);
+}
+
+
 /**
   * @brief
   * @param
@@ -186,44 +259,15 @@ uint16_t display_calc_address_oper_reg(S_display_address *ps_sensor_address, u16
   */
 void t_processing_display(void *pvParameters){
 	actionQueueMember actionMember;
+	displayUserConfig = (S_display_user_config*)pvParameters;
 
-	// menu listboxs adjustment
-	menuSetLisBoxNumItem(0, 6);
-	menuSetLisBoxNumItem(1, 6);
-	menuSetLisBoxNumItem(2, 6);
-	menuSetLisBoxNumItem(3, 6);
+	initUserMenu( (S_display_user_config*)pvParameters );
+	// set value indication according last adjustments
+	getLastMenuData();
 
-	displayInit( &myDisplay, brightnes );
-	keyboardInit();
-	initValueAddress();
-
-	//-------------------Init key processing timer and queue-------------------------------
-	keyTimerHandler =  xTimerCreate((const char*)"BUTTON TIMER",
-			                         BUTTON_PROCESSING_MS,
-			                         pdTRUE,
-	                                 (void *)0,
-	                                 butttonTimerFunctionCB);
-	lcdTimerHandler =  xTimerCreate((const char*)"LCD TIMER",
-			                         LCD_UPDATE_HIGHT_MS,
-                                     pdTRUE,
-                                     (void *)&lcdPeriodType,
-                                     lcdTimerFunctionCB);
-	escTimerHandler = xTimerCreate((const char*)"LCD TIMER",
-			                         BUTTON_ESC_PERIOD_MS,
-                                     pdFALSE,
-                                     (void *)0,
-                                     escTimerFunctionCB);
-	menuQueue = xQueueCreate( ACTION_QUEUE_QANTITY, sizeof(actionQueueMember) );
-   // Start key processing timer
-	xTimerStart( keyTimerHandler, 0 );
-	// Start lcd processing timer
-	xTimerStart( lcdTimerHandler, 0 );
-
-    // initialization string
-	uint8_t str[] = "*8888";
-	displayWrite(&myDisplay, SCREEN_4, str, strlen((const char*)str), COLOR_RED, TX_ADDRESS_ALL);
-	vTaskDelay(2000);
-	displayClear(&myDisplay, 0, TX_ADDRESS_ALL);
+	vTaskDelay(200);
+	//welcomeScreen();
+    // initialization streen
 	while(1){
 		xQueueReceive(menuQueue,(void*)&actionMember,  portMAX_DELAY );
 

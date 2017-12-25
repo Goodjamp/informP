@@ -40,6 +40,7 @@ struct tm *timeGet;
 struct tm timeUpdate;
 static GPRMC_Def myGPRMC;
 static uint16_t registerValue;
+static S_TIME_user_config *configData;
 
 //---------Sattic function definition---------
 static void initUSARTGPS(void);
@@ -129,7 +130,7 @@ bool updateTime(void){
 			timeUpdate.tm_min = myGPRMC.minutes;
 			timeUpdate.tm_sec = myGPRMC.seconds;
 			timeUpdate.tm_isdst = -1;
-			timeSetUTC = mktime(&timeUpdate);
+			timeSetUTC = mktime(&timeUpdate) + configData->timeCorection * SECONDS_PER_HOUR;
 			clockSetTime(timeSetUTC);
 			return true;
 		}
@@ -138,6 +139,7 @@ bool updateTime(void){
 }
 
 void t_processing_TIME(void *p_task_par){
+	configData = (S_TIME_user_config*)p_task_par;
 	registerValue = TIME_STATUS_ERROR;
 	processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.status_TIME);
 	// create event group for processing clock event
@@ -161,11 +163,33 @@ void t_processing_TIME(void *p_task_par){
 			// get curent time value
 			timeGetUTC = clockGetTime();
 			timeGet = gmtime(&timeGetUTC);
+
+
+			// update YEAR
+			registerValue = (uint16_t)( timeGet->tm_year - 100 +2000);
+			processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.date_year);
+			// update MONTH
+			registerValue = (uint16_t)( timeGet->tm_mon+1);
+			processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.date_month);
+			// update DAY
+			registerValue = (uint16_t)( timeGet->tm_mday);
+			processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.date_day);
+			// update HOUR
+			registerValue = (uint16_t)( timeGet->tm_hour);
+			processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.time_honour);
+			// update MINUTE
+			registerValue = (uint16_t)( timeGet->tm_min);
+			processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.time_minute);
+			// update SECOND
+			registerValue = (uint16_t)( timeGet->tm_sec);
+			processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.time_second);
+
+
 			// update DATE
 			registerValue = (uint16_t)( ((timeGet->tm_mon + 1) << 8) | (uint8_t)(timeGet->tm_mday) );
 			processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.DATE);
 			// update TIME
-			registerValue = (uint16_t)( ((timeGet->tm_hour + 2) << 8) | (uint8_t)(timeGet->tm_min));
+			registerValue = (uint16_t)( ((timeGet->tm_hour) << 8) | (uint8_t)(timeGet->tm_min));
 			processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.TIME);
 			//Update status
 			registerValue = TIME_STATUS_OK;

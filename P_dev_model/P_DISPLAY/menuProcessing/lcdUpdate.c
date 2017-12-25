@@ -14,6 +14,7 @@
 #include "lcdUpdate.h"
 #include "menuProcessing.h"
 #include "processing_display.h"
+#include "processing_display_extern.h"
 #include "processing_mem_map_extern.h"
 
 extern S_address_oper_data s_address_oper_data;
@@ -30,7 +31,8 @@ struct {
 	uint16_t addressValue;
 }paramIndication[NUMBER_OF_VALUE] = {
 		[PAR_TEMPERATURE] = { .sumbol = { SYMBOL_TEMPERATURE }, },
-		[PAR_PRESSURE]    = { .sumbol = { SYMBOL_PRESSURE}, },
+		[PAR_PRESSURE_PA]    = { .sumbol = { SYMBOL_PRESSURE_PA}, },
+		[PAR_PRESSURE_MM]    = { .sumbol = { SYMBOL_PRESSURE_MM}, },
 		[PAR_HUMIDITY]    = { .sumbol = { SYMBOL_HUMIDITY }, },
 		[PAR_DATE]        = { .sumbol = { SYMBOL_DATE }, },
 		[PAR_TIME]        = { .sumbol = { SYMBOL_TIME }, },
@@ -42,8 +44,10 @@ void initValueAddress(void){
 	// copy address of all values that can indication
 	paramIndication[PAR_TEMPERATURE].addressValue  = s_address_oper_data.s_sensor_address.rezTemperature;
 	paramIndication[PAR_TEMPERATURE].addressStatus = s_address_oper_data.s_sensor_address.status_sensor;
-	paramIndication[PAR_PRESSURE].addressValue     = s_address_oper_data.s_sensor_address.rezPressure;
-	paramIndication[PAR_PRESSURE].addressStatus    = s_address_oper_data.s_sensor_address.status_sensor;
+	paramIndication[PAR_PRESSURE_PA].addressValue     = s_address_oper_data.s_sensor_address.rezPressure_GPasc;
+	paramIndication[PAR_PRESSURE_PA].addressStatus    = s_address_oper_data.s_sensor_address.status_sensor;
+	paramIndication[PAR_PRESSURE_MM].addressValue     = s_address_oper_data.s_sensor_address.rezPressure_mmHg;
+	paramIndication[PAR_PRESSURE_MM].addressStatus    = s_address_oper_data.s_sensor_address.status_sensor;
 	paramIndication[PAR_HUMIDITY].addressValue     = s_address_oper_data.s_sensor_address.rezHumidity;
 	paramIndication[PAR_HUMIDITY].addressStatus    = s_address_oper_data.s_sensor_address.status_sensor;
 	paramIndication[PAR_DATE].addressValue         = s_address_oper_data.s_TIME_address.DATE;
@@ -65,42 +69,49 @@ bool menuWorkHight(uint8_t *str, uint16_t status, uint16_t value, uint8_t cnt){
 	case PAR_TEMPERATURE:
 		switch(status){
 		case VALUE_STATUS_OK:
-			sprintf((char*)str, "%1c%5.1f", (char)paramIndication[cnt].sumbol[0], (float)((int16_t)value)/10 );
+			TEMPERATURE_NORMAL_NOERROR_HIGH;
 			return true;
 		}
 		break;
-	case PAR_PRESSURE:
+	case PAR_PRESSURE_PA:
 		switch(status){
 		case VALUE_STATUS_OK:
-			sprintf((char*)str, "%1c%4d", (char)paramIndication[cnt].sumbol[0], value);
+			PRESSURE_PA_NORMAL_NOERROR_HIGH;
+			return true;
+		}
+		break;
+	case PAR_PRESSURE_MM:
+		switch(status){
+		case VALUE_STATUS_OK:
+			PRESSURE_MM_NORMAL_NOERROR_HIGH;
 			return true;
 		}
 		break;
 	case PAR_HUMIDITY:
 		switch(status){
 		case VALUE_STATUS_OK:
-			sprintf((char*)str, "%1c%5.1f", (char)paramIndication[cnt].sumbol[0], (float)(value)/10 );
+			HUMIDITY_NORMAL_NOERROR_HIGH;
 			return true;
 		}
 		break;
 	case PAR_DATE:
 		switch(status){
 		case VALUE_STATUS_OK:
-			sprintf((char*)str, "%1c%02d.%02d", (char)paramIndication[cnt].sumbol[0], (uint8_t)(value>>8), (uint8_t)(value));
+			DATE_NORMAL_NOERROR_HIGH;
 			return true;
 		}
 		break;
 	case PAR_TIME:
 		switch(status){
 		case VALUE_STATUS_OK:
-			sprintf((char*)str, "%1c%02d.%02d", (char)paramIndication[cnt].sumbol[0], (uint8_t)(value>>8), (uint8_t)(value));
+			TIME_NORMAL_NOERROR_HIGH;
 			return true;
 		}
 		break;
 	case PAR_FRQ:
 		switch(status){
 	    case VALUE_STATUS_OK:
-	    	sprintf((char*)str, "%1c%5.2f", (char)paramIndication[cnt].sumbol[0], (float)(value)/1000);
+	    	FRQ_NORMAL_NOERROR_HIGH;
 	    	return true;
 	    }
 		break;
@@ -113,28 +124,19 @@ bool menuWorkLow(uint8_t *str, uint16_t status, uint16_t value, uint8_t cnt) {
 	processing_mem_map_read_s_proces_object_modbus(&value, 1, paramIndication[cnt].addressValue);
 
 	switch (cnt) {
-	case PAR_FRQ:
-		switch (status) {
-		case VALUE_STATUS_ALLARM:
-			sprintf((char*) str, "%1c    ",
-					(char) paramIndication[cnt].sumbol[0]);
-			return true;
-		}
+
 	case PAR_DATE:
 		switch (status) {
 		case VALUE_STATUS_OK:
-			sprintf((char*) str, "%1c%02d%02d",
-					(char) paramIndication[cnt].sumbol[0],
-					(uint8_t)(value >> 8), (uint8_t)(value));
+			DATE_NORMAL_NOERROR_LOW;
 			return true;
 		}
 		break;
+
 	case PAR_TIME:
 		switch (status) {
 		case VALUE_STATUS_OK:
-			sprintf((char*) str, "%1c%02d%02d",
-					(char) paramIndication[cnt].sumbol[0],
-					(uint8_t)(value >> 8), (uint8_t)(value));
+			TIME_NORMAL_NOERROR_LOW;
 			return true;
 		}
 		break;
@@ -153,42 +155,49 @@ bool menuAdjLowFocus(uint8_t *str, uint16_t status, uint16_t value, uint8_t cnt)
 	case PAR_TEMPERATURE:
 		switch(status){
 		case VALUE_STATUS_OK:
-			sprintf((char*)str, " %5.1f", (float)((int16_t)value)/10 );
+			TEMPERATURE_ADJUSTMENT_INFOCUS_NOERROR_LOW;
 			return true;
 		}
 		break;
-	case PAR_PRESSURE:
+	case PAR_PRESSURE_PA:
 		switch(status){
 		case VALUE_STATUS_OK:
-			sprintf((char*)str, " %4d", value);
+			PRESSURE_PA_ADJUSTMENT_INFOCUS_NOERROR_LOW;
+			return true;
+		}
+		break;
+	case PAR_PRESSURE_MM:
+		switch(status){
+		case VALUE_STATUS_OK:
+			PRESSURE_MM_ADJUSTMENT_INFOCUS_NOERROR_LOW;
 			return true;
 		}
 		break;
 	case PAR_HUMIDITY:
 		switch(status){
 		case VALUE_STATUS_OK:
-			sprintf((char*)str, " %5.1f", (float)(value)/10 );
+			HUMIDITY_ADJUSTMENT_INFOCUS_NOERROR_LOW;
 			return true;
 		}
 		break;
 	case PAR_DATE:
 		switch(status){
 		case VALUE_STATUS_OK:
-			sprintf((char*)str, " %02d%02d", (uint8_t)(value>>8), (uint8_t)(value));
+			DATE_ADJUSTMENT_INFOCUS_NOERROR_LOW;
 			return true;
 		}
 		break;
 	case PAR_TIME:
 		switch(status){
 		case VALUE_STATUS_OK:
-			sprintf((char*)str, " %02d%02d", (uint8_t)(value>>8), (uint8_t)(value));
+			TIME_ADJUSTMENT_INFOCUS_NOERROR_LOW;
 			return true;
 		}
 		break;
 	case PAR_FRQ:
 		switch(status){
 	    case VALUE_STATUS_OK:
-	    	sprintf((char*)str, " %5.2f", (float)(value)/1000);
+	    	FRQ_ADJUSTMENT_INFOCUS_NOERROR_LOW;
 	    	return true;
 	    }
 		break;

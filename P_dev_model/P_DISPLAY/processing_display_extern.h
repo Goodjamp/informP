@@ -15,7 +15,12 @@
 
 #include "processing_mem_map.h"
 
-#define DEV_9                display
+#define DEV_8                display
+// number of possible value for indication
+#define NUMBER_OF_VALUE      7
+// max number of LCD screen
+#define NUMBER_OF_LCD_STRING 4
+
 //#define DEV_1_BIT_STATUS_REG 1
 
 
@@ -39,8 +44,8 @@ typedef struct{
 	uint16_t numScreen;                       // number of screen connected to device
 	struct{                                   // configuration parameters of every screen
 		uint16_t numParamiterPerScreen;
-		uint8_t  listOfParamiters[6];
-	}screenConfig[4];
+		uint8_t  listOfParamiters[NUMBER_OF_VALUE];
+	}screenConfig[NUMBER_OF_LCD_STRING];
 }S_display_user_config;
 //--------------------------------------------------------------------------------------------------------------------------------------
 #pragma pack(pop)

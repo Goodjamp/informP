@@ -11,6 +11,7 @@
 #ifndef PROCESSING_FEQMETTER_H_
 #define PROCESSING_FEQMETTER_H_
 
+
 // frequency threshold F*1000
 #define FRQ_MAX 55000
 #define FRQ_MIN 45000
@@ -28,6 +29,10 @@
 
 //Frequency measurement accuracy in *100 uHz
 #define FRQ_ACCURACY     2
+//200 uHz = 0.0002 Hz
+
+// timout before ERROR STATUS
+#define ERROR_TIMEOUT_MS    1000
 
 #define GET_TIM_F(X)     (uint32_t)(X.PCLK2_Frequency)
 

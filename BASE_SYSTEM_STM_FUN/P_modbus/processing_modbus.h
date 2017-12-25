@@ -21,9 +21,9 @@
 #include "processing_reset_control.h"
 
 // РАЗМЕР БУФФЕРА НА RX (SLAVE ЧИТАЕТ, MASTER )
-#define MODBUS_SIZE_BUFF_IN 256
+#define MODBUS_SIZE_BUFF_IN 80
 // РАЗМЕР БУФФЕРА НА TX (MASTER ЗАПИСЫВАЕТ)
-#define MODBUS_SIZE_BUFF_OUT 256
+#define MODBUS_SIZE_BUFF_OUT 80
 
 
 // К-во пропусков между передачей запроса когда выставлен статус запроса

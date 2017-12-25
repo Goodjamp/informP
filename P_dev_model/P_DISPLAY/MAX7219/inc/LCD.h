@@ -10,8 +10,8 @@
 #define SCREEN_PROCESSING_H_
 
 #include "max7219.h"
+#include "processing_display_extern.h"
 
-#define NUMBER_OF_LCD_STRING    4
 // max7219 Position matrix LCD in screen
 #define ORDER_NUM_MATRIX        0
 // max7219 Position 7-SEGMENTS LCD in screen

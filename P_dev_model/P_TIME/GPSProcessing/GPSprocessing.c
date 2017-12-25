@@ -5,9 +5,6 @@
 #include "ctype.h"
 #include "string.h"
 
-// Project my headers
-//#include "processing_USART.h"
-//#include "USART_fifo_operation.h"
 #include "GPSprocessing.h"
 
 static uint8_t charHexToLSOctet(uint8_t dataIn, uint8_t *numDigits);

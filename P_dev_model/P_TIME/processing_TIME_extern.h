@@ -13,13 +13,13 @@
 
 #include "processing_mem_map.h"
 
-#define DEV_7                TIME
+#define DEV_6                TIME
 //#define DEV_1_BIT_STATUS_REG 1
 
 // Number of status registers TIME
-#define NUM_REG_STATUS_TIME       1
+#define NUM_REG_STATUS_TIME  1
 // Total number of registers (without status registers)
-#define NUM_REG_TIME              8
+#define NUM_REG_TIME         8
 
 typedef enum {
 	TIME_STATUS_OK,
@@ -62,8 +62,8 @@ typedef struct{
 
 //----------------------------- Конфигурация процесса FRQmetter--------------------------------------------------------------------------------
 typedef struct{
-	FunctionalState state;                           // состояние програмного модуля: ENABLE/DISABLE
-	uint16_t timeZone;                               // часовой пояс
+	uint16_t  state;          // state of module ENABLE/DISABLE
+	uint16_t  timeCorection;  // time correction in hours
 }S_TIME_user_config;
 //--------------------------------------------------------------------------------------------------------------------------------------
 #pragma pack(pop)
