@@ -229,6 +229,10 @@ void displaySetDefConfig(displayHandlerDef *displayHandlerIn)
 	displaySetBrightnes(displayHandlerIn, displayHandlerIn->brightnesList[displayHandlerIn->currentSettings.brightnes], 0, TX_ADDRESS_ALL);
 	while(displayIntarfaceGetStatus(displayHandlerIn) == DISPLAY_BUSY){}
 
+	displayConfigDecodeMode(displayHandlerIn->txData, 0, 0b0);
+	displayConfigDecodeMode(displayHandlerIn->txData, 1, 0b0);
+	displayTxCommand(displayHandlerIn, 0, TX_ADDRESS_ALL);
+	while(displayIntarfaceGetStatus(displayHandlerIn) == DISPLAY_BUSY){}
 }
 
 /**
