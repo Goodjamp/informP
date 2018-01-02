@@ -109,7 +109,7 @@ typedef enum{
 // Update screen function
 void displayClearBuff(displayBuffDef *displayBuffer, uint8_t numMax);
 void displaySet7Segment(displayBuffDef *displayBuffer, uint8_t numMax, uint8_t data, uint8_t numDig, LAYER_ORDER layerOrder);
-void displaySet8x8Matrix(displayBuffDef *displayBuffer, uint8_t numMax, uint8_t data);
+void displaySet8x8Matrix(displayBuffDef *displayBuffer, uint8_t numMax, uint8_t data, LAYER_ORDER layerOrder);
 void displaySetConfig(displayBuffDef *displayBuffer, uint8_t numMax,  maxComandDef maxComand, uint8_t data);
 void displaySetConfigMulti(displayBuffDef *displayBuffer, uint8_t sizeBuff, maxComandDef maxComand, uint8_t data);
 void displayConfigDecodeMode(displayBuffDef *displayBuffer, uint8_t numMax, uint8_t data);

@@ -145,6 +145,7 @@ DISPLAY_STATUS displayIntarfaceGetStatus(displayHandlerDef const *displayHandler
   */
 void displayWrite(displayHandlerDef *displayHandlerIn, uint16_t numString, uint8_t *str, uint16_t strSize, COLOR color, TX_ADDRESS txAddress)
 {
+	uint8_t seg7Shift = 1;
 	uint16_t cnt = 0;
 	uint16_t digCnt = 0;
 	LAYER_ORDER layer;
@@ -152,12 +153,19 @@ void displayWrite(displayHandlerDef *displayHandlerIn, uint16_t numString, uint8
 	// first max7219  - 8x8 matrix indicator
 	// Second max7219 - 7-segment indicator
 	displayClearBuff(displayHandlerIn->txData,MAX_PER_SCREEN);
-	// set max#1 sumbol - 8x8 matrix
-	displaySet8x8Matrix(displayHandlerIn->txData, ORDER_NUM_MATRIX,  str[ORDER_NUM_MATRIX] );
+	// set max#1 symbol - 8x8 matrix(maximum 2 layer suport)
+	displaySet8x8Matrix(displayHandlerIn->txData, ORDER_NUM_MATRIX,  str[ORDER_NUM_MATRIX], LAYER_ORDER_FIRST );
+	// second matrix layer
+    if(str[ORDER_NUM_MATRIX+1] >  0x80)
+    {
+    	str[ORDER_NUM_MATRIX + 1] &= 0b1111111;
+    	displaySet8x8Matrix(displayHandlerIn->txData, ORDER_NUM_MATRIX,  str[ORDER_NUM_MATRIX + 1], LAYER_ORDER_SECOND );
+    	seg7Shift++;
+    }
 	// set max#2 - 7 segment 4 ripple colors digits
 	for(cnt = 0 ; cnt < (strSize-1); cnt++)
 	{
-		if(str[cnt + 1] >= 128 ){ // current symbol in first layer
+		if(str[cnt + 1] >= 0x80 ){ // current symbol in first layer
 			digCnt--;
 			str[cnt + 1] &= 0b1111111;
 			layer = LAYER_ORDER_SECOND;
@@ -177,14 +185,14 @@ void displayWrite(displayHandlerDef *displayHandlerIn, uint16_t numString, uint8
 		// set new value for selected screen
 		switch (color){
 		case COLOR_GREEN:
-			displaySet7Segment(  displayHandlerIn->txData, ORDER_NUM_7SEG, str[cnt + 1],  digCnt,     layer);
+			displaySet7Segment(  displayHandlerIn->txData, ORDER_NUM_7SEG, str[cnt + seg7Shift],  digCnt,     layer);
 			break;
 		case COLOR_RED:
-			displaySet7Segment(  displayHandlerIn->txData, ORDER_NUM_7SEG, str[cnt + 1],  digCnt + 4, layer);
+			displaySet7Segment(  displayHandlerIn->txData, ORDER_NUM_7SEG, str[cnt + seg7Shift],  digCnt + 4, layer);
 			break;
 		case COLOR_ORANGE:
-			displaySet7Segment(  displayHandlerIn->txData, ORDER_NUM_7SEG, str[cnt + 1],  digCnt,     layer);
-			displaySet7Segment(  displayHandlerIn->txData, ORDER_NUM_7SEG, str[cnt + 1],  digCnt + 4, layer);
+			displaySet7Segment(  displayHandlerIn->txData, ORDER_NUM_7SEG, str[cnt + seg7Shift],  digCnt,     layer);
+			displaySet7Segment(  displayHandlerIn->txData, ORDER_NUM_7SEG, str[cnt + seg7Shift],  digCnt + 4, layer);
 			break;
 		}
 

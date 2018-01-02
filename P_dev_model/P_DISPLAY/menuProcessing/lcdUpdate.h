@@ -20,6 +20,7 @@
 #define SYMBOL_TIME          'T'
 #define SYMBOL_FRQ           'F'
 #define ERROR_INF            "ErrO"
+#define ALLARM_INF           '~'
 #define TEST_STR             "@8888"
 
 typedef enum{
@@ -75,19 +76,27 @@ typedef enum{
 #define HUMIDITY_ADJUSTMENT_INFOCUS_NOERROR_LOW    sprintf((char*)str, " %5.1f",                                         (float)(value)/10 );
 
 /****DATE**********/
-#define DATE_NORMAL_NOERROR_HIGH                   sprintf((char*)str, "%1c%02d.%02d", (char)paramIndication[cnt].sumbol[0],  (uint8_t)(value), (uint8_t)(value >> 8));
-#define DATE_NORMAL_NOERROR_LOW                    sprintf((char*)str, "%1c%02d%02d",  (char)paramIndication[cnt].sumbol[0],  (uint8_t)(value), (uint8_t)(value >> 8));
-#define DATE_ADJUSTMENT_INFOCUS_NOERROR_LOW        sprintf((char*)str, " %02d%02d",                                           (uint8_t)(value), (uint8_t)(value >> 8));
+#define DATE_NORMAL_NOERROR_HIGH                   sprintf((char*)str, "%1c%02d.%02d",     (char)paramIndication[cnt].sumbol[0],               (uint8_t)(value), (uint8_t)(value >> 8));
+#define DATE_NORMAL_NOERROR_LOW                    sprintf((char*)str, "%1c%02d%02d",      (char)paramIndication[cnt].sumbol[0],               (uint8_t)(value), (uint8_t)(value >> 8));
+#define DATE_NORMAL_ALLARM_HIGH                    sprintf((char*)str, "%1c%1c%02d.%02d",  (char)paramIndication[cnt].sumbol[0], ALLARM_INF,   (uint8_t)(value), (uint8_t)(value >> 8));
+#define DATE_NORMAL_ALLARM_LOW                     sprintf((char*)str, "%1c%1c%02d%02d",   (char)paramIndication[cnt].sumbol[0], ALLARM_INF,   (uint8_t)(value), (uint8_t)(value >> 8));
+#define DATE_ADJUSTMENT_INFOCUS_NOERROR_LOW        sprintf((char*)str, " %02d%02d",                                                            (uint8_t)(value), (uint8_t)(value >> 8));
 
 /****TIME**********/
-#define TIME_NORMAL_NOERROR_HIGH                   sprintf((char*)str, "%1c%02d.%02d", (char)paramIndication[cnt].sumbol[0],  (uint8_t)(value>>8), (uint8_t)(value));
-#define TIME_NORMAL_NOERROR_LOW                    sprintf((char*)str, "%1c%02d%02d",  (char)paramIndication[cnt].sumbol[0],  (uint8_t)(value>>8), (uint8_t)(value));
-#define TIME_ADJUSTMENT_INFOCUS_NOERROR_LOW        sprintf((char*)str, " %02d%02d",                                           (uint8_t)(value>>8), (uint8_t)(value));
+#define TIME_NORMAL_NOERROR_HIGH                   sprintf((char*)str, "%1c%02d.%02d",     (char)paramIndication[cnt].sumbol[0],               (uint8_t)(value>>8), (uint8_t)(value));
+#define TIME_NORMAL_NOERROR_LOW                    sprintf((char*)str, "%1c%02d%02d",      (char)paramIndication[cnt].sumbol[0],               (uint8_t)(value>>8), (uint8_t)(value));
+#define TIME_NORMAL_ALLARM_HIGH                    sprintf((char*)str, "%1c%1c%02d.%02d",  (char)paramIndication[cnt].sumbol[0], ALLARM_INF,   (uint8_t)(value>>8), (uint8_t)(value));
+#define TIME_NORMAL_ALLARM_LOW                     sprintf((char*)str, "%1c%1c%02d%02d",   (char)paramIndication[cnt].sumbol[0], ALLARM_INF,   (uint8_t)(value>>8), (uint8_t)(value));
+
+#define TIME_ADJUSTMENT_INFOCUS_NOERROR_LOW        sprintf((char*)str, " %02d%02d",                                                            (uint8_t)(value>>8), (uint8_t)(value));
 
 
 /****FRQ*******/
-#define FRQ_NORMAL_NOERROR_HIGH                    sprintf((char*)str, "%1c%5.2f", (char)paramIndication[cnt].sumbol[0], (float)(value)/1000);
-#define FRQ_ADJUSTMENT_INFOCUS_NOERROR_LOW         sprintf((char*)str, " %5.2f",                                         (float)(value)/1000);
+#define FRQ_NORMAL_NOERROR_HIGH                    sprintf((char*)str, "%1c%5.2f",    (char)paramIndication[cnt].sumbol[0],             (float)(value)/1000);
+#define FRQ_NORMAL_ALLARM_HIGH                     sprintf((char*)str, "%1c%1c%5.2f", (char)paramIndication[cnt].sumbol[0], ALLARM_INF, (float)(value)/1000);
+#define FRQ_ADJUSTMENT_INFOCUS_NOERROR_LOW         sprintf((char*)str, " %5.2f",                                                        (float)(value)/1000);
+
+
 
 
 bool updateLCD(uint8_t *str, BLINK_STATE blinkState, DISPLAY_MENU displayMenu, bool focus, uint8_t numberValue );

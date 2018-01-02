@@ -183,7 +183,7 @@ void t_processing_FRQmetter(void *pvParameters){
 	s_FRQConfig =(S_FRQmetter_user_config*)pvParameters;
 
     // init state - ERROR (up to obtain first result)
-	updateFrqStatus(FRQ_STATUS_ERROR);
+	updateFrqStatus(FRQ_STATUS_ALLARM);
 
 	//	Configure all peripherals
 	frqGPIOConfig();
@@ -194,7 +194,7 @@ void t_processing_FRQmetter(void *pvParameters){
 
 		if(xSemaphoreTake(semaphoreUpdateFRQ,ERROR_TIMEOUT_MS ) == pdFALSE){
             //error
-			updateFrqStatus(FRQ_STATUS_ERROR);
+			updateFrqStatus(FRQ_STATUS_ALLARM);
 			continue;
 		}
 

@@ -64,17 +64,25 @@ void displaySet7Segment(displayBuffDef *displayBuffer, uint8_t numMax, uint8_t d
   * @param
   * @retval None
   */
-void displaySet8x8Matrix(displayBuffDef *displayBuffer, uint8_t numMax, uint8_t data)
+void displaySet8x8Matrix(displayBuffDef *displayBuffer, uint8_t numMax, uint8_t data, LAYER_ORDER layerOrder)
 {
-	uint16_t cnt = 0;
-	for(;cnt < sizeof(symbols8x8Matrix)/sizeof(symbols8x8Matrix[0]); cnt++){
+	uint16_t cnt, cnt2;
+	for(cnt = 0 ;cnt < sizeof(symbols8x8Matrix)/sizeof(symbols8x8Matrix[0]); cnt++){
 		if( data == symbols8x8Matrix[cnt].symbol){
-			// Copy all symboll
-			memcpy( (uint8_t*)displayBuffer[numMax], symbols8x8Matrix[cnt].points, sizeof(symbols8x8Matrix[cnt].points) );
-			return;
+			// Copy
+			if( LAYER_ORDER_FIRST == layerOrder ){
+			    memcpy( (uint8_t*)displayBuffer[numMax], symbols8x8Matrix[cnt].points, sizeof(symbols8x8Matrix[cnt].points) );
+			}
+			else{
+                for(cnt2 = 0; cnt2 < NUM_MAX_DIGITS; cnt2++){
+                	displayBuffer[numMax][cnt2] |= symbols8x8Matrix[cnt].points[cnt2];
+                }
+			}
+			return; // if symbol was found - return
 		}
 	}
-	memcpy( (uint8_t*)displayBuffer[numMax], symbols8x8Matrix[cnt].points, sizeof(symbols8x8Matrix[cnt].points) );
+	// if symbol was not found, cope cle
+   memcpy( (uint8_t*)displayBuffer[numMax], symbols8x8Matrix[cnt].points, sizeof(symbols8x8Matrix[cnt].points) );
 }
 
 

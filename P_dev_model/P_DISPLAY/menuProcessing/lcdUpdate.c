@@ -99,6 +99,9 @@ bool menuWorkHight(uint8_t *str, uint16_t status, uint16_t value, uint8_t cnt){
 		case VALUE_STATUS_OK:
 			DATE_NORMAL_NOERROR_HIGH;
 			return true;
+		case VALUE_STATUS_ALLARM:
+			DATE_NORMAL_ALLARM_HIGH;
+			return true;
 		}
 		break;
 	case PAR_TIME:
@@ -106,12 +109,18 @@ bool menuWorkHight(uint8_t *str, uint16_t status, uint16_t value, uint8_t cnt){
 		case VALUE_STATUS_OK:
 			TIME_NORMAL_NOERROR_HIGH;
 			return true;
+		case VALUE_STATUS_ALLARM:
+			TIME_NORMAL_ALLARM_HIGH;
+			return true;
 		}
 		break;
 	case PAR_FRQ:
 		switch(status){
 	    case VALUE_STATUS_OK:
 	    	FRQ_NORMAL_NOERROR_HIGH;
+	    	return true;
+	    case VALUE_STATUS_ALLARM:
+	    	FRQ_NORMAL_ALLARM_HIGH;
 	    	return true;
 	    }
 		break;
@@ -130,6 +139,9 @@ bool menuWorkLow(uint8_t *str, uint16_t status, uint16_t value, uint8_t cnt) {
 		case VALUE_STATUS_OK:
 			DATE_NORMAL_NOERROR_LOW;
 			return true;
+		case VALUE_STATUS_ALLARM:
+			DATE_NORMAL_ALLARM_LOW;
+			return true;
 		}
 		break;
 
@@ -137,6 +149,9 @@ bool menuWorkLow(uint8_t *str, uint16_t status, uint16_t value, uint8_t cnt) {
 		switch (status) {
 		case VALUE_STATUS_OK:
 			TIME_NORMAL_NOERROR_LOW;
+			return true;
+		case VALUE_STATUS_ALLARM:
+			TIME_NORMAL_ALLARM_LOW;
 			return true;
 		}
 		break;
@@ -185,6 +200,9 @@ bool menuAdjLowFocus(uint8_t *str, uint16_t status, uint16_t value, uint8_t cnt)
 		case VALUE_STATUS_OK:
 			DATE_ADJUSTMENT_INFOCUS_NOERROR_LOW;
 			return true;
+		case VALUE_STATUS_ALLARM:
+			DATE_ADJUSTMENT_INFOCUS_NOERROR_LOW;
+			return true;
 		}
 		break;
 	case PAR_TIME:
@@ -192,11 +210,17 @@ bool menuAdjLowFocus(uint8_t *str, uint16_t status, uint16_t value, uint8_t cnt)
 		case VALUE_STATUS_OK:
 			TIME_ADJUSTMENT_INFOCUS_NOERROR_LOW;
 			return true;
+		case VALUE_STATUS_ALLARM:
+			TIME_ADJUSTMENT_INFOCUS_NOERROR_LOW;
+			return true;
 		}
 		break;
 	case PAR_FRQ:
 		switch(status){
 	    case VALUE_STATUS_OK:
+	    	FRQ_ADJUSTMENT_INFOCUS_NOERROR_LOW;
+	    	return true;
+	    case VALUE_STATUS_ALLARM:
 	    	FRQ_ADJUSTMENT_INFOCUS_NOERROR_LOW;
 	    	return true;
 	    }
