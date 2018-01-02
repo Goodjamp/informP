@@ -14,12 +14,10 @@
 #include "stm32f10x_spi.h"
 #include "stm32f10x_tim.h"
 
-#include "lcdHWInterface.h"
-
-
+#include "lcdHWInterfaceSPI.h"
 
 #include "LCD.h"
-
+#ifdef USE_SPI
 // ------------------------definition for screen----------------------
 static LDDescr LDList[NUMBER_OF_LCD_STRING] = {
 		[SCREEN_1] = {
@@ -282,6 +280,8 @@ static void spiInterruptTx(void){
 }
 
 
+
+
 /**
   * @brief
   * @param
@@ -314,3 +314,4 @@ void hwInterfaceTx(uint16_t orderNumberDispl, TX_ADDRESS txAddress){
 	spiInterruptTx();
 }
 
+#endif

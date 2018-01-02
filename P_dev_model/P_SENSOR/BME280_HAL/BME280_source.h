@@ -63,10 +63,12 @@ typedef enum{
 	BME280_REG_CTRL_MES   = 0xF4,
 	BME280_REG_STATUS     = 0xF3,
 	BME280_REG_CTRL_HUM   = 0xF2,
-	BME280_REG_CALIB26_41 = 0xE1,
 	BME280_REG_RESET      = 0xE0,
 	BME280_REG_ID         = 0xD0,
-	BME280_REG_CALIB00_25 = 0x88,
+
+	BME280_REG_CALIB25_31 = 0xE1,
+	BME280_REG_CALIB24    = 0xA1,
+	BME280_REG_CALIB00_23 = 0x88,
 }BME280_REG;
 
 
@@ -134,8 +136,9 @@ typedef enum{
 
 
 //Calibration registers divided on the  two part
-#define SIZE_OF_CALIBRATION_1  26
-#define SIZE_OF_CALIBRATION_2  17
+#define SIZE_OF_CALIBRATION_1  24
+#define SIZE_OF_CALIBRATION_2  1
+#define SIZE_OF_CALIBRATION_3  7
 #pragma pack(push,1)
 typedef struct{
 	uint16_t dig_T1_;

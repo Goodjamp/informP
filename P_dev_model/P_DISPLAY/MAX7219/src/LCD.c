@@ -10,7 +10,6 @@
 
 #include "LCD.h"
 #include "max7219.h"
-#include "debugStuff.h"
 
 static volatile displayHandlerDef *displayHandler;
 

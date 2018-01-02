@@ -5,6 +5,8 @@
 *.txt
 *.o
 *.exe
+*.Release
+*.Debug
 Debug
 bin
 obj

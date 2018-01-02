@@ -15,6 +15,11 @@
   </Components>
   <ExcludedFiles>
     <Exclude path="P_dev_model/P_TIME/GPSProcessing/gpsPRJ/mainGPS.c"/>
+    <Exclude path="P_dev_model/P_DISPLAY/MAX7219/maxTimer/LCD_.c"/>
+    <Exclude path="P_dev_model/P_DISPLAY/MAX7219/maxTimer/LCD_.h"/>
+    <Exclude path="P_dev_model/P_DISPLAY/MAX7219/maxTimer/main.c"/>
+    <Exclude path="P_dev_model/P_DISPLAY/MAX7219/maxTimer/LCD.c"/>
+    <Exclude path="P_dev_model/P_DISPLAY/MAX7219/maxTimer/LCD.h"/>
   </ExcludedFiles>
   <Drivers/>
 </Project>

@@ -21,24 +21,21 @@ union{
 
 
 int main(int argc, char *argv[]){
-int b = 6;
-    int *a;
-    *a++=8;
 
     GPRMC_Def myGPRMC;
     addGPSPars(GPRMC, &myGPRMC);
-    parsGPS(&myGPRMC, (uint8_t*)data1, (uint8_t)strlen(data1));
+    parsGPS((void*)&myGPRMC, (uint8_t*)data1, (uint8_t)strlen((char*)data1));
     printf("gps Rx status =  %u\n", myGPRMC.procesingPars.statusGPS);
     printf("gps Rx status =  %u\n", myGPRMC.procesingPars.statusGPS);
-    parsGPS(&myGPRMC, (uint8_t*)data3, (uint8_t)strlen(data3));
+    parsGPS((void*)&myGPRMC, (uint8_t*)data3, (uint8_t)strlen((char*)data3));
     printf("gps Rx status =  %u\n", myGPRMC.procesingPars.statusGPS);
-    parsGPS(&myGPRMC, (uint8_t*)data4, (uint8_t)strlen(data4));
+    parsGPS((void*)&myGPRMC, (uint8_t*)data4, (uint8_t)strlen((char*)data4));
     printf("gps Rx status =  %u\n", myGPRMC.procesingPars.statusGPS);
-    parsGPS(&myGPRMC, (uint8_t*)data5, (uint8_t)strlen(data5));
+    parsGPS((void*)&myGPRMC, (uint8_t*)data5, (uint8_t)strlen((char*)data5));
     printf("gps Rx status =  %u\n", myGPRMC.procesingPars.statusGPS);
-    parsGPS(&myGPRMC, (uint8_t*)data6, (uint8_t)strlen(data6));
+    parsGPS((void*)&myGPRMC, (uint8_t*)data6, (uint8_t)strlen((char*)data6));
     printf("gps Rx status =  %u\n", myGPRMC.procesingPars.statusGPS);
-    parsGPS(&myGPRMC, (uint8_t*)data7, (uint8_t)strlen(data7));
+    parsGPS((void*)&myGPRMC, (uint8_t*)data7, (uint8_t)strlen((char*)data7));
     printf("gps Rx status =  %u\n", myGPRMC.procesingPars.statusGPS);
 	return 0;
 }

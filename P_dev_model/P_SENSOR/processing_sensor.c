@@ -42,7 +42,7 @@ void i2cInitGpio(uint8_t step){
 	// config I2C CSCL GPIO
 	GPIO_InitStructure.GPIO_Pin = I2C1_SCL;
 	GPIO_InitStructure.GPIO_Mode = (step) ? (GPIO_Mode_AF_OD) : (GPIO_Mode_IPU);
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 	/*Config CSL functions of I2C1*/
 	GPIO_Init(I2C1_SCL_PORT, &GPIO_InitStructure);
@@ -50,7 +50,7 @@ void i2cInitGpio(uint8_t step){
 	// config I2C CSDA GPIO
 	GPIO_InitStructure.GPIO_Pin = ( I2C1_SDA);
 	GPIO_InitStructure.GPIO_Mode =  (step) ? (GPIO_Mode_AF_OD) : ( GPIO_Mode_IPU);
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
 	GPIO_Init(I2C1_SDA_PORT, &GPIO_InitStructure);
 	// Enable Alternate function
 
@@ -114,22 +114,10 @@ void i2c_init(void){
 BME280Handler sensorHandler;
 
 void initBME280(void){
-	if( BME280_init(&sensorHandler, BME280_ADDRESS_HIGHT) == BME280_STATUS_COMUNICATION_ERROR)
-	{
-		return BME280_STATUS_COMUNICATION_ERROR;
-	}
-	if( BME280_setValueMesState(&sensorHandler, MES_VALUE_TEMPERATURE, MES_STATE_ENABLE) == BME280_STATUS_COMUNICATION_ERROR)
-	{
-		return BME280_STATUS_COMUNICATION_ERROR;
-	}
-	if( BME280_setValueMesState(&sensorHandler, MES_VALUE_PRESSURE, MES_STATE_ENABLE) == BME280_STATUS_COMUNICATION_ERROR)
-	{
-		return BME280_STATUS_COMUNICATION_ERROR;
-	}
-	if( BME280_setValueMesState(&sensorHandler, MES_VALUE_HUMIDITY, MES_STATE_ENABLE) == BME280_STATUS_COMUNICATION_ERROR)
-	{
-		return BME280_STATUS_COMUNICATION_ERROR;
-	}
+	BME280_init(&sensorHandler, BME280_ADDRESS_HIGHT);
+	BME280_setValueMesState(&sensorHandler, MES_VALUE_TEMPERATURE, MES_STATE_ENABLE);
+	BME280_setValueMesState(&sensorHandler, MES_VALUE_PRESSURE, MES_STATE_ENABLE);
+	BME280_setValueMesState(&sensorHandler, MES_VALUE_HUMIDITY, MES_STATE_ENABLE);
 }
 
 void t_processing_sensor(void *pvParameters){
@@ -158,7 +146,6 @@ void t_processing_sensor(void *pvParameters){
 			i2c_init();
 			//vTaskDelay(100);
 			debugPin_1_Set;
-			BME280_setValueMesState(&sensorHandler, MES_VALUE_TEMPERATURE, MES_STATE_ENABLE);
 			//initBME280();
 			debugPin_1_Clear;
 

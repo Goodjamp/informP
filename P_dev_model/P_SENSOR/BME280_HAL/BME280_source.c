@@ -68,16 +68,32 @@ static BME280_STATUS updateRegister(uint8_t deviceAddres, uint8_t regAddres, uin
 
 BME280_STATUS BME280_init(BME280Handler *handler, uint8_t address){
 	handler->selfAddress = address;
+	uint16_t tempE4, tempE5, tempE6, tempE7;    // &((uint8_t)&data)[0]
 	// Read first area of calibration data
-	if(  BMEReadData( address, BME280_REG_CALIB00_25, (uint8_t*)(&handler->calibrationData), SIZE_OF_CALIBRATION_1) )
+	if(  BMEReadData( address, BME280_REG_CALIB00_23, (uint8_t*)&(handler->calibrationData), SIZE_OF_CALIBRATION_1) )
+	//if(  BMEReadData( address, BME280_REG_CALIB00_23, (uint8_t*)&(&handler->calibrationData)[0], SIZE_OF_CALIBRATION_1) )
 	{
 		return BME280_STATUS_COMUNICATION_ERROR;
 	}
-	// Read first area of calibration data
-	if(  BMEReadData( address, BME280_REG_CALIB26_41, &((uint8_t*)(&handler->calibrationData))[SIZE_OF_CALIBRATION_2], SIZE_OF_CALIBRATION_2) )
+	// Read second area of calibration data
+	if(  BMEReadData( address, BME280_REG_CALIB24, &((uint8_t*)(&handler->calibrationData))[SIZE_OF_CALIBRATION_1], SIZE_OF_CALIBRATION_2) )
 	{
 		return BME280_STATUS_COMUNICATION_ERROR;
 	}
+	// Read  thread area of calibration data
+	if(  BMEReadData( address, BME280_REG_CALIB25_31, &((uint8_t*)(&handler->calibrationData))[SIZE_OF_CALIBRATION_1 + SIZE_OF_CALIBRATION_2], SIZE_OF_CALIBRATION_3) )
+	{
+		return BME280_STATUS_COMUNICATION_ERROR;
+	}
+	tempE4 =((uint8_t*)(&handler->calibrationData))[28];
+	tempE5 =((uint8_t*)(&handler->calibrationData))[29];
+	tempE6 =((uint8_t*)(&handler->calibrationData))[30];
+	tempE7 =((uint8_t*)(&handler->calibrationData))[31];
+	handler->calibrationData.dig_H4_ = (int16_t)((tempE4<<4) | (tempE5 & 0b1111));
+	handler->calibrationData.dig_H5_ = (int16_t)((tempE6<<4) | (tempE5>>4) );
+	handler->calibrationData.dig_H6_ = (int8_t)tempE7;
+	// update some calib data 29
+
 	return handler->sensorStatus = BME280_STATUS_OK;
 }
 
@@ -234,18 +250,49 @@ static BME280_U32_t BME280_compensate_P_int64(BME280Handler *handler, BME280_S32
 	return (BME280_U32_t) p;
 }
 
+// Returns humidity in %RH as unsigned 32 bit integer in Q22.10 format (22 integer and 10 fractional bits).
+// Output value of “47445” represents 47445/1024 = 46.333 %RH
+BME280_U32_t bme280_compensate_H_int32(BME280Handler *handler, BME280_S32_t adc_H){
+BME280_S32_t v_x1_u32r;
+v_x1_u32r = (t_fine - ((BME280_S32_t)76800));
+v_x1_u32r = (((((adc_H << 14) - (((BME280_S32_t)dig_H4) << 20) - (((BME280_S32_t)dig_H5) * v_x1_u32r)) +\
+            ((BME280_S32_t)16384)) >> 15) * (((((((v_x1_u32r * ((BME280_S32_t)dig_H6)) >> 10) * (((v_x1_u32r *\
+	        ((BME280_S32_t)dig_H3)) >> 11) + ((BME280_S32_t)32768))) >> 10) + ((BME280_S32_t)2097152)) *\
+	        ((BME280_S32_t)dig_H2) + 8192) >> 14));
+	v_x1_u32r = (v_x1_u32r - (((((v_x1_u32r >> 15) * (v_x1_u32r >> 15)) >> 7) * ((BME280_S32_t)dig_H1)) >> 4));
+	v_x1_u32r = (v_x1_u32r < 0 ? 0 : v_x1_u32r);
+	v_x1_u32r = (v_x1_u32r > 419430400 ? 419430400 : v_x1_u32r);
+	return (BME280_U32_t)(v_x1_u32r>>12);
+}
 
+/*
 // Returns humidity in %RH as unsigned 32 bit integer in Q22.10 format (22 integer and 10 fractional bits).
 // Output value of “47445” represents 47445/1024 = 46.333 %RH
 static BME280_U32_t bme280_compensate_H_int32(BME280Handler *handler, BME280_S32_t adc_H) {
-	BME280_S32_t v_x1_u32r;
-	v_x1_u32r = (t_fine - ((BME280_S32_t)76800));
-	v_x1_u32r = (((((adc_H << 14) - (((BME280_S32_t)dig_H4) << 20) - (((BME280_S32_t)dig_H5) * v_x1_u32r)) +
-	            ((BME280_S32_t)16384)) >> 15) * (((((((v_x1_u32r * ((BME280_S32_t)dig_H6)) >> 10) * (((v_x1_u32r *
-	            ((BME280_S32_t)dig_H3)) >> 11) + ((BME280_S32_t)32768))) >> 10) + ((BME280_S32_t)2097152)) *
-	            ((BME280_S32_t)dig_H2) + 8192) >> 14));
-	v_x1_u32r =(v_x1_u32r- (((((v_x1_u32r >> 15) * (v_x1_u32r >> 15)) >> 7) * ((BME280_S32_t)dig_H1)) >> 4));
-	v_x1_u32r = (v_x1_u32r < 0 ? 0 : v_x1_u32r);
-	v_x1_u32r = (v_x1_u32r > 419430400 ? 419430400 : v_x1_u32r);
-	return (BME280_U32_t) (v_x1_u32r >> 12);
+	    double humidity;
+		double humidity_min = 0.0;
+		double humidity_max = 100.0;
+		double var1;
+		double var2;
+		double var3;
+		double var4;
+		double var5;
+		double var6;
+
+		var1 = ((double)t_fine) - 76800.0;
+		var2 = (((double)dig_H4) * 64.0 + (((double)dig_H5) / 16384.0) * var1);
+		var3 = adc_H - var2;
+		var4 = ((double)dig_H2) / 65536.0;
+		var5 = (1.0 + (((double)dig_H3) / 67108864.0) * var1);
+		var6 = 1.0 + (((double)dig_H6) / 67108864.0) * var1 * var5;
+		var6 = var3 * var4 * (var5 * var6);
+		humidity = var6 * (1.0 - ((double)dig_H1) * var6 / 524288.0);
+
+		if (humidity > humidity_max)
+			humidity = humidity_max;
+		else if (humidity < humidity_min)
+			humidity = humidity_min;
+
+		return (uint)humidity;
 }
+*/

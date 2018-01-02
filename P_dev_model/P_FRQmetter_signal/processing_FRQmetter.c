@@ -31,7 +31,7 @@ static uint16_t status;
 static S_FRQmetter_user_config *s_FRQConfig;
 
 
-struct{
+volatile struct{
 	uint8_t updateCNT;
 	uint32_t inputCaptureCNT;
 	volatile uint8_t f_ICinterrupt;

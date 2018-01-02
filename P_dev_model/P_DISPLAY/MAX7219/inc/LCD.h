@@ -12,6 +12,10 @@
 #include "max7219.h"
 #include "processing_display_extern.h"
 
+/********SELECTED TYPE UF INTERFACE******/
+//#define USE_SPI
+#define USE_TIMER
+
 // max7219 Position matrix LCD in screen
 #define ORDER_NUM_MATRIX        0
 // max7219 Position 7-SEGMENTS LCD in screen
@@ -87,7 +91,7 @@ typedef struct{
 typedef struct{
 	displayCurrentSetings currentSettings;
 	const uint8_t *       brightnesList;
-	DISPLAY_STATUS        status;
+	volatile DISPLAY_STATUS        status;
 	uint16_t              dataCnt;   // Data transmit counter  (set user according number of max chips per display)
 	uint8_t               digitCnt;  // digit transmit counter (count to max number of digits NUM_MAX_DIGITS)
 	uint8_t               numForTx;  // number of data to Tx per one MAX

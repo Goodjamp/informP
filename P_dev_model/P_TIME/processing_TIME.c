@@ -184,7 +184,6 @@ void t_processing_TIME(void *p_task_par){
 			registerValue = (uint16_t)( timeGet->tm_sec);
 			processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.time_second);
 
-
 			// update DATE
 			registerValue = (uint16_t)( ((timeGet->tm_mon + 1) << 8) | (uint8_t)(timeGet->tm_mday) );
 			processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.DATE);

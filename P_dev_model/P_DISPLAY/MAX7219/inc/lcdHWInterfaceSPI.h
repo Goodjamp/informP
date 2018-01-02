@@ -1,5 +1,5 @@
 /********************************************************************************
- * @file    lcdHWInterface.h
+ * @file    lcdHWInterfaceSPI.h
  * @author  Gerasimchuk A.
  * @version V1.0.0
  * @date    23-November-2016
