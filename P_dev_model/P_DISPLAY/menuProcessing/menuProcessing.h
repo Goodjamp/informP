@@ -17,6 +17,11 @@ typedef enum{
 	MENU_ACTION_SELL,
 	MENU_ACTION_TEST,
 	MENU_ACTION_ESC,
+	//WIDE RANGE ACTION: MENU SWITCH
+	MENU_ACTION_SWITCH_TO_TEST,
+	MENU_ACTION_SWITCH_TO_WORK,
+	MENU_ACTION_SWITCH_TO_ADJ,
+	//LAST ACTION, NO SENS
 	MENU_NO_ACTION
 }menuActionListDef;
 
@@ -52,7 +57,7 @@ uint8_t menuSetListboxItemIndex(uint8_t orderNumberLisbox, uint8_t newItemIndex)
 DISPLAY_MENU menuGetCurrentMenu (void);
 uint8_t menuGetListbox(void);
 // User implementation function
-void setBreightnes(void);
+void setBreightnes(menuActionListDef menuAction);
 
 
 

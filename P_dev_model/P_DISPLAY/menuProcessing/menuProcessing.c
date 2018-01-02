@@ -7,12 +7,13 @@
   */
 
 #include "stdint.h"
+
 #include "menuProcessing.h"
 #include "keyBoardProcessingUserInterface.h"
 #include "LCD.h"
 #include "processing_display_extern.h"
 
-extern displayHandlerDef myDisplay;;
+extern displayHandlerDef myDisplay;
 
 typedef struct{
 
@@ -48,6 +49,7 @@ void mainMenuUpdate(menuActionListDef inAction){
 	    	break;
 	    case MENU_ACTION_TEST:
 	    	menuDescription.displayState = DISPLAY_MENU_TEST;
+	    	setBreightnes( (uint8_t)MENU_ACTION_SWITCH_TO_TEST );
 	    	break;
 	    default: break;
 	};
@@ -68,6 +70,7 @@ void adjustmentMenuUpdate(menuActionListDef inAction){
 	    	break;
 	    case MENU_ACTION_TEST:
 	    	menuDescription.displayState = DISPLAY_MENU_TEST;
+	    	setBreightnes( (uint8_t)MENU_ACTION_SWITCH_TO_TEST );
 	    	break;
 	    default: break;
 	};
@@ -79,6 +82,7 @@ void testMenuUpdate(menuActionListDef inAction){
 	switch(inAction){
 	    case MENU_ACTION_ESC:
         menuDescription.displayState = DISPLAY_MENU_WORK;
+        setBreightnes( (uint8_t)MENU_ACTION_SWITCH_TO_WORK );
         break;
 	}
 
@@ -87,7 +91,7 @@ void testMenuUpdate(menuActionListDef inAction){
 
 void updateBrightnes(void){
 	// Call user implementation function
-	setBreightnes();
+	setBreightnes( (uint8_t)MENU_ACTION_SELL );
 }
 
 

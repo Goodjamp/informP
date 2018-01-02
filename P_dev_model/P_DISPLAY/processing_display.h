@@ -24,9 +24,11 @@
 //
 #define BUTTON_PROCESSING_MS   5
 
-#define BUTTON_ESC_PERIOD_MS   8000
+#define BUTTON_ESC_PERIOD_MS   5000
 
-#define FLASH_PAGE_MENU_DATA      125
+#define FLASH_PAGE_MENU_DATA   125
+
+#define TEST_BRIGHTNES_UNDEX   0
 
 
 typedef struct{
@@ -58,11 +60,20 @@ typedef enum{
 typedef struct{
     uint8_t action;
     uint8_t periodIndex;
-}keyActionDescription;
+}queueKeyActionItemPayload;
 //#pragma pack(pop)
 
+// item of payload queue in case of Set brightnes
+//#pragma pack(push,1)
 typedef struct{
-	actionTypeDef type;
+    uint8_t action;
+    uint8_t reserved;
+}queueSetBrightnesItemPayload;
+//#pragma pack(pop)
+
+
+typedef struct{
+	uint8_t type;
 	uint8_t payload[ACTION_QUEUE_PAYLOAD];
 }actionQueueMember;
 

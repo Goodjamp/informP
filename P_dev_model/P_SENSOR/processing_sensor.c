@@ -116,8 +116,13 @@ BME280Handler sensorHandler;
 void initBME280(void){
 	BME280_init(&sensorHandler, BME280_ADDRESS_HIGHT);
 	BME280_setValueMesState(&sensorHandler, MES_VALUE_TEMPERATURE, MES_STATE_ENABLE);
+	BME280_setOverSample(&sensorHandler, MES_VALUE_HUMIDITY, OVERSEMPLE_16);
 	BME280_setValueMesState(&sensorHandler, MES_VALUE_PRESSURE, MES_STATE_ENABLE);
+	BME280_setOverSample(&sensorHandler, MES_VALUE_HUMIDITY, OVERSEMPLE_16);
 	BME280_setValueMesState(&sensorHandler, MES_VALUE_HUMIDITY, MES_STATE_ENABLE);
+	BME280_setOverSample(&sensorHandler, MES_VALUE_HUMIDITY, OVERSEMPLE_16);
+
+	BME280_setMesDelay(&sensorHandler, MEASUREMENT_DELAY_65_5ms);
 }
 
 void t_processing_sensor(void *pvParameters){
@@ -165,7 +170,7 @@ void t_processing_sensor(void *pvParameters){
 
 		}
 
-        vTaskDelay(100);
+        vTaskDelay(2000);
 
 	}
 }

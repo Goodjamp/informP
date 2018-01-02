@@ -36,6 +36,7 @@ extern S_address_oper_data s_address_oper_data;
 static S_display_user_config *displayUserConfig;
 
 displayHandlerDef myDisplay;
+uint8_t tempSaveBrightnes = 0;
 //-----Queue for send action to menu
 QueueHandle_t menuQueue;
 uint8_t lcdPeriodType;
@@ -50,7 +51,7 @@ volatile uint8_t  keyNumAction;
 volatile uint8_t  keyNumPeriod;
 /*====================================DISPLAY ================================================*/
 TimerHandle_t     lcdTimerHandler;
-
+uint8_t           currentBrightnes;
 
 typedef struct{
 	uint16_t cntTest;
@@ -89,7 +90,6 @@ void updateLcdVal(BLINK_STATE blinkState) {
 				        blinkState,
 				        menuGetCurrentMenu(),
 				        (cnt == menuGetListbox() ) ? (true):(false),
-				        //TODO in next string I refer to the adjustment of display
 				        displayUserConfig->screenConfig[cnt].listOfParamiters[ menuGetListboxItemIndex(cnt)] )
 		    )
 			continue;
@@ -127,7 +127,7 @@ static void lcdTimerFunctionCB( TimerHandle_t xTimer ){
 	};
 
 
-    // push button action to queue
+    // push LCD UPDATE action to queue
     xQueueSendToBack(menuQueue, (void*)&actionMember, 0);
 }
 
@@ -137,7 +137,7 @@ static void escTimerFunctionCB( TimerHandle_t xTimer ){
 		.payload[0] = MENU_ACTION_ESC,
 		.payload[1] = 0,
 	};
-	// push button action to queue
+	// push ESC action to queue
 	xQueueSendToBack(menuQueue, (void*)&actionMember, 0);
 }
 
@@ -164,9 +164,10 @@ static menuActionListDef decodeKeyAction(uint8_t action, int8_t intervalIn){
 }
 
 
-void setBreightnes(void){
+void setBreightnes(menuActionListDef menuAction){
 	actionQueueMember actionMember = {
-		.type = event_Brightnes
+		.type = event_Brightnes,
+		.payload[0] = (uint8_t)menuAction
 	};
     // push button action to queue
     xQueueSendToBack(menuQueue, (void*)&actionMember, 0);
@@ -251,7 +252,6 @@ void saveMenuConfigData(void){
 	FLASH_OPERATION_write_flash_page_16b( (uint16_t*)cursorPos, sizeof(cursorPos)/sizeof(uint16_t), (uint16_t)FLASH_PAGE_MENU_DATA);
 }
 
-
 /**
   * @brief
   * @param
@@ -265,9 +265,8 @@ void t_processing_display(void *pvParameters){
 	// set value indication according last adjustments
 	getLastMenuData();
 
-	vTaskDelay(200);
+	vTaskDelay(100);
 	//welcomeScreen();
-    // initialization streen
 	while(1){
 		xQueueReceive(menuQueue,(void*)&actionMember,  portMAX_DELAY );
 
@@ -290,22 +289,34 @@ void t_processing_display(void *pvParameters){
 		// Key update
 		case event_KEY:
 			menuUpdate(
-					decodeKeyAction(  ((keyActionDescription*)actionMember.payload)->action ,
-					                  ((keyActionDescription*)actionMember.payload)->periodIndex
+					decodeKeyAction(  ((queueKeyActionItemPayload*)actionMember.payload)->action ,
+					                  ((queueKeyActionItemPayload*)actionMember.payload)->periodIndex
 					               )
 					  );
 			// Start ESC timer
-			if( MENU_ACTION_ESC != ((keyActionDescription*)actionMember.payload)->action  )
+			if( MENU_ACTION_ESC != ((queueKeyActionItemPayload*)actionMember.payload)->action  )
 			{
 			    xTimerStart(escTimerHandler,10);
 			}
 			break;
 		case event_Brightnes:
-			if( ++myDisplay.currentSettings.brightnes > (sizeof(brightnes)/sizeof(brightnes[0])-1 ) )
-			{
-				myDisplay.currentSettings.brightnes = 0;
-			}
-			displaySetBrightnes(&myDisplay, myDisplay.brightnesList[myDisplay.currentSettings.brightnes], 0, TX_ADDRESS_ALL);
+			switch(  ((queueSetBrightnesItemPayload*)actionMember.payload)->action  ){
+			case MENU_ACTION_SWITCH_TO_TEST:
+				tempSaveBrightnes = myDisplay.currentSettings.brightnes;
+				myDisplay.currentSettings.brightnes = TEST_BRIGHTNES_UNDEX;
+				break;
+			case MENU_ACTION_SWITCH_TO_WORK:
+			case MENU_ACTION_SWITCH_TO_ADJ:
+				myDisplay.currentSettings.brightnes = tempSaveBrightnes;
+				break;
+			default:
+				if( ++myDisplay.currentSettings.brightnes > (sizeof(brightnes)/sizeof(brightnes[0])-1 ) )
+				{
+					myDisplay.currentSettings.brightnes = 0;
+				}
+				displaySetBrightnes(&myDisplay, myDisplay.brightnesList[myDisplay.currentSettings.brightnes], 0, TX_ADDRESS_ALL);
+				break;
+			};
 			break;
 		}
 

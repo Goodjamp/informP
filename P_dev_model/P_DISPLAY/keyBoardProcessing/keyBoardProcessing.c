@@ -96,7 +96,7 @@ actionDetect keyUpdate(volatile uint8_t *actionNum, volatile uint8_t *timePeriod
     else if( !actionProces.detect && ( actionProces.cnt > 0) )
     {
     	cnt = 0;
-    	// finde nearest time period
+    	// find nearest time period
     	while( ( cnt < actionDescr[actionProces.index].numPeriod ) && (actionDescr[actionProces.index].periodForAction[cnt] < actionProces.cnt ) )
     	{
             cnt++;

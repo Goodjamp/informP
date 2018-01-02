@@ -16,8 +16,8 @@
 #include "keyBoardProcessingUserInterface.h"
 
 
-#define ACTION_MODE_PERIOD   5
-#define ACTION_SELL_PERIOD   5
+#define ACTION_MODE_PERIOD   20
+#define ACTION_SELL_PERIOD   20
 #define ACTION_TEST_PERIOD   400
 
 

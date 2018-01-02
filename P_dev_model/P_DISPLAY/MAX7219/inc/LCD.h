@@ -89,13 +89,13 @@ typedef struct{
 /* @brief
  * */
 typedef struct{
-	displayCurrentSetings currentSettings;
-	const uint8_t *       brightnesList;
-	volatile DISPLAY_STATUS        status;
-	uint16_t              dataCnt;   // Data transmit counter  (set user according number of max chips per display)
-	uint8_t               digitCnt;  // digit transmit counter (count to max number of digits NUM_MAX_DIGITS)
-	uint8_t               numForTx;  // number of data to Tx per one MAX
-	displayBuffDef        txData[MAX_PER_SCREEN];    // pointer on the buffer for Tx data
+	displayCurrentSetings    currentSettings;
+	const uint8_t *          brightnesList;
+	volatile DISPLAY_STATUS  status;
+	uint16_t                 dataCnt;   // Data transmit counter  (set user according number of max chips per display)
+	uint8_t                  digitCnt;  // digit transmit counter (count to max number of digits NUM_MAX_DIGITS)
+	uint8_t                  numForTx;  // number of data to Tx per one MAX
+	displayBuffDef           txData[MAX_PER_SCREEN];    // pointer on the buffer for Tx data
 }displayHandlerDef;
 
 
