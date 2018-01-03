@@ -112,8 +112,8 @@ static void butttonTimerFunctionCB( TimerHandle_t xTimer ){
 	{
 		actionQueueMember actionMember = {
 			.type = event_KEY,
-			.payload[0] = keyNumAction,
-			.payload[1] = keyNumPeriod,
+			.queueType.KeyAction.action = keyNumAction,
+			.queueType.KeyAction.periodIndex = keyNumPeriod,
 		};
 		keyPause(50);
 		// push button action to queue
@@ -135,8 +135,8 @@ static void lcdTimerFunctionCB( TimerHandle_t xTimer ){
 static void escTimerFunctionCB( TimerHandle_t xTimer ){
 	actionQueueMember actionMember = {
 		.type = event_KEY,
-		.payload[0] = MENU_ACTION_ESC,
-		.payload[1] = 0,
+		.queueType.KeyAction.action = MENU_ACTION_ESC,
+		.queueType.KeyAction.periodIndex = 0,
 	};
 	// push ESC action to queue
 	xQueueSendToBack(menuQueue, (void*)&actionMember, 0);
@@ -168,7 +168,7 @@ static menuActionListDef decodeKeyAction(uint8_t action, int8_t intervalIn){
 void setBreightnes(menuActionListDef menuAction){
 	actionQueueMember actionMember = {
 		.type = event_Brightnes,
-		.payload[0] = (uint8_t)menuAction
+		.queueType.payload[0] = (uint8_t)menuAction
 	};
     // push button action to queue
     xQueueSendToBack(menuQueue, (void*)&actionMember, 0);
@@ -221,12 +221,6 @@ static void initUserMenu(S_display_user_config *configData){
 
 }
 
-static void welcomeScreen(void){
-	uint8_t str[] = "*8888";
-	displayWrite(&myDisplay, SCREEN_4, str, strlen((const char*)str), COLOR_RED, TX_ADDRESS_ALL);
-	vTaskDelay(2000);
-	displayClear(&myDisplay, 0, TX_ADDRESS_ALL);
-}
 
 static void getLastMenuData(void){
 	uint8_t cnt;
@@ -290,18 +284,18 @@ void t_processing_display(void *pvParameters){
 		// Key update
 		case event_KEY:
 			menuUpdate(
-					decodeKeyAction(  ((queueKeyActionItemPayload*)actionMember.payload)->action ,
-					                  ((queueKeyActionItemPayload*)actionMember.payload)->periodIndex
+					decodeKeyAction(  actionMember.queueType.KeyAction.action,
+							          actionMember.queueType.KeyAction.periodIndex
 					               )
 					  );
 			// Start ESC timer
-			if( MENU_ACTION_ESC != ((queueKeyActionItemPayload*)actionMember.payload)->action  )
+			if( MENU_ACTION_ESC !=  actionMember.queueType.KeyAction.action )
 			{
 			    xTimerStart(escTimerHandler,10);
 			}
 			break;
 		case event_Brightnes:
-			switch(  ((queueSetBrightnesItemPayload*)actionMember.payload)->action  ){
+			switch( actionMember.queueType.Brightnes.action ){
 			case MENU_ACTION_SWITCH_TO_TEST:
 				tempSaveBrightnes = myDisplay.currentSettings.brightnes;
 				myDisplay.currentSettings.brightnes = TEST_BRIGHTNES_UNDEX;

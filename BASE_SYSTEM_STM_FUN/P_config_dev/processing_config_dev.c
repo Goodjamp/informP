@@ -209,8 +209,6 @@ REZ_REQ_CHEACK_SLAVE processing_config_check_is_input_reg(void* p_check_address)
 // ILLEGAL_DATA_ADRESS - недопустимый адрес
 
 REZ_REQ_CHEACK_SLAVE processing_config_check_is_preset_multiple_reg(void* p_check_address){
-	u16 address_reg=(*((u16*)p_check_address)); // адрес начала запрашиваимых регистров
-	u16 num_reg=(*((u16*)p_check_address++)); // количество запрашиваимых регистров
 	return REQ_SLAVE_OK;
 }
 

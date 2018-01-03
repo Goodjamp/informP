@@ -210,7 +210,7 @@ void init_a_bit_status(void){
 	// до MAX_NUM_MODUL-1 - потому что на последнем месте позиция MODBUS (проанализированно выше)
 	for(;counter_bit<(MAX_NUM_MODUL-1);counter_bit++)
 	{
-		if((1<<counter_bit)& (*p_dev_staff)){
+		if((1<<counter_bit) & (*p_dev_staff)){
 			a_bit_status[counter_dev]=counter_bit+NUM_PORT_MODBUS;
 			counter_dev++;
 		}

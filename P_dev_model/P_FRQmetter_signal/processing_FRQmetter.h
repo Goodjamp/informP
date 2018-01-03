@@ -13,8 +13,8 @@
 
 
 // frequency threshold F*1000
-#define FRQ_MAX 55000
-#define FRQ_MIN 45000
+#define FRQ_MAX 51000
+#define FRQ_MIN 49000
 
 
 // GPIO timer description

@@ -292,7 +292,7 @@ int main(void)
 #endif
 
 // задача управления процесом програмной презагрузки и световой индикации режима работы
-	//xTaskCreate(  t_processing_reset_control, ( const char * ) "WatcDogTask", 70,	NULL, 4, NULL );
+	xTaskCreate(  t_processing_reset_control, ( const char * ) "WatcDogTask", 70,	NULL, 4, NULL );
 
 	NVIC_SetPriorityGrouping(NVIC_PriorityGroup_4);
 

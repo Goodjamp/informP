@@ -71,10 +71,15 @@ typedef struct{
 }queueSetBrightnesItemPayload;
 //#pragma pack(pop)
 
+typedef union{
+	uint8_t                      payload[ACTION_QUEUE_PAYLOAD];
+	queueKeyActionItemPayload    KeyAction;
+	queueSetBrightnesItemPayload Brightnes;
+}queueMesType;
 
 typedef struct{
-	uint8_t type;
-	uint8_t payload[ACTION_QUEUE_PAYLOAD];
+	uint32_t     type;
+	queueMesType queueType;
 }actionQueueMember;
 
 
@@ -82,5 +87,6 @@ typedef struct{
 //---------MENU PROCESSING FUNCTION PROTOTYPE-------------------------------
 //--------------------------------------------------------------------------
 uint16_t display_calc_address_oper_reg(S_display_address *ps_sensor_address, u16 adres_start);
+void saveMenuConfigData(void);
 
 #endif // PROCESSING_DISPLAY_H_

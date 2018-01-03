@@ -84,6 +84,8 @@ void testMenuUpdate(menuActionListDef inAction){
         menuDescription.displayState = DISPLAY_MENU_WORK;
         setBreightnes( (uint8_t)MENU_ACTION_SWITCH_TO_WORK );
         break;
+	    default:
+	    break;
 	}
 
 }

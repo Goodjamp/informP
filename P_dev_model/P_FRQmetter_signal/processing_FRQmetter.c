@@ -27,7 +27,7 @@
 extern S_address_oper_data s_address_oper_data;
 
 xSemaphoreHandle semaphoreUpdateFRQ;
-static uint16_t status;
+//static uint16_t status;
 static S_FRQmetter_user_config *s_FRQConfig;
 
 
@@ -183,7 +183,7 @@ void t_processing_FRQmetter(void *pvParameters){
 	s_FRQConfig =(S_FRQmetter_user_config*)pvParameters;
 
     // init state - ERROR (up to obtain first result)
-	updateFrqStatus(FRQ_STATUS_ALLARM);
+	updateFrqStatus(FRQ_STATUS_ERROR);
 
 	//	Configure all peripherals
 	frqGPIOConfig();
@@ -194,7 +194,7 @@ void t_processing_FRQmetter(void *pvParameters){
 
 		if(xSemaphoreTake(semaphoreUpdateFRQ,ERROR_TIMEOUT_MS ) == pdFALSE){
             //error
-			updateFrqStatus(FRQ_STATUS_ALLARM);
+			updateFrqStatus(FRQ_STATUS_ERROR);
 			continue;
 		}
 
@@ -205,11 +205,11 @@ void t_processing_FRQmetter(void *pvParameters){
 		frq = frq  + s_FRQConfig->frqCorrection*10;
 		if((frq < FRQ_MAX) && (frq > FRQ_MIN)){
 			updateFrqStatus(FRQ_STATUS_OK);
-			processing_mem_map_write_s_proces_object_modbus(&frq, 1, s_address_oper_data.s_FRQmetter_address.rez_FRQmetter);
 		}
 		else{
 			updateFrqStatus(FRQ_STATUS_ALLARM);
 		}
+		processing_mem_map_write_s_proces_object_modbus(&frq, 1, s_address_oper_data.s_FRQmetter_address.rez_FRQmetter);
 		logFRQ(totatalCNT, frq);
 		frqRezMes.updateCNT = 0;
 		frqRezMes.inputCaptureCNT = 0;

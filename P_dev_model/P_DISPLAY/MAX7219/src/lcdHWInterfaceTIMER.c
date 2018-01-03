@@ -51,7 +51,7 @@ static volatile struct {
 	TX_ADDRESS address;
 } ldTxDef;
 
-static volatile struct{
+static struct{
     uint16_t data;
     uint8_t  txState: 2;
     uint8_t  clockState: 2;

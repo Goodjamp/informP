@@ -4,8 +4,10 @@
  *  Created on: Feb 6, 2012
  *      Author: Gerasimchuk
  */
+#include "stddef.h"
 
 #include "processing_USART.h"
+
 
 
 //----USART Tx/Rx bufers---------------------------------------------------
@@ -189,10 +191,10 @@ USART_errort  ConfigureUSART(const S_port_config *ps_port_unit_config, USART_Typ
 	USART_InitTypeDef USART_InitStructure;
 	USART_ClockInitTypeDef USART_ClockInitStruct;
 	GPIO_InitTypeDef GPIO_InitStructure;
-	GPIO_TypeDef  *GPIO_USART_port_TX;
-	GPIO_TypeDef  *GPIO_USART_port_RX;
-	uint16_t GPIO_USART_pin_TX;
-	uint16_t GPIO_USART_pin_RX;
+	GPIO_TypeDef  *GPIO_USART_port_TX = NULL;
+	GPIO_TypeDef  *GPIO_USART_port_RX = NULL;
+	uint16_t GPIO_USART_pin_TX = 0;
+	uint16_t GPIO_USART_pin_RX = 0;
 	u8 counter;
 
 	// ищу запрашиваимый USART в списке доступных

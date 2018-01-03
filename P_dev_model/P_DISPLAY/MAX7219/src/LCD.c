@@ -165,9 +165,9 @@ void displayWrite(displayHandlerDef *displayHandlerIn, uint16_t numString, uint8
 	// set max#2 - 7 segment 4 ripple colors digits
 	for(cnt = 0 ; cnt < (strSize-1); cnt++)
 	{
-		if(str[cnt + 1] >= 0x80 ){ // current symbol in first layer
+		if(str[cnt + seg7Shift] >= 0x80 ){ // current symbol in first layer
 			digCnt--;
-			str[cnt + 1] &= 0b1111111;
+			str[cnt + seg7Shift] &= 0b1111111;
 			layer = LAYER_ORDER_SECOND;
 		}
 		else
