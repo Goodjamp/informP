@@ -12,7 +12,9 @@
 
 #include "stm32f10x_gpio.h"
 
+//P4
 #define debugPin1  GPIO_Pin_2
+//P5
 #define debugPin2  GPIO_Pin_3
 #define debugPort1 GPIOA
 #define debugPort2 GPIOA

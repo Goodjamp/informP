@@ -29,6 +29,7 @@
 extern S_address_oper_data s_address_oper_data;
 DS1621MessStatus mesStatus;
 xSemaphoreHandle semaphoreUpdateFRQ;
+static BME280_STATUS bmeStatus;
 
 //---------------------------------I2C user implementation functions-----------------------
 void i2cInitGpio(uint8_t step){
@@ -113,51 +114,98 @@ void i2c_init(void){
 
 BME280Handler sensorHandler;
 
-void initBME280(void){
-	BME280_init(&sensorHandler, BME280_ADDRESS_HIGHT);
-	BME280_setValueMesState(&sensorHandler, MES_VALUE_TEMPERATURE, MES_STATE_ENABLE);
-	BME280_setOverSample(&sensorHandler, MES_VALUE_HUMIDITY, OVERSEMPLE_16);
-	BME280_setValueMesState(&sensorHandler, MES_VALUE_PRESSURE, MES_STATE_ENABLE);
-	BME280_setOverSample(&sensorHandler, MES_VALUE_HUMIDITY, OVERSEMPLE_16);
-	BME280_setValueMesState(&sensorHandler, MES_VALUE_HUMIDITY, MES_STATE_ENABLE);
-	BME280_setOverSample(&sensorHandler, MES_VALUE_HUMIDITY, OVERSEMPLE_16);
 
-	BME280_setMesDelay(&sensorHandler, MEASUREMENT_DELAY_65_5ms);
+BME280_STATUS initI2C_Sensor(void){
+	BME280_STATUS bmeStatus;
+	bool sensorIsOnLine = false;
+	i2c_init();
+	BME280_setI2CAddress(&sensorHandler, BME280_ADDRESS_HIGHT);
+	if(BME280_STATUS_OK  != (bmeStatus = BME280_isOnTheLine(&sensorHandler, &sensorIsOnLine) ) ){
+        return bmeStatus;
+	}
+
+	if( !sensorIsOnLine ){
+		return BME280_STATUS_SENSOR_ERROR;
+	}
+
+	if(BME280_STATUS_OK  != (bmeStatus = BME280_init(&sensorHandler) ) )
+	{
+		return bmeStatus;
+	}
+	// Enable measurement all value with 16 oversemple
+	if(BME280_STATUS_OK  != (bmeStatus = BME280_setValueMesState(&sensorHandler, MES_VALUE_TEMPERATURE, MES_STATE_ENABLE) ) )
+	{
+		return bmeStatus;
+	}
+	if(BME280_STATUS_OK  != (bmeStatus = BME280_setOverSample(&sensorHandler, MES_VALUE_HUMIDITY, OVERSEMPLE_16) ) )
+	{
+		return bmeStatus;
+	}
+	if(BME280_STATUS_OK  != (bmeStatus = BME280_setValueMesState(&sensorHandler, MES_VALUE_PRESSURE, MES_STATE_ENABLE) ) )
+	{
+		return bmeStatus;
+	}
+	if(BME280_STATUS_OK  != (bmeStatus = BME280_setOverSample(&sensorHandler, MES_VALUE_HUMIDITY, OVERSEMPLE_16) ) )
+	{
+		return bmeStatus;
+	}
+	if(BME280_STATUS_OK  != (bmeStatus = BME280_setValueMesState(&sensorHandler, MES_VALUE_HUMIDITY, MES_STATE_ENABLE) ) )
+	{
+		return bmeStatus;
+	}
+	if(BME280_STATUS_OK  != (bmeStatus = BME280_setOverSample(&sensorHandler, MES_VALUE_HUMIDITY, OVERSEMPLE_16) ) )
+	{
+		return bmeStatus;
+	}
+    // set delay between measurement equal 65 ms
+	if(BME280_STATUS_OK  != (bmeStatus = BME280_setMesDelay(&sensorHandler, MEASUREMENT_DELAY_65_5ms) ) )
+	{
+		return bmeStatus;
+	}
+
+
 }
+
+
 
 void t_processing_sensor(void *pvParameters){
 	//S_sensor_user_config *s_FRQConfig =(S_sensor_user_config*)pvParameters;
 	uint16_t rezMes = 0;
-
 	float rezMesHumidity;
 	float rezMesTemperature;
 	float rezMesPressure;
-	BME280_STATUS bmeRezMes;
 	uint16_t status;
+	bmeStatus = initI2C_Sensor();
 
-	i2c_init();
-	initBME280();
+	status = (bmeStatus == BME280_STATUS_OK) ? SENSOR_OK : SENSOR_ERROR;
+	processing_mem_map_write_s_proces_object_modbus((uint16_t*)&status, 1, s_address_oper_data.s_sensor_address.status_sensor);
 
 	while(1){
-		debugPin_2_Set;
-		bmeRezMes = BME280_forcedMes(&sensorHandler, &rezMesTemperature, &rezMesPressure, &rezMesHumidity);
-		debugPin_2_Clear;
 
-		if (bmeRezMes == BME280_STATUS_COMUNICATION_ERROR)
+		if( BME280_STATUS_OK  != bmeStatus )
 		{
-			status = SENSOR_ERROR;
-			processing_mem_map_write_s_proces_object_modbus((uint16_t*)&status, 1, s_address_oper_data.s_sensor_address.status_sensor);
-
-			i2c_init();
-			//vTaskDelay(100);
 			debugPin_1_Set;
-			//initBME280();
+			if(BME280_STATUS_OK  == (bmeStatus = initI2C_Sensor()))
+			{
+				debugPin_1_Clear;
+				status = SENSOR_OK;
+			    processing_mem_map_write_s_proces_object_modbus((uint16_t*)&status, 1, s_address_oper_data.s_sensor_address.status_sensor);
+			    continue;
+			}
 			debugPin_1_Clear;
-
+			vTaskDelay(10);
 		}
-		else{
-			status = SENSOR_OK;
-			processing_mem_map_write_s_proces_object_modbus((uint16_t*)&status, 1, s_address_oper_data.s_sensor_address.status_sensor);
+		else
+		{
+			if(BME280_STATUS_OK  != (bmeStatus = BME280_forcedMes(&sensorHandler, &rezMesTemperature,
+					                                                              &rezMesPressure,
+					                                                              &rezMesHumidity) ) )
+			{
+				status = SENSOR_ERROR;
+				processing_mem_map_write_s_proces_object_modbus((uint16_t*)&status, 1, s_address_oper_data.s_sensor_address.status_sensor);
+				vTaskDelay(10);
+				continue;
+			}
 
 		    rezMes = rezMesTemperature*10;
 		    processing_mem_map_write_s_proces_object_modbus(&rezMes, 1, s_address_oper_data.s_sensor_address.rezTemperature);
@@ -167,10 +215,7 @@ void t_processing_sensor(void *pvParameters){
 		    processing_mem_map_write_s_proces_object_modbus(&rezMes, 1, s_address_oper_data.s_sensor_address.rezPressure_GPasc);
 		    rezMes = (rezMesPressure * PASCAL_TO_MMHG_COEF);
 		    processing_mem_map_write_s_proces_object_modbus(&rezMes, 1, s_address_oper_data.s_sensor_address.rezPressure_mmHg);
-
+		    vTaskDelay(500);
 		}
-
-        vTaskDelay(2000);
-
 	}
 }

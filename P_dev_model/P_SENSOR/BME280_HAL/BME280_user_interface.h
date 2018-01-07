@@ -12,6 +12,7 @@
 #define BME280_USER_INTERFASE_H_
 
 #include "stdint.h"
+#include "stdbool.h"
 
 #include "BME280_source.h"
 
@@ -67,7 +68,7 @@ typedef enum{
 	BME280_STATUS_OK,                     // SENSOR READY FOR OPERATION
 	BME280_STATUS_SENSOR_ERROR,           // SENSOR DATA ERROR
 	BME280_STATUS_COMUNICATION_ERROR,     // INTARFACE CONUMICATION ERROR
-	BME280_STATUS_BUSY // SENSOR IN MEASUREMEN PROCES
+	BME280_STATUS_BUSY                    // SENSOR IN MEASUREMEN PROCES
 }BME280_STATUS;
 
 typedef void(*bme280MesCallbackDef)(BME280_STATUS rezMesStatus,float rezMesTemperature,float rezMesPressure, float rezMesHumidity);
@@ -80,19 +81,22 @@ typedef struct{
 }BME280Handler;
 
 //BME280 configuration functions
-BME280_STATUS BME280_init               (BME280Handler *handler, uint8_t address);
+void          BME280_setI2CAddress      (BME280Handler *handler, uint8_t address);
+BME280_STATUS BME280_init               (BME280Handler *handler);
 BME280_STATUS BME280_setValueMesState   (BME280Handler *handler, MES_VALUE_DEF mesValue, MES_STATE_DEF newMesState);
 BME280_STATUS BME280_setOverSample      (BME280Handler *handler, MES_VALUE_DEF mesValue, OVERSEMPLE_DEF overSample);
 BME280_STATUS BME280_setFilterParameters(BME280Handler *handler, FILTER_DEF filterPar);
 BME280_STATUS BME280_setMesDelay        (BME280Handler *handler, MEASUREMENT_DELAY_DEF mesDelay);
 BME280_STATUS BME280_setMesCallBack     (BME280Handler *handler, bme280MesCallbackDef mesCallbak);
+BME280_STATUS BME280_reset              (BME280Handler *handler);
+BME280_STATUS BME280_isOnTheLine        (BME280Handler *handler, bool *onLine);
+
 // Measurement control functions
 BME280_STATUS BME280_forcedMes          (BME280Handler *handler, float *rezMesTemperature, float *rezMesPressure, float *rezMesHumidity);
 BME280_STATUS BME280_startContiniousMes (BME280Handler *handler, MES_STATE_DEF newMesState);
 
 // Information functions
 BME280_STATUS BME280_getStatus          (BME280Handler *handler);
-
 
 //-------------------------user implementation  functions----------------------
 typedef enum{

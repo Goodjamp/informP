@@ -6,6 +6,7 @@
   * @brief
   */
 #include "stdint.h"
+#include "stdbool.h"
 
 #include "BME280_source.h"
 #include "BME280_user_interface.h"
@@ -66,22 +67,26 @@ static BME280_STATUS updateRegister(uint8_t deviceAddres, uint8_t regAddres, uin
 }
 
 
-BME280_STATUS BME280_init(BME280Handler *handler, uint8_t address){
+void BME280_setI2CAddress(BME280Handler *handler, uint8_t address){
 	handler->selfAddress = address;
+}
+
+
+BME280_STATUS BME280_init(BME280Handler *handler){
 	uint16_t tempE4, tempE5, tempE6, tempE7;    // &((uint8_t)&data)[0]
 	// Read first area of calibration data
-	if(  BMEReadData( address, BME280_REG_CALIB00_23, (uint8_t*)&(handler->calibrationData), SIZE_OF_CALIBRATION_1) )
+	if(  BMEReadData( handler->selfAddress, BME280_REG_CALIB00_23, (uint8_t*)&(handler->calibrationData), SIZE_OF_CALIBRATION_1) )
 	//if(  BMEReadData( address, BME280_REG_CALIB00_23, (uint8_t*)&(&handler->calibrationData)[0], SIZE_OF_CALIBRATION_1) )
 	{
 		return BME280_STATUS_COMUNICATION_ERROR;
 	}
 	// Read second area of calibration data
-	if(  BMEReadData( address, BME280_REG_CALIB24, &((uint8_t*)(&handler->calibrationData))[SIZE_OF_CALIBRATION_1], SIZE_OF_CALIBRATION_2) )
+	if(  BMEReadData( handler->selfAddress, BME280_REG_CALIB24, &((uint8_t*)(&handler->calibrationData))[SIZE_OF_CALIBRATION_1], SIZE_OF_CALIBRATION_2) )
 	{
 		return BME280_STATUS_COMUNICATION_ERROR;
 	}
 	// Read  thread area of calibration data
-	if(  BMEReadData( address, BME280_REG_CALIB25_31, &((uint8_t*)(&handler->calibrationData))[SIZE_OF_CALIBRATION_1 + SIZE_OF_CALIBRATION_2], SIZE_OF_CALIBRATION_3) )
+	if(  BMEReadData( handler->selfAddress, BME280_REG_CALIB25_31, &((uint8_t*)(&handler->calibrationData))[SIZE_OF_CALIBRATION_1 + SIZE_OF_CALIBRATION_2], SIZE_OF_CALIBRATION_3) )
 	{
 		return BME280_STATUS_COMUNICATION_ERROR;
 	}
@@ -93,7 +98,6 @@ BME280_STATUS BME280_init(BME280Handler *handler, uint8_t address){
 	handler->calibrationData.dig_H5_ = (int16_t)((tempE6<<4) | (tempE5>>4) );
 	handler->calibrationData.dig_H6_ = (int8_t)tempE7;
 	// update some calib data 29
-
 	return handler->sensorStatus = BME280_STATUS_OK;
 }
 
@@ -151,6 +155,22 @@ BME280_STATUS BME280_setMesDelay(BME280Handler *handler, MEASUREMENT_DELAY_DEF m
     											  BME280_REG_CONFIG,
     		                                      newFieldValue,
     		                                      (uint8_t)(CONFIG_T_SB_FIELD_MASK << CONFIG_T_SB_FIELD_SHIFT));
+}
+
+
+BME280_STATUS BME280_isOnTheLine(BME280Handler *handler, bool *onLine){
+	uint8_t registerValue;
+	if( TRANSACION_STATUS_ERROR == (handler->sensorStatus = BMEReadData (handler->selfAddress, BME280_REG_ID, &registerValue, 1) ) ){
+		return handler->sensorStatus;
+	};
+	*onLine = (BME280_ID == registerValue) ? true : false;
+	return handler->sensorStatus;
+}
+
+
+BME280_STATUS BME280_reset(BME280Handler *handler){
+	uint8_t registerValue = BME280_RESET;
+	return handler->sensorStatus = BMEReadData (handler->selfAddress, BME280_REG_RESET, &registerValue, 1);
 }
 
 

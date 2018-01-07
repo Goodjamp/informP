@@ -196,7 +196,7 @@ void init_a_bit_status(void){
 	// статус масива - номер полей статуса порта
 	counter_dev=0;
 	counter_bit=0;
-	if(((0b1)& (*p_dev_staff))||((0b1000000000000000)& (*p_dev_staff)))
+	if( ((0b1) & (*p_dev_staff)) || ((0b1000000000000000)& (*p_dev_staff)) )
 	{
 		for(counter_bit=0;counter_bit<NUM_PORT_MODBUS;counter_bit++)
 			{

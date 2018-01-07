@@ -66,28 +66,17 @@ static void startTransactionI2C(I2C_DEF  i2cIn, uint8_t address_dev, uint8_t add
 	I2C_GenerateSTART(I2CProcessing[i2cIn].I2C_SEL, ENABLE);
 }
 
-#define SIZE_BUFF 10
-struct{
- uint16_t resStatus[SIZE_BUFF];
- uint16_t cnt;
-}I2Csr;
 
-static inline bool clearI2CComunication(I2C_DEF  i2cIn, uint16_t I2C_SR1Field){
+static inline bool clearI2CComunication(I2C_DEF  i2cIn, uint16_t I2C_SR, uint16_t I2C_SR1Field ){
 
-	I2Csr.resStatus[I2Csr.cnt] = I2C_ReadRegister(I2CProcessing[i2cIn].I2C_SEL, I2C_Register_SR1);
-
-	if( I2Csr.resStatus[I2Csr.cnt++] & I2C_SR1Field )
+	if( I2C_SR & I2C_SR1Field )
 	{
-		if(I2Csr.cnt >= SIZE_BUFF)
-			I2Csr.cnt = 0;
 		return true;
 	}
 
-	if(I2Csr.cnt >= SIZE_BUFF)
-		I2Csr.cnt = 0;
-
 	// FULL STOP I2C
 	I2CProcessing[i2cIn].transactionStatus = I2C_STATUS_TRANSACTION_ERROR;
+	I2CProcessing[i2cIn].stateCnt = 0;
 	I2C_ITConfig(I2CProcessing[i2cIn].I2C_SEL, I2C_IT_BUF, DISABLE);
 	I2C_ITConfig(I2CProcessing[i2cIn].I2C_SEL, I2C_IT_EVT, DISABLE);
 	//I2C_GenerateSTART(I2CProcessing[i2cIn].I2C_SEL, DISABLE);
@@ -100,13 +89,12 @@ static inline bool clearI2CComunication(I2C_DEF  i2cIn, uint16_t I2C_SR1Field){
 	if( I2CProcessing[i2cIn].I2C_SEL == I2C2 ){
 		NVIC_DisableIRQ(I2C2_EV_IRQn);
 	}
-	I2CProcessing[i2cIn].stateCnt = 0;
 	return false;
 }
 
 
 static inline uint32_t getTimeTransaction(I2C_DEF i2cIn, uint16_t numData){
-	return i2cgetTimeMs() + 30 + ( I2CProcessing[i2cIn].I2C_periodUs * (numData + 5))/10000;
+	return i2cgetTimeMs() + 10 + ( I2CProcessing[i2cIn].I2C_periodUs * (numData + 5))/10000;
 }
 
 
@@ -165,6 +153,7 @@ I2C_STATUS i2cTxData(I2C_DEF i2cIn, uint8_t address_dev, uint8_t address_reg, ui
 		{
 			// timeout stop transaction
 			I2CProcessing[i2cIn].transactionStatus = I2C_STATUS_TRANSACTION_ERROR;
+			I2CProcessing[i2cIn].stateCnt = 0;
 			break;
 		}
 
@@ -199,6 +188,7 @@ I2C_STATUS i2cRxData(I2C_DEF i2cIn, uint8_t address_dev, uint8_t address_reg, ui
 		{
 			// timeout stop transaction
 			I2CProcessing[i2cIn].transactionStatus = I2C_STATUS_TRANSACTION_ERROR;
+			I2CProcessing[i2cIn].stateCnt = 0;
 			break;
 		}
 
@@ -228,10 +218,17 @@ void I2C2_EV_IRQHandler(void){
 //Function: I2CProcessingInterrupRx
 //Description:State machine for TRANSMITE data to I2C device. Called from I2C interrupt
 static inline void I2CProcessingInterruptTx(I2C_DEF  i2cIn){
+
+	uint16_t I2C_SR = I2C_ReadRegister(I2CProcessing[i2cIn].I2C_SEL, I2C_Register_SR1);
+
+	if(I2C_STATUS_TRANSACTION_PROCESSING != I2CProcessing[i2cIn].transactionStatus )
+	{
+	    return;
+	}
 	switch(I2CProcessing[i2cIn].stateCnt){
 	case I2C_TX_SB:
 		// first interrupt should be completed SB generation
-		if( !clearI2CComunication(i2cIn, I2C_SR1_SB))
+		if( !clearI2CComunication(i2cIn, I2C_SR, I2C_SR1_SB))
 		{
 
 			return;
@@ -241,7 +238,7 @@ static inline void I2CProcessingInterruptTx(I2C_DEF  i2cIn){
 		I2CProcessing[i2cIn].stateCnt = I2C_TX_ADDRESS;
 		break;
 	case I2C_TX_ADDRESS:
-		if( !clearI2CComunication(i2cIn, I2C_SR1_ADDR))
+		if( !clearI2CComunication(i2cIn, I2C_SR, I2C_SR1_ADDR))
 		{
 			return;
 		};
@@ -253,7 +250,7 @@ static inline void I2CProcessingInterruptTx(I2C_DEF  i2cIn){
 		I2CProcessing[i2cIn].stateCnt = I2C_TX_TXE;
 		break;
 	case I2C_TX_TXE:
-		if( !clearI2CComunication(i2cIn, I2C_SR1_TXE))
+		if( !clearI2CComunication(i2cIn, I2C_SR, I2C_SR1_TXE))
 		{
 			return;
 		};
@@ -269,7 +266,7 @@ static inline void I2CProcessingInterruptTx(I2C_DEF  i2cIn){
 		I2CProcessing[i2cIn].cnt++;
 		break;
 	case I2C_TX_BTF:
-		if( !clearI2CComunication(i2cIn, I2C_SR1_BTF))
+		if( !clearI2CComunication(i2cIn, I2C_SR, I2C_SR1_BTF))
 		{
 			return;
 		};
@@ -286,11 +283,19 @@ static inline void I2CProcessingInterruptTx(I2C_DEF  i2cIn){
 //Function: I2CProcessingInterrupRx
 //Description:State machine for receive data from I2C device. Called from I2C interrupt
 static inline void I2CProcessingInterruptRx(I2C_DEF  i2cIn){
+	debugPin_2_Set;
+	debugPin_2_Clear;
+	uint16_t I2C_SR = I2C_ReadRegister(I2CProcessing[i2cIn].I2C_SEL, I2C_Register_SR1);
+
+	if( (I2C_STATUS_TRANSACTION_PROCESSING != I2CProcessing[i2cIn].transactionStatus ) || (I2C_SR == 0))
+	{
+	    return;
+	}
 	switch(I2CProcessing[i2cIn].stateCnt){
 	case I2C_RX_SB_F1:
 		//I2C_GenerateSTART(I2CProcessing[i2cIn].I2C_SEL, DISABLE);
 		// first interrupt should be completed SB generation
-		if( !clearI2CComunication(i2cIn, I2C_SR1_SB))
+		if( !clearI2CComunication(i2cIn, I2C_SR, I2C_SR1_SB))
 		{
 			return;
 		};
@@ -299,7 +304,7 @@ static inline void I2CProcessingInterruptRx(I2C_DEF  i2cIn){
 		break;
 	case I2C_RX_ADDRESS_F1:
 		//I2C_GenerateSTART(I2CProcessing[i2cIn].I2C_SEL, DISABLE);
-		if( !clearI2CComunication(i2cIn, I2C_SR1_ADDR))
+		if( !clearI2CComunication(i2cIn, I2C_SR, I2C_SR1_ADDR))
 		{
 			return;
 		};
@@ -309,7 +314,7 @@ static inline void I2CProcessingInterruptRx(I2C_DEF  i2cIn){
 		I2CProcessing[i2cIn].stateCnt = I2C_RX_BTF_F1;
 		break;
 	case I2C_RX_BTF_F1:
-		if( !clearI2CComunication(i2cIn, I2C_SR1_BTF))
+		if( !clearI2CComunication(i2cIn, I2C_SR, I2C_SR1_BTF))
 		{
 			return;
 		};
@@ -318,7 +323,7 @@ static inline void I2CProcessingInterruptRx(I2C_DEF  i2cIn){
 		I2CProcessing[i2cIn].stateCnt = I2C_RX_SB_F2;
 		break;
 	case I2C_RX_SB_F2:
-		if( !clearI2CComunication(i2cIn, I2C_SR1_SB))
+		if( !clearI2CComunication(i2cIn, I2C_SR, I2C_SR1_SB))
 		{
 			return;
 		};
@@ -327,7 +332,7 @@ static inline void I2CProcessingInterruptRx(I2C_DEF  i2cIn){
 		I2CProcessing[i2cIn].stateCnt = I2C_RX_ADDRESS_F2;
 		break;
 	case I2C_RX_ADDRESS_F2:
-		if( !clearI2CComunication(i2cIn, I2C_SR1_ADDR))
+		if( !clearI2CComunication(i2cIn, I2C_SR, I2C_SR1_ADDR))
 		{
 			return;
 		};
@@ -356,7 +361,7 @@ static inline void I2CProcessingInterruptRx(I2C_DEF  i2cIn){
 		I2CProcessing[i2cIn].stateCnt = I2C_RX_RXE_F2;
 		break;
 	case I2C_RX_RXE_F2:
-		if( !clearI2CComunication(i2cIn, I2C_SR1_RXNE))
+		if( !clearI2CComunication(i2cIn, I2C_SR, I2C_SR1_RXNE))
 		{
 			return;
 		};
@@ -376,7 +381,7 @@ static inline void I2CProcessingInterruptRx(I2C_DEF  i2cIn){
 		}
 		break;
 	case I2C_RX_BTF_F2: // in RX mode, I2C_RX_BTF flag set in case of DR not empty and shift reg not empty
-		if( !clearI2CComunication(i2cIn, I2C_SR1_BTF))
+		if( !clearI2CComunication(i2cIn, I2C_SR, I2C_SR1_BTF))
 		{
 			return;
 		};
@@ -389,7 +394,7 @@ static inline void I2CProcessingInterruptRx(I2C_DEF  i2cIn){
 		I2CProcessing[i2cIn].stateCnt = I2C_RX_RXE_F3;
 		break;
 	case I2C_RX_RXE_F3:
-		if( !clearI2CComunication(i2cIn, I2C_SR1_RXNE))
+		if( !clearI2CComunication(i2cIn, I2C_SR, I2C_SR1_RXNE))
 		{
 			return;
 		};
@@ -400,7 +405,7 @@ static inline void I2CProcessingInterruptRx(I2C_DEF  i2cIn){
 		I2CProcessing[i2cIn].stateCnt = 0;
 		break;
 	case I2C_RX_BTF_F3:
-		if( !clearI2CComunication(i2cIn, I2C_SR1_BTF))
+		if( !clearI2CComunication(i2cIn, I2C_SR, I2C_SR1_BTF))
 		{
 			return;
 		};

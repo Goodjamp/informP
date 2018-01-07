@@ -71,7 +71,7 @@ typedef enum{
 // режимы работы устройства
 typedef enum{
 	WORK_OK=0,
-	ERROR_MODE=1
+	ERROR_MODE
 }WORK_MODE;
 
 #pragma pack(push, 1)
