@@ -61,7 +61,7 @@ void clockSetCallback(rtcCalbackDef secondCallbackIn, rtcCalbackDef alarmCallbac
 void RTC_IRQHandler(void){
 	if( !(RTC_GetITStatus(RTC_IT_SEC) || RTC_GetITStatus(RTC_IT_ALR)) ) return;
 
-	if( RTC_GetITStatus(RTC_IT_SEC) )
+	if(   RTC_GetITStatus(RTC_IT_ALR) )
 	{
 		if( secondCallback != NULL)
 		{
@@ -69,7 +69,7 @@ void RTC_IRQHandler(void){
 		}
 		RTC_ClearITPendingBit(RTC_IT_SEC);
 	}
-	else if(  RTC_GetITStatus(RTC_IT_ALR) )
+	else if( RTC_GetITStatus(RTC_IT_SEC) )
 	{
 		if( alarmCallback != NULL)
 		{
@@ -83,6 +83,12 @@ void RTC_IRQHandler(void){
 void clockSetTime(uint32_t UTCtime){
 	RTC_SetCounter(UTCtime);
 }
+
+
+void clockSetAllarmTime(uint32_t UTCtime){
+	 RTC_SetAlarm(UTCtime);
+}
+
 
 uint32_t clockGetTime(void){
 	return RTC_GetCounter();
