@@ -83,11 +83,9 @@ static REZ_REQ_CHEACK_SLAVE processing_reset_control_single_registr(void* p_chec
 }
 
 
-//------------функция processing_config_set_dev_error-----------------------------------
-// функция processing_config_set_dev_error - выполняет установку аварийного бита устройства в глобальном статус регистре устройства
-//                                           и включает аварийную сигнализацию
-// входные аргументы:
-//num_bit - номер бита который нужно установить
+//@brief function processing_config_set_dev_error
+//@brief processing_config_set_dev_error - set error bit in global device error register and enable error indication
+//@[in]: num_bit - number bit that need to set
 void processing_reset_control_set_dev_error(u8 num_bit, FlagStatus state){
 	u16 state_status_reg, counter;
 	// нахожу порядочный номер бита модуля, который вызвал данную функцию

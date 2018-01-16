@@ -19,9 +19,11 @@
 #include "stm32f10x_tim.h"
 
 #include "processing_FRQmetter.h"
+#include "processing_FRQmetter_extern.h"
 #include "processing_mem_map_extern.h"
 #include "flash_operation.h"
 #include "funct.h"
+#include "processing_reset_control.h"
 
 // All data address
 extern S_address_oper_data s_address_oper_data;
@@ -187,16 +189,20 @@ void t_processing_FRQmetter(void *pvParameters){
 
 	//	Configure all peripherals
 	frqGPIOConfig();
-	frqTIMConfigure(); //8842
+	frqTIMConfigure();
 	vSemaphoreCreateBinary(semaphoreUpdateFRQ);
-	//xQueueSendToBackFromISR()
+
 	while(1){
 
 		if(xSemaphoreTake(semaphoreUpdateFRQ,ERROR_TIMEOUT_MS ) == pdFALSE){
-            //error
+            //set local error error
 			updateFrqStatus(FRQ_STATUS_ERROR);
+			// set global error status end error indication
+			SET_GLOBAL_STATUS(DEV_5);
 			continue;
 		}
+
+		RESET_GLOBAL_STATUS(DEV_5);
 
 		frqRezMes.f_ICinterrupt = 0;
 		totatalCNT = frqRezMes.updateCNT * TIM_MAX_CNT + frqRezMes.inputCaptureCNT;
