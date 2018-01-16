@@ -82,7 +82,8 @@ typedef enum {
 typedef enum {
     TX_STATE_BIT = 0,
     TX_STATE_LD,
-    TX_STATE_COMPLITE
+    TX_STATE_COMPLITE,
+    TX_STATE_NOT_DEFINED
 }TX_STATE;
 
 //void transmitCallback(void);

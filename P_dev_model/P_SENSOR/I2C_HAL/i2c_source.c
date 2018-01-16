@@ -283,8 +283,6 @@ static inline void I2CProcessingInterruptTx(I2C_DEF  i2cIn){
 //Function: I2CProcessingInterrupRx
 //Description:State machine for receive data from I2C device. Called from I2C interrupt
 static inline void I2CProcessingInterruptRx(I2C_DEF  i2cIn){
-	debugPin_2_Set;
-	debugPin_2_Clear;
 	uint16_t I2C_SR = I2C_ReadRegister(I2CProcessing[i2cIn].I2C_SEL, I2C_Register_SR1);
 
 	if( (I2C_STATUS_TRANSACTION_PROCESSING != I2CProcessing[i2cIn].transactionStatus ) || (I2C_SR == 0))

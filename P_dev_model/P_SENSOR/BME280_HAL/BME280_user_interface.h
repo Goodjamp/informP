@@ -89,7 +89,7 @@ BME280_STATUS BME280_setFilterParameters(BME280Handler *handler, FILTER_DEF filt
 BME280_STATUS BME280_setMesDelay        (BME280Handler *handler, MEASUREMENT_DELAY_DEF mesDelay);
 BME280_STATUS BME280_setMesCallBack     (BME280Handler *handler, bme280MesCallbackDef mesCallbak);
 BME280_STATUS BME280_reset              (BME280Handler *handler);
-BME280_STATUS BME280_isOnTheLine        (BME280Handler *handler, bool *onLine);
+BME280_STATUS BME280_isOnLine        (BME280Handler *handler, bool *onLine);
 
 // Measurement control functions
 BME280_STATUS BME280_forcedMes          (BME280Handler *handler, float *rezMesTemperature, float *rezMesPressure, float *rezMesHumidity);

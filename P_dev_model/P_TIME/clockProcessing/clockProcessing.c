@@ -63,30 +63,57 @@ void RTC_IRQHandler(void){
 
 	if(   RTC_GetITStatus(RTC_IT_ALR) )
 	{
-		if( secondCallback != NULL)
-		{
-			secondCallback(RTC_GetCounter());
-		}
-		RTC_ClearITPendingBit(RTC_IT_SEC);
-	}
-	else if( RTC_GetITStatus(RTC_IT_SEC) )
-	{
 		if( alarmCallback != NULL)
 		{
 			alarmCallback(RTC_GetCounter());
 		}
 		RTC_ClearITPendingBit(RTC_IT_ALR);
 	}
+	else if( RTC_GetITStatus(RTC_IT_SEC) )
+	{
+		if( secondCallback != NULL)
+		{
+			secondCallback(RTC_GetCounter());
+		}
+		RTC_ClearITPendingBit(RTC_IT_SEC);
+	}
 }
 
 
 void clockSetTime(uint32_t UTCtime){
-	RTC_SetCounter(UTCtime);
+
+	  RTC_EnterConfigMode();
+	  RTC_WaitForLastTask();
+
+	  /* Set RTC COUNTER MSB word */
+	  RTC->CNTH = UTCtime >> 16;
+	  RTC_WaitForLastTask();
+
+	  /* Set RTC COUNTER LSB word */
+	  RTC->CNTL = (UTCtime & RTC_LSB_MASK);
+	  RTC_WaitForLastTask();
+
+	  RTC_ExitConfigMode();
+	  RTC_WaitForLastTask();
+
 }
 
 
-void clockSetAllarmTime(uint32_t UTCtime){
-	 RTC_SetAlarm(UTCtime);
+void clockSetAlarmTime(uint32_t UTCtime){
+
+	  RTC_EnterConfigMode();
+	  RTC_WaitForLastTask();
+
+	  /* Set the ALARM MSB word */
+	  RTC->ALRH = UTCtime >> 16;
+	  RTC_WaitForLastTask();
+
+	  /* Set the ALARM LSB word */
+	  RTC->ALRL = (UTCtime & RTC_LSB_MASK);
+	  RTC_WaitForLastTask();
+
+	  RTC_ExitConfigMode();
+	  RTC_WaitForLastTask();
 }
 
 

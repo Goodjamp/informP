@@ -15,6 +15,7 @@
 
 #include "FreeRTOS.h"
 #include "task.h"
+#include "timers.h"
 #include "event_groups.h"
 
 #include "funct.h"
@@ -28,7 +29,6 @@
 
 #include "debugStuff.h"
 
-
 //--------------USART---------------------------------------------
 extern S_address_oper_data s_address_oper_data;
 extern S_Task_parameters task_parameters[NUMBER_MY_PROCES];
@@ -38,29 +38,23 @@ EventBits_t        rezWaiteEvent;
 
 static uint8_t usartReadBuff[USART_READ_BUFF_SIZE];
 static uint8_t numRezRead;
-static uint32_t timeSetUTC;
-static time_t timeGetUTC;
-struct tm *timeGet;
-struct tm timeUpdate;
 static GPRMC_Def myGPRMC;
 static uint16_t registerValue;
 static S_TIME_user_config *configData;
 
 static struct{
 	uint8_t initTIme:1;
-	uint8_t syncClock:1;
+	uint8_t fineTuneClock:1;
 	uint8_t reserved:6;
 }timeProcessingState = {
 		.initTIme = 1,
-		.syncClock = 0
+		.fineTuneClock = 0
 };
 
 static struct{
-	SEZON_TIME sezonTime;// = SEZON_TIME_NOT_SET;
-    uint8_t    correction;
+	SEZON_TIME sezonTime; // = SEZON_TIME_NOT_SET;
 }timeCorrection = {
-		.sezonTime  = SEZON_TIME_WINTER,
-		.correction = 0
+		.sezonTime  = SEZON_TIME_WINTER
 };
 
 //---------Sattic function definition---------
@@ -127,15 +121,19 @@ void secondClockCallBack(uint32_t seconCnt){
 			SECOND_EVENT_BIT,
 			&pxHigherPriorityTaskWoken
     );
-
 }
 
 
 void alarmClockCallBack(uint32_t seconCnt){
-	// pass mutex, swithc task
+	BaseType_t pxHigherPriorityTaskWoken;
+
+	xEventGroupSetBitsFromISR(
+			clockEventGroup,
+			ALARM_EVENT_BITS,
+			&pxHigherPriorityTaskWoken
+    );
 
 }
-
 
 /*@brief getLastWeekDate  - return date of last Sunday in month
  *@[in]  date        -  day of month, 1-31
@@ -166,7 +164,6 @@ static inline SEZON_TIME getSezonTime(struct tm *nowTime){
 	{
 
 		uint8_t lastSundayToStart = getLastWeekDate(nowTime->tm_mday, tm_wday, DAYLIGHT_START_MOUNTH_DAYS);
-		printf("DAYLIGHT_START_MOUNTH, last Sunday = %d\n",lastSundayToStart);
 	    if( nowTime->tm_mday > lastSundayToStart )
 		{
 			return SEZON_TIME_SUMMER;
@@ -181,7 +178,6 @@ static inline SEZON_TIME getSezonTime(struct tm *nowTime){
 	else if(DAYLIGHT_STOP_MOUNTH == tm_mon )
 	{
 		uint8_t lastSundaysToStop = getLastWeekDate(nowTime->tm_mday, tm_wday, DAYLIGHT_STOP_MOUNTH_DAYS);
-		printf("DAYLIGHT_START_MOUNTH, last Sunday = %d\n",lastSundaysToStop);
 	    if( nowTime->tm_mday < lastSundaysToStop )
 		{
 			return SEZON_TIME_SUMMER;
@@ -199,49 +195,6 @@ static inline SEZON_TIME getSezonTime(struct tm *nowTime){
 }
 
 
-
-static bool updateTime(uint8_t *gpsData, uint8_t numberOfData ){
-	parsGPS(&myGPRMC, gpsData, numberOfData);
-	if(rxGPSStatus((void*)&myGPRMC) == GPS_STATUS_COMPLETE)
-	{
-		//set time
-		timeUpdate.tm_year = myGPRMC.year + 100;
-		timeUpdate.tm_mon = myGPRMC.mounth - 1; // -1 according time.h
-		timeUpdate.tm_mday = myGPRMC.date;
-		timeUpdate.tm_hour = myGPRMC.honour;
-		timeUpdate.tm_min = myGPRMC.minutes;
-		timeUpdate.tm_sec = myGPRMC.seconds;
-		timeUpdate.tm_isdst = -1;
-		timeSetUTC = mktime(&timeUpdate) + dayLightCorrection.correction * SECONDS_PER_HOUR;
-		/*
-		if( dayLightCorrection.sezonTime == SEZON_TIME_NOT_SET)
-	    {
-			timeGet = gmtime(&timeGetUTC);
-		    dayLightCorrection.correction = ( SEZON_TIME_SUMMER == ( dayLightCorrection.sezonTime = getSezonTime( timeGet ) ) ) ? (1):(2);
-	    }
-	    */
-		clockSetTime(timeSetUTC);
-		return true;
-	}
-	return false;
-}
-
-
-/*
- *
- * 	numRezRead = ReadUSART(task_parameters[gpsUSARTNum].RdUSART, (uint8_t*)usartReadBuff, USART_READ_BUFF_SIZE, USART_READ_BUFF_TIME_MS);
-		if( numRezRead == 0)
-			continue;
-		if( GPSdata.cnt < GPSBuffSize )
-		{
-			memcpy(&GPSdata.data[GPSdata.cnt], usartReadBuff, numRezRead);
-			GPSdata.cnt += numRezRead;
-		}
- *
- *
- *
- * */
-
 static void initTimeProcessing(void){
 	clockInit();
 	clockSetCallback(secondClockCallBack, alarmClockCallBack);
@@ -250,7 +203,48 @@ static void initTimeProcessing(void){
 }
 
 
+static bool updateRTC(uint8_t *gpsData, uint8_t numberOfData ) {
+	struct tm timeUpdate;
+	time_t timeSetUTC, alarmSetUTC;
+	struct tm *timeGet;
+	parsGPS(&myGPRMC, usartReadBuff, numRezRead);
+	if (rxGPSStatus((void*) &myGPRMC) == GPS_STATUS_COMPLETE) {
+		//set time
+		timeUpdate.tm_year = myGPRMC.year + 100;
+		timeUpdate.tm_mon  = myGPRMC.mounth - 1; // -1 according time.h
+		timeUpdate.tm_mday = myGPRMC.date;
+		timeUpdate.tm_hour = myGPRMC.honour;
+		timeUpdate.tm_min  = myGPRMC.minutes;
+		timeUpdate.tm_sec  = myGPRMC.seconds;
+		timeUpdate.tm_isdst = -1;
+		// get UTC time for RTC
+		timeSetUTC = mktime(&timeUpdate);
+		// I need day of the week for detect current period of dayLight
+		timeGet = gmtime(&timeSetUTC);
+		uint8_t correction = ( SEZON_TIME_SUMMER == (timeCorrection.sezonTime = getSezonTime(timeGet)) ) ?
+						(configData->timeCorection + 1) :
+						(configData->timeCorection);
+        // add correction in seconds for current time
+		timeSetUTC += correction * SECONDS_PER_HOUR;
+		 // ALARM USE FOR UPDATE DAYLYGHT!!!!!!!!!!!!!   VERY IMPORTANT     !!!!!!!!!!!!!
+		timeUpdate.tm_min  = 0;
+		timeUpdate.tm_sec  = 0;
+		// calculate time for update: current time UTC  + one hour in seconds  + correction in seconds
+		alarmSetUTC =  mktime(&timeUpdate);
+		alarmSetUTC =  alarmSetUTC + SECONDS_PER_HOUR + correction * SECONDS_PER_HOUR;
+		// set alarm
+		clockSetAlarmTime( alarmSetUTC );
+		// set RTC
+		clockSetTime(timeSetUTC);
+		return true;
+	}
+	return false;
+}
+
 void t_processing_TIME(void *p_task_par){
+	uint8_t temp = 0;
+	time_t timeGetUTC;
+	struct tm *timeGet;
 	configData = (S_TIME_user_config*)p_task_par;
 	// create event group for processing clock event
 	clockEventGroup= xEventGroupCreate();
@@ -260,72 +254,52 @@ void t_processing_TIME(void *p_task_par){
 	registerValue = TIME_STATUS_ERROR;
 	processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.status_TIME);
 
+	Clrinbuf_without_time(&task_parameters[gpsUSARTNum]);
 	while(1)
 	{
 		numRezRead = ReadUSART(task_parameters[gpsUSARTNum].RdUSART, (uint8_t*)usartReadBuff, USART_READ_BUFF_SIZE, USART_READ_BUFF_TIME_MS);
 		if( 0 != numRezRead)
 		{
-			parsGPS(&myGPRMC, usartReadBuff, numRezRead);
-			if(rxGPSStatus((void*)&myGPRMC) == GPS_STATUS_COMPLETE)
-			{
-				//set time
-				timeUpdate.tm_year = myGPRMC.year + 100;
-				timeUpdate.tm_mon = myGPRMC.mounth - 1; // -1 according time.h
-				timeUpdate.tm_mday = myGPRMC.date;
-				timeUpdate.tm_hour = myGPRMC.honour;
-				timeUpdate.tm_min = myGPRMC.minutes;
-				timeUpdate.tm_sec = myGPRMC.seconds;
-				timeUpdate.tm_isdst = -1;
-				timeSetUTC = mktime(&timeUpdate);
-                // I need day of the week
-				timeGet = gmtime(&timeGetUTC);
-				timeCorrection.correction = ( SEZON_TIME_SUMMER == ( dayLightCorrection.sezonTime = getSezonTime( timeGet ) ) ) ?
-						                        (configData->timeCorection + 1):
-						                        (configData->timeCorection);
-
-				timeGetUTC += timeCorrection.correction * SECONDS_PER_HOUR;
-				clockSetTime(timeSetUTC);
-				break;
-			}
-
-			/*
-			if( updateTime(usartReadBuff, USART_READ_BUFF_SIZE) )
-				break;
-				*/
+		    if (updateRTC(usartReadBuff, numRezRead))
+		    {
+			    break;
+		    }
 		}
 	}
 	// set clock update time
 	registerValue = TIME_STATUS_OK;
 	processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.status_TIME);
+
 	while(1){
 
 		// wait for any time event
-		if( timeProcessingState.syncClock )
+		if( timeProcessingState.fineTuneClock )
 		{
 			// update RTC
+			debugPin_1_Set;
 			numRezRead = ReadUSART(task_parameters[gpsUSARTNum].RdUSART, (uint8_t*)usartReadBuff, USART_READ_BUFF_SIZE, USART_READ_BUFF_TIME_MS);
 			if( 0 != numRezRead)
 			{
-				if ( updateTime(usartReadBuff, USART_READ_BUFF_SIZE) )
+				if ( updateRTC(usartReadBuff, numRezRead) )
 				{
-					 timeProcessingState.syncClock = 0;
+					 timeProcessingState.fineTuneClock = 0;
 				}
 			}
+			debugPin_1_Clear;
 		    rezWaiteEvent = xEventGroupWaitBits(
 			    	clockEventGroup,
-				    SECOND_EVENT_BIT | ALARM_EVENT_BITS,
+				    ( SECOND_EVENT_BIT | ALARM_EVENT_BITS  ),
 				    pdTRUE,
 				    pdFALSE,
 				    0
 				    );
-
 		}
 		else
 		{
 			// infinity wait for any time processing event
 		    rezWaiteEvent = xEventGroupWaitBits(
 			    	clockEventGroup,
-				    SECOND_EVENT_BIT | ALARM_EVENT_BITS,
+				    ( SECOND_EVENT_BIT | ALARM_EVENT_BITS ),
 				    pdTRUE,
 				    pdFALSE,
 				    portMAX_DELAY
@@ -334,7 +308,8 @@ void t_processing_TIME(void *p_task_par){
 
 		if( rezWaiteEvent & SECOND_EVENT_BIT ) // processing second event
 		{
-			// get curent time value
+
+			// get current date/time value
 			timeGetUTC = clockGetTime();
 			timeGet = gmtime(&timeGetUTC);
 
@@ -370,7 +345,19 @@ void t_processing_TIME(void *p_task_par){
 		}
 		else if( rezWaiteEvent & ALARM_EVENT_BITS ) // processing alarm event, dayLight update
 		{
-			timeProcessingState.syncClock = 1;
+			timeProcessingState.fineTuneClock = 1;
+			// clear USART in buff
+			Clrinbuf_without_time(&task_parameters[gpsUSARTNum]);
+
+			if( (temp++) & 0x1)
+			{
+				debugPin_2_Clear;
+			}
+			else
+			{
+				debugPin_2_Set;
+			}
+
 		}
 	}
 }
