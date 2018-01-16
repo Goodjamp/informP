@@ -158,19 +158,32 @@ BME280_STATUS BME280_setMesDelay(BME280Handler *handler, MEASUREMENT_DELAY_DEF m
 }
 
 
-BME280_STATUS BME280_isOnTheLine(BME280Handler *handler, bool *onLine){
+BME280_STATUS BME280_isOnLine(BME280Handler *handler, bool *onLine){
 	uint8_t registerValue;
-	if( TRANSACION_STATUS_ERROR == (handler->sensorStatus = BMEReadData (handler->selfAddress, BME280_REG_ID, &registerValue, 1) ) ){
+	if(!IS_BME_AVAILABLE(handler))
+	{
 		return handler->sensorStatus;
-	};
+	}
+	if( TRANSACION_STATUS_ERROR == BMEReadData(handler->selfAddress, BME280_REG_ID, &registerValue, 1)  )
+	{
+		return handler->sensorStatus = BME280_STATUS_COMUNICATION_ERROR;;
+	}
 	*onLine = (BME280_ID == registerValue) ? true : false;
-	return handler->sensorStatus;
+	return handler->sensorStatus = BME280_STATUS_OK;
 }
 
 
 BME280_STATUS BME280_reset(BME280Handler *handler){
 	uint8_t registerValue = BME280_RESET;
-	return handler->sensorStatus = BMEReadData (handler->selfAddress, BME280_REG_RESET, &registerValue, 1);
+	if(!IS_BME_AVAILABLE(handler))
+	{
+		return handler->sensorStatus;
+	}
+	if( TRANSACION_STATUS_ERROR == BMEWriteData(handler->selfAddress, BME280_REG_RESET, &registerValue, 1) )
+	{
+		return handler->sensorStatus = BME280_STATUS_COMUNICATION_ERROR;
+	}
+	return handler->sensorStatus = BME280_STATUS_OK;
 }
 
 

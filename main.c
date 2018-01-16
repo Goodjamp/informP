@@ -74,7 +74,7 @@ int main(void)
 
 
 
-	delay_loop(); // ожидаю пока стабилизируеться питание
+	delay_loop();
 	// настройка портов логического управления
 	processing_simple_gpio();
 	// настраиваю карту памяти и механизм доступа к ней
@@ -108,7 +108,7 @@ int main(void)
 	}
 
 	//Run HID (usb)
-	USB_HIDInit();
+	//USB_HIDInit();
 
 	/*******************************************************************************/
 	//---------------ЗАПУСКАЮ ЗАДАЧИ ПРОТОКОЛОВ СОГЛАСНО НАСТРОЕК--------------------
@@ -292,7 +292,7 @@ int main(void)
 #endif
 
 // задача управления процесом програмной презагрузки и световой индикации режима работы
-	xTaskCreate(  t_processing_reset_control, ( const char * ) "WatcDogTask", 70,	NULL, 4, NULL );
+	//xTaskCreate(  t_processing_reset_control, ( const char * ) "WatcDogTask", 70,	NULL, 4, NULL );
 
 	NVIC_SetPriorityGrouping(NVIC_PriorityGroup_4);
 

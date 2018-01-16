@@ -120,7 +120,7 @@ BME280_STATUS initI2C_Sensor(void){
 	bool sensorIsOnLine = false;
 	i2c_init();
 	BME280_setI2CAddress(&sensorHandler, BME280_ADDRESS_HIGHT);
-	if(BME280_STATUS_OK  != (bmeStatus = BME280_isOnTheLine(&sensorHandler, &sensorIsOnLine) ) ){
+	if(BME280_STATUS_OK  != (bmeStatus = BME280_isOnLine(&sensorHandler, &sensorIsOnLine) ) ){
         return bmeStatus;
 	}
 
@@ -162,8 +162,7 @@ BME280_STATUS initI2C_Sensor(void){
 	{
 		return bmeStatus;
 	}
-
-
+	return BME280_STATUS_OK;
 }
 
 
@@ -184,15 +183,12 @@ void t_processing_sensor(void *pvParameters){
 
 		if( BME280_STATUS_OK  != bmeStatus )
 		{
-			debugPin_1_Set;
 			if(BME280_STATUS_OK  == (bmeStatus = initI2C_Sensor()))
 			{
-				debugPin_1_Clear;
 				status = SENSOR_OK;
 			    processing_mem_map_write_s_proces_object_modbus((uint16_t*)&status, 1, s_address_oper_data.s_sensor_address.status_sensor);
 			    continue;
 			}
-			debugPin_1_Clear;
 			vTaskDelay(10);
 		}
 		else
