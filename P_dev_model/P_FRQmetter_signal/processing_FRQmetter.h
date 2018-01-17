@@ -11,6 +11,8 @@
 #ifndef PROCESSING_FEQMETTER_H_
 #define PROCESSING_FEQMETTER_H_
 
+#include "stdint.h"
+#include "processing_FRQmetter_extern.h"
 
 // frequency threshold F*1000
 #define FRQ_MAX 51000
@@ -35,6 +37,12 @@
 #define ERROR_TIMEOUT_MS    1000
 
 #define GET_TIM_F(X)     (uint32_t)(X.PCLK2_Frequency)
+
+// union for cast FRQ_STATUS to uint16_t
+typedef union{
+	uint16_t   statusU16;
+	FRQ_STATUS statusUser;
+}castStatus;
 
 //Function prototype
 void t_processing_FRQ(void);

@@ -20,10 +20,12 @@ BF_processing_reset_control_ bf_counter_reset_control={0,0};
 u16 data_reset_reg;
 //параметры режимов индикации
 S_mode_blink s_mode_blink={
-		MOD_1_ON*10/PERIOD_TASK,MOD_1_OFF*10/PERIOD_TASK,
-		MOD_2_ON*10/PERIOD_TASK,MOD_2_OFF*10/PERIOD_TASK,
-		MOD_3_ON*10/PERIOD_TASK,MOD_3_OFF*10/PERIOD_TASK,
-		0,WORK_OK
+		.as_blink_par = { [WORK_OK]      = { MOD_1_ON*10/PERIOD_TASK, MOD_1_OFF*10/PERIOD_TASK },
+		                  [ERROR_MODE]   = { MOD_2_ON*10/PERIOD_TASK, MOD_2_OFF*10/PERIOD_TASK },
+		                  [NOT_USE_WORK] = {MOD_3_ON*10/PERIOD_TASK, MOD_3_OFF*10/PERIOD_TASK  } },
+		.counter     = 0,
+		.state_blink = 0,
+		.work_mode   = WORK_OK
 };
 // асоциативный масив для установки битов статуса
 u8 a_bit_status[MAX_NUM_MODULS]={[0 ... (MAX_NUM_MODULS-1)]=0};

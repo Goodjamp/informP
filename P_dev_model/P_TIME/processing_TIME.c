@@ -295,9 +295,11 @@ void t_processing_TIME(void *p_task_par){
 				if ( updateRTC(usartReadBuff, numRezRead) )
 				{
 					 timeProcessingState.fineTuneClock = 0;
+					 registerValue = TIME_STATUS_OK;
+					 processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.status_TIME);
 				}
 			}
-			// Alarm indication
+			// UPDATE TIME TIMOUT!!!!  Alarm indication
 			if( errorIndTimeThresHold_ms >= xTaskGetTickCount() )
 			{
 				// set alarm status and indication
