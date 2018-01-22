@@ -164,6 +164,6 @@ typedef struct{
 
 
 #define IS_BME_AVAILABLE(X) ((X->sensorStatus == BME280_STATUS_OK)||\
-						    (X->sensorStatus == BME280_STATUS_SENSOR_ERROR)|| \
-						    (X->sensorStatus == BME280_STATUS_COMUNICATION_ERROR))
+						     (X->sensorStatus == BME280_STATUS_SENSOR_ERROR)|| \
+						     (X->sensorStatus == BME280_STATUS_COMUNICATION_ERROR))
 #endif

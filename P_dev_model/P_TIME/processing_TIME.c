@@ -228,11 +228,11 @@ static bool updateRTC(uint8_t *gpsData, uint8_t numberOfData ) {
         // add correction in seconds for current time
 		timeSetUTC += correction * SECONDS_PER_HOUR;
 		 // ALARM USE FOR UPDATE DAYLYGHT!!!!!!!!!!!!!   VERY IMPORTANT     !!!!!!!!!!!!!
-		timeUpdate.tm_min  = 0;
-		timeUpdate.tm_sec  = 0;
+		//timeUpdate.tm_min  = 0;
+		//timeUpdate.tm_sec  = 0;
 		// calculate time for update: current time UTC  + one hour in seconds  + correction in seconds
 		alarmSetUTC =  mktime(&timeUpdate);
-		alarmSetUTC =  alarmSetUTC + SECONDS_PER_HOUR + correction * SECONDS_PER_HOUR;
+		alarmSetUTC =  alarmSetUTC + 3 + correction * SECONDS_PER_HOUR;
 		// set alarm
 		clockSetAlarmTime( alarmSetUTC );
 		// set RTC
@@ -272,14 +272,13 @@ void t_processing_TIME(void *p_task_par){
 			    break;
 		    }
 		}
-		if( errorIndTimeThresHold_ms >= xTaskGetTickCount() )
+		if( errorIndTimeThresHold_ms <= xTaskGetTickCount() )
 		{
 			// set global error status end error indication
 			SET_GLOBAL_STATUS(DEV_6);
 		}
 	}
 
-	// set clock update time
 	registerValue = TIME_STATUS_OK;
 	processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.status_TIME);
 
@@ -300,7 +299,7 @@ void t_processing_TIME(void *p_task_par){
 				}
 			}
 			// UPDATE TIME TIMOUT!!!!  Alarm indication
-			if( errorIndTimeThresHold_ms >= xTaskGetTickCount() )
+			if( errorIndTimeThresHold_ms <= xTaskGetTickCount() )
 			{
 				// set alarm status and indication
 				registerValue = TIME_STATUS_ALLARM;
@@ -360,9 +359,6 @@ void t_processing_TIME(void *p_task_par){
 			// update TIME
 			registerValue = (uint16_t)( ((timeGet->tm_hour) << 8) | (uint8_t)(timeGet->tm_min));
 			processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.TIME);
-			//Update status
-			registerValue = TIME_STATUS_OK;
-		    processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.status_TIME);
 
 		}
 		else if( rezWaiteEvent & ALARM_EVENT_BITS ) // processing alarm event, dayLight update

@@ -32,6 +32,27 @@ xSemaphoreHandle semaphoreUpdateFRQ;
 //static uint16_t status;
 static S_FRQmetter_user_config *s_FRQConfig;
 
+#define NUMBER_OF_RES   10
+
+struct{
+	uint16_t rezArray[NUMBER_OF_RES];
+	uint32_t summ;
+	uint16_t cnt;
+}frqMiddleRez;
+
+uint16_t updateMiddleRez(uint16_t newFrq){
+
+	frqMiddleRez.summ -= frqMiddleRez.rezArray[ frqMiddleRez.cnt ];
+	frqMiddleRez.summ += newFrq;
+	frqMiddleRez.rezArray[ frqMiddleRez.cnt++ ] = newFrq;
+
+	if(frqMiddleRez.cnt >= NUMBER_OF_RES)
+	{
+		frqMiddleRez.cnt = 0;
+	}
+   return (uint16_t)( frqMiddleRez.summ/NUMBER_OF_RES );
+}
+
 
 volatile struct{
 	uint8_t updateCNT;
@@ -237,8 +258,7 @@ void t_processing_FRQmetter(void *pvParameters){
  		frqRezMes.f_ICinterrupt = 0;
 		totatalCNT = frqRezMes.updateCNT * TIM_MAX_CNT + frqRezMes.inputCaptureCNT;
 		// calculate frq + correction
-		frq = ((float)(frqRezMes.df/(float)totatalCNT)*1000);
-		frq = frq  + s_FRQConfig->frqCorrection*10;
+		frq = updateMiddleRez( ((float)(frqRezMes.df/(float)totatalCNT)*1000)  + s_FRQConfig->frqCorrection*10 );
 		if((frq < FRQ_MAX) && (frq > FRQ_MIN)){
 			updateFrqStatus(FRQ_STATUS_OK);
 		}

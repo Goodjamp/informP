@@ -24,6 +24,8 @@
 #include "processing_sensor_extern.h"
 #include "processing_sensor.h"
 #include "processing_mem_map_extern.h"
+#include "processing_reset_control.h"
+
 #include "debugStuff.h"
 
 extern S_address_oper_data s_address_oper_data;
@@ -118,8 +120,11 @@ BME280Handler sensorHandler;
 BME280_STATUS initI2C_Sensor(void){
 	BME280_STATUS bmeStatus;
 	bool sensorIsOnLine = false;
+
 	i2c_init();
+
 	BME280_setI2CAddress(&sensorHandler, BME280_ADDRESS_HIGHT);
+    // Is sensor online ?
 	if(BME280_STATUS_OK  != (bmeStatus = BME280_isOnLine(&sensorHandler, &sensorIsOnLine) ) ){
         return bmeStatus;
 	}
@@ -166,7 +171,27 @@ BME280_STATUS initI2C_Sensor(void){
 }
 
 
-
+static void updateSensorStatus(SENSOR_STATUS newStatus){
+	static uint16_t currentSensorStatus = SENSOR_STATUS_NOT_SET;
+	if(currentSensorStatus == newStatus)
+	{
+		return;
+	}
+	currentSensorStatus = newStatus;
+	uint16_t regValue = (uint16_t)newStatus;
+	processing_mem_map_write_s_proces_object_modbus((uint16_t*)&regValue, 1, s_address_oper_data.s_sensor_address.status_sensor);
+    switch(regValue){
+    case SENSOR_STATUS_OK:
+		// set global error status end error indication
+		RESET_GLOBAL_STATUS(DEV_7);
+		break;
+    case SENSOR_STATUS_ERROR:
+		// set global error status end error indication
+		SET_GLOBAL_STATUS(DEV_7);
+		break;
+    default:break;
+    }
+}
 
 void t_processing_sensor(void *pvParameters){
 	//S_sensor_user_config *s_FRQConfig =(S_sensor_user_config*)pvParameters;
@@ -174,20 +199,22 @@ void t_processing_sensor(void *pvParameters){
 	float rezMesHumidity;
 	float rezMesTemperature;
 	float rezMesPressure;
-	uint16_t status;
+	//uint16_t status;
 	bmeStatus = initI2C_Sensor();
 
-	status = (bmeStatus == BME280_STATUS_OK) ? SENSOR_OK : SENSOR_ERROR;
-	processing_mem_map_write_s_proces_object_modbus((uint16_t*)&status, 1, s_address_oper_data.s_sensor_address.status_sensor);
+	//status = (bmeStatus == BME280_STATUS_OK) ? SENSOR_STATUS_OK : SENSOR_STATUS_ERROR;
+	updateSensorStatus(  (bmeStatus == BME280_STATUS_OK) ? SENSOR_STATUS_OK : SENSOR_STATUS_ERROR  );
+	//processing_mem_map_write_s_proces_object_modbus((uint16_t*)&status, 1, s_address_oper_data.s_sensor_address.status_sensor);
 
 	while(1){
 
 		if( BME280_STATUS_OK  != bmeStatus )
 		{
-			if(BME280_STATUS_OK  == (bmeStatus = initI2C_Sensor()))
+			if( BME280_STATUS_OK  == (bmeStatus = initI2C_Sensor()) )
 			{
-				status = SENSOR_OK;
-			    processing_mem_map_write_s_proces_object_modbus((uint16_t*)&status, 1, s_address_oper_data.s_sensor_address.status_sensor);
+				//status = SENSOR_STATUS_OK;
+				updateSensorStatus(SENSOR_STATUS_OK);
+				//processing_mem_map_write_s_proces_object_modbus((uint16_t*)&status, 1, s_address_oper_data.s_sensor_address.status_sensor);
 			    continue;
 			}
 			vTaskDelay(10);
@@ -198,8 +225,9 @@ void t_processing_sensor(void *pvParameters){
 					                                                              &rezMesPressure,
 					                                                              &rezMesHumidity) ) )
 			{
-				status = SENSOR_ERROR;
-				processing_mem_map_write_s_proces_object_modbus((uint16_t*)&status, 1, s_address_oper_data.s_sensor_address.status_sensor);
+				//status = SENSOR_STATUS_ERROR;
+				updateSensorStatus(SENSOR_STATUS_ERROR);
+				//processing_mem_map_write_s_proces_object_modbus((uint16_t*)&status, 1, s_address_oper_data.s_sensor_address.status_sensor);
 				vTaskDelay(10);
 				continue;
 			}
