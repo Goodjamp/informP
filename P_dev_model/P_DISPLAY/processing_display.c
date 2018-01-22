@@ -260,7 +260,7 @@ void t_processing_display(void *pvParameters){
 	// set value indication according last adjustments
 	getLastMenuData();
 
-	vTaskDelay(100);
+	vTaskDelay(30);
 	//welcomeScreen();
 	while(1){
 		xQueueReceive(menuQueue,(void*)&actionMember,  portMAX_DELAY );

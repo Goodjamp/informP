@@ -19,9 +19,11 @@
 #include "stm32f10x_tim.h"
 
 #include "processing_FRQmetter.h"
+#include "processing_FRQmetter_extern.h"
 #include "processing_mem_map_extern.h"
 #include "flash_operation.h"
 #include "funct.h"
+#include "processing_reset_control.h"
 
 // All data address
 extern S_address_oper_data s_address_oper_data;
@@ -29,6 +31,27 @@ extern S_address_oper_data s_address_oper_data;
 xSemaphoreHandle semaphoreUpdateFRQ;
 //static uint16_t status;
 static S_FRQmetter_user_config *s_FRQConfig;
+
+#define NUMBER_OF_RES   10
+
+struct{
+	uint16_t rezArray[NUMBER_OF_RES];
+	uint32_t summ;
+	uint16_t cnt;
+}frqMiddleRez;
+
+uint16_t updateMiddleRez(uint16_t newFrq){
+
+	frqMiddleRez.summ -= frqMiddleRez.rezArray[ frqMiddleRez.cnt ];
+	frqMiddleRez.summ += newFrq;
+	frqMiddleRez.rezArray[ frqMiddleRez.cnt++ ] = newFrq;
+
+	if(frqMiddleRez.cnt >= NUMBER_OF_RES)
+	{
+		frqMiddleRez.cnt = 0;
+	}
+   return (uint16_t)( frqMiddleRez.summ/NUMBER_OF_RES );
+}
 
 
 volatile struct{
@@ -167,11 +190,45 @@ u16 FRQmetter_calc_address_oper_reg(S_FRQmetter_address *ps_FRQmetter_address, u
 }
 
 
-
-
 static void updateFrqStatus(FRQ_STATUS newStatus){
-	uint16_t status = (uint16_t)newStatus;
-	processing_mem_map_write_s_proces_object_modbus(&status, 1, s_address_oper_data.s_FRQmetter_address.status_FRQmetter);
+	static FRQ_STATUS currentStatus = FRQ_STATUS_NOT_SET;
+	if( newStatus == currentStatus )
+	{
+		return;
+	}
+	// cast status
+	castStatus status = {
+		.statusUser = newStatus
+	};
+	//selected operation
+	switch( newStatus){
+	    case FRQ_STATUS_OK:
+        	// update global status
+	    	if( currentStatus == FRQ_STATUS_ERROR )
+	    	{
+		    	RESET_GLOBAL_STATUS(DEV_5);
+	    	}
+	    	processing_mem_map_write_s_proces_object_modbus(&status.statusU16, 1, s_address_oper_data.s_FRQmetter_address.status_FRQmetter);
+	    	currentStatus = FRQ_STATUS_OK;
+	    	break;
+	    case FRQ_STATUS_ALLARM:
+	        if( currentStatus == FRQ_STATUS_ERROR )
+	        {
+	        	// update global status
+	        	RESET_GLOBAL_STATUS(DEV_5);
+	        }
+	        processing_mem_map_write_s_proces_object_modbus(&status.statusU16, 1, s_address_oper_data.s_FRQmetter_address.status_FRQmetter);
+	        currentStatus = FRQ_STATUS_ALLARM;
+	        break;
+	    case FRQ_STATUS_ERROR:
+        	// update global status
+	    	SET_GLOBAL_STATUS(DEV_5);
+	        processing_mem_map_write_s_proces_object_modbus(&status.statusU16, 1, s_address_oper_data.s_FRQmetter_address.status_FRQmetter);
+	    	currentStatus = FRQ_STATUS_ERROR;
+	    	break;
+	    default: break;
+	}
+
 }
 
 /* @brief
@@ -183,26 +240,25 @@ void t_processing_FRQmetter(void *pvParameters){
 	s_FRQConfig =(S_FRQmetter_user_config*)pvParameters;
 
     // init state - ERROR (up to obtain first result)
-	updateFrqStatus(FRQ_STATUS_ERROR);
+	updateFrqStatus(FRQ_STATUS_OK);
 
 	//	Configure all peripherals
 	frqGPIOConfig();
-	frqTIMConfigure(); //8842
+	frqTIMConfigure();
 	vSemaphoreCreateBinary(semaphoreUpdateFRQ);
-	//xQueueSendToBackFromISR()
+
 	while(1){
 
-		if(xSemaphoreTake(semaphoreUpdateFRQ,ERROR_TIMEOUT_MS ) == pdFALSE){
-            //error
+		if( xSemaphoreTake(semaphoreUpdateFRQ,ERROR_TIMEOUT_MS ) == pdFALSE){
+            //set local error (in module register)
 			updateFrqStatus(FRQ_STATUS_ERROR);
 			continue;
 		}
-
-		frqRezMes.f_ICinterrupt = 0;
+        // processing result of measurement
+ 		frqRezMes.f_ICinterrupt = 0;
 		totatalCNT = frqRezMes.updateCNT * TIM_MAX_CNT + frqRezMes.inputCaptureCNT;
 		// calculate frq + correction
-		frq = ((float)(frqRezMes.df/(float)totatalCNT)*1000);
-		frq = frq  + s_FRQConfig->frqCorrection*10;
+		frq = updateMiddleRez( ((float)(frqRezMes.df/(float)totatalCNT)*1000)  + s_FRQConfig->frqCorrection*10 );
 		if((frq < FRQ_MAX) && (frq > FRQ_MIN)){
 			updateFrqStatus(FRQ_STATUS_OK);
 		}

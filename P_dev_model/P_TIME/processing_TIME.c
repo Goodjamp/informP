@@ -26,6 +26,7 @@
 #include "processing_TIME_extern.h"
 #include "clockProcessing.h"
 #include "GPSprocessing.h"
+#include "processing_reset_control.h"
 
 #include "debugStuff.h"
 
@@ -227,11 +228,11 @@ static bool updateRTC(uint8_t *gpsData, uint8_t numberOfData ) {
         // add correction in seconds for current time
 		timeSetUTC += correction * SECONDS_PER_HOUR;
 		 // ALARM USE FOR UPDATE DAYLYGHT!!!!!!!!!!!!!   VERY IMPORTANT     !!!!!!!!!!!!!
-		timeUpdate.tm_min  = 0;
-		timeUpdate.tm_sec  = 0;
+		//timeUpdate.tm_min  = 0;
+		//timeUpdate.tm_sec  = 0;
 		// calculate time for update: current time UTC  + one hour in seconds  + correction in seconds
 		alarmSetUTC =  mktime(&timeUpdate);
-		alarmSetUTC =  alarmSetUTC + SECONDS_PER_HOUR + correction * SECONDS_PER_HOUR;
+		alarmSetUTC =  alarmSetUTC + 3 + correction * SECONDS_PER_HOUR;
 		// set alarm
 		clockSetAlarmTime( alarmSetUTC );
 		// set RTC
@@ -245,6 +246,9 @@ void t_processing_TIME(void *p_task_par){
 	uint8_t temp = 0;
 	time_t timeGetUTC;
 	struct tm *timeGet;
+	TickType_t errorIndTimeThresHold_ms;
+
+
 	configData = (S_TIME_user_config*)p_task_par;
 	// create event group for processing clock event
 	clockEventGroup= xEventGroupCreate();
@@ -255,6 +259,8 @@ void t_processing_TIME(void *p_task_par){
 	processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.status_TIME);
 
 	Clrinbuf_without_time(&task_parameters[gpsUSARTNum]);
+	// calculate error indication time threshold
+	errorIndTimeThresHold_ms = xTaskGetTickCount() + ERROR_IND_TIME_THRESHOLD;
 	while(1)
 	{
 		numRezRead = ReadUSART(task_parameters[gpsUSARTNum].RdUSART, (uint8_t*)usartReadBuff, USART_READ_BUFF_SIZE, USART_READ_BUFF_TIME_MS);
@@ -262,17 +268,22 @@ void t_processing_TIME(void *p_task_par){
 		{
 		    if (updateRTC(usartReadBuff, numRezRead))
 		    {
+		    	RESET_GLOBAL_STATUS(DEV_6);
 			    break;
 		    }
 		}
+		if( errorIndTimeThresHold_ms <= xTaskGetTickCount() )
+		{
+			// set global error status end error indication
+			SET_GLOBAL_STATUS(DEV_6);
+		}
 	}
-	// set clock update time
+
 	registerValue = TIME_STATUS_OK;
 	processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.status_TIME);
 
 	while(1){
 
-		// wait for any time event
 		if( timeProcessingState.fineTuneClock )
 		{
 			// update RTC
@@ -283,9 +294,19 @@ void t_processing_TIME(void *p_task_par){
 				if ( updateRTC(usartReadBuff, numRezRead) )
 				{
 					 timeProcessingState.fineTuneClock = 0;
+					 registerValue = TIME_STATUS_OK;
+					 processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.status_TIME);
 				}
 			}
+			// UPDATE TIME TIMOUT!!!!  Alarm indication
+			if( errorIndTimeThresHold_ms <= xTaskGetTickCount() )
+			{
+				// set alarm status and indication
+				registerValue = TIME_STATUS_ALLARM;
+				processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.status_TIME);
+			}
 			debugPin_1_Clear;
+			// Take a last events without timeout
 		    rezWaiteEvent = xEventGroupWaitBits(
 			    	clockEventGroup,
 				    ( SECOND_EVENT_BIT | ALARM_EVENT_BITS  ),
@@ -305,7 +326,7 @@ void t_processing_TIME(void *p_task_par){
 				    portMAX_DELAY
 				    );
 		}
-
+        // processing event
 		if( rezWaiteEvent & SECOND_EVENT_BIT ) // processing second event
 		{
 
@@ -338,9 +359,6 @@ void t_processing_TIME(void *p_task_par){
 			// update TIME
 			registerValue = (uint16_t)( ((timeGet->tm_hour) << 8) | (uint8_t)(timeGet->tm_min));
 			processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.TIME);
-			//Update status
-			registerValue = TIME_STATUS_OK;
-		    processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.status_TIME);
 
 		}
 		else if( rezWaiteEvent & ALARM_EVENT_BITS ) // processing alarm event, dayLight update
@@ -348,7 +366,8 @@ void t_processing_TIME(void *p_task_par){
 			timeProcessingState.fineTuneClock = 1;
 			// clear USART in buff
 			Clrinbuf_without_time(&task_parameters[gpsUSARTNum]);
-
+			// calculate error indication time threshold
+			errorIndTimeThresHold_ms = xTaskGetTickCount() + ERROR_IND_TIME_THRESHOLD;
 			if( (temp++) & 0x1)
 			{
 				debugPin_2_Clear;

@@ -55,7 +55,7 @@ S_config_moduls s_config_moduls; // глобальная структура настроек МОДУЛЕЙ устрой
 
 void delay_loop(){
 	u32 coutner=0;
-	while(coutner<1000){
+	while(coutner<100){
 		coutner++;
 	}
 }
@@ -66,7 +66,7 @@ S_modbus_tsk_par s_modbus_tsk_par[NUM_PORT_MODBUS];
 int main(void)
 {
 	u8 k1;
-   debugPinConfig();
+    debugPinConfig();
 	//Run HID (usb)
 	//USB_HIDInit();
 	//t_processing_display((void*)&k1);
@@ -292,7 +292,7 @@ int main(void)
 #endif
 
 // задача управления процесом програмной презагрузки и световой индикации режима работы
-	//xTaskCreate(  t_processing_reset_control, ( const char * ) "WatcDogTask", 70,	NULL, 4, NULL );
+	xTaskCreate(  t_processing_reset_control, ( const char * ) "WatcDogTask", 70,	NULL, 4, NULL );
 
 	NVIC_SetPriorityGrouping(NVIC_PriorityGroup_4);
 
