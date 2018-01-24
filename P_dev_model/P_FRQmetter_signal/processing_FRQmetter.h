@@ -36,6 +36,10 @@
 // timout before ERROR STATUS
 #define ERROR_TIMEOUT_MS    1000
 
+//Average interval
+#define NUMBER_OF_RESULTS     8
+#define MAX_INDEX_OF_RESULTS  7
+
 #define GET_TIM_F(X)     (uint32_t)(X.PCLK2_Frequency)
 
 // union for cast FRQ_STATUS to uint16_t

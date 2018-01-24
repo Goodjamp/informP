@@ -32,27 +32,22 @@ xSemaphoreHandle semaphoreUpdateFRQ;
 //static uint16_t status;
 static S_FRQmetter_user_config *s_FRQConfig;
 
-#define NUMBER_OF_RES   10
+
 
 struct{
-	uint16_t rezArray[NUMBER_OF_RES];
+	uint16_t rezArray[NUMBER_OF_RESULTS];
 	uint32_t summ;
 	uint16_t cnt;
 }frqMiddleRez;
 
 uint16_t updateMiddleRez(uint16_t newFrq){
 
-	frqMiddleRez.summ -= frqMiddleRez.rezArray[ frqMiddleRez.cnt ];
-	frqMiddleRez.summ += newFrq;
+	frqMiddleRez.summ = frqMiddleRez.summ - frqMiddleRez.rezArray[ frqMiddleRez.cnt ] + newFrq;
 	frqMiddleRez.rezArray[ frqMiddleRez.cnt++ ] = newFrq;
+    frqMiddleRez.cnt &= (MAX_INDEX_OF_RESULTS);
 
-	if(frqMiddleRez.cnt >= NUMBER_OF_RES)
-	{
-		frqMiddleRez.cnt = 0;
-	}
-   return (uint16_t)( frqMiddleRez.summ/NUMBER_OF_RES );
+   return (uint16_t)( frqMiddleRez.summ/NUMBER_OF_RESULTS );
 }
-
 
 volatile struct{
 	uint8_t updateCNT;
