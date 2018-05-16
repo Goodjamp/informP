@@ -495,12 +495,18 @@ void t_Modbus_SLAVE(void *p_task_par) {
 		// выполн€ю проверку
 		rez_chack_req = cheack_req_modbus(ptaskparameters, ps_modbus_req_input,address_KP); //
 		// анализирую результаты проверки
-		if (rez_chack_req == REQ_SLAVE_ERROR) { // ошибка полей или контрольной суммы
+		if (rez_chack_req == REQ_SLAVE_ERROR)
+		{ // ошибка полей или контрольной суммы
 			continue;
-		} else if (rez_chack_req) { // ошибка из кодов исключени€
+		}
+		else if (rez_chack_req)
+		{ // ошибка из кодов исключени€
 			num_TSTI = modbus_exception(ps_modbus_req_input,(S_modbus_make_res*) buf_out_slave, rez_chack_req);
-		} else { // запрос коректный, вызываю ф-ю обработки команды
-			if((ps_modbus_req_input->function - 1)==16){
+		}
+		else
+		{ // запрос коректный, вызываю ф-ю обработки команды
+			if((ps_modbus_req_input->function - 1)==16)
+			{
 				ps_modbus_req_input->function =ps_modbus_req_input->function;
 			}
 			num_TSTI = p_procesing_slave[ps_modbus_req_input->function - 1]((void*) ps_modbus_req_input,(S_modbus_make_res*) buf_out_slave);

@@ -12,33 +12,39 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stdint.h"
 #include "usb_desc.h"
+#include "usb_user_setings.h"
 
 /*********************************************************************************/
 /*******************          REPORT DESCRIPTOR          *************************/
 /*********************************************************************************/
 const uint8_t CustomHID_ReportDescriptor[] ={
 		  0x06, 0xFF, 0x00,      /* USAGE_PAGE (Vendor Page: 0xFF00) */
-		    0x09, 0x01,            /* USAGE (Demo Kit)               */
+		    0x09, 0x01,            /* USAGE                          */
 		    0xa1, 0x01,            /* COLLECTION (Application)       */
 		    /* 6 */
 
 		    /* Out */
-		    0x85, 0x01,            /*     REPORT_ID (1)              */
-		    0x09, 0x01,            /*     USAGE (Out)	             */
+//		    0x85, 0x01,            /*     REPORT_ID (1)              */
+//		    0x09, 0x01,            /*     USAGE (Out)	             */
 		    0x15, 0x00,            /*     LOGICAL_MINIMUM (0)        */
 		    0x26, 0xff, 0x00,      /*     LOGICAL_MAXIMUM (255)      */
 		    0x75, 0x08,            /*     REPORT_SIZE (8)            */
-		    0x95, 0x09,            /*     REPORT_COUNT (1)           */
-		    0x91, 0x82,            /*     OUTPUT (Data,Var,Abs,Vol)  */
+		    0x95, EP_COUNT,            /*     REPORT_COUNT               */
+//		    0x91, 0x82,            /*     OUTPUT (Data,Var,Abs,Vol)  */
+		    0x09, 0x01,            /* USAGE */
 
+            0x81, 0b10,            /*     INPUT (Data,Var,Abs,Vol)   */
+		    0x95, EP_COUNT,            /*     REPORT_COUNT               */
+		    0x09, 0x01,            /* USAGE */
+		    0x91, 0b10,            /*     OUTPUT (Data,Var,Abs,Vol)  */
 		    /* In */
-		    0x85, 0x07,            /*     REPORT_ID (7)              */
-		    0x09, 0x07,            /*     USAGE (IN)             */
-		    0x15, 0x00,            /*     LOGICAL_MINIMUM (0)        */
-		    0x26, 0xff, 0x00,      /*     LOGICAL_MAXIMUM (255)      */
-		    0x75, 0x08,            /*     REPORT_SIZE (8)            */
-		    0x95, 0x04,            /*     REPORT_COUNT (4)           */
-		    0x81, 0x82,            /*     INPUT (Data,Var,Abs,Vol)   */
+//		    0x85, 0x07,            /*     REPORT_ID (7)              */
+//		    0x09, 0x07,            /*     USAGE (IN)             */
+//		    0x15, 0x00,            /*     LOGICAL_MINIMUM (0)        */
+//		    0x26, 0xff, 0x00,      /*     LOGICAL_MAXIMUM (255)      */
+//		    0x75, 0x08,            /*     REPORT_SIZE (8)            */
+//		    0x95, EP_SIZE,            /*     REPORT_COUNT              */
+//		    0x81, 0x82,            /*     INPUT (Data,Var,Abs,Vol)   */
 		    /* 161 */
 
 		    0xc0 	          /*     END_COLLECTION	             */
@@ -92,10 +98,10 @@ const sUSBHIDDescriptor CustomHID_ConfigDescriptor = {
 									.bDescriptorType = USB_INTERFACE_DESCRIPTOR_TYPE,
 									.bInterfaceNumber = 0x00,
 									.bAlternateSetting = 0x00,
-									.bNumEndpoints = EP_NUM_INTERFACE_1,
+									.bNumEndpoints = EP_NUM,
 									.bInterfaceClass = 0x03,    /* bInterfaceClass: HID */
 									.bInterfaceSubClass = 0x00,
-									.bInterfaceProtocol = 0x02, // ?
+									.bInterfaceProtocol = 0x00, // ?
 									.iInterface = 0x04,
 		},
 		/********USB HID descriptor***************/
@@ -114,33 +120,17 @@ const sUSBHIDDescriptor CustomHID_ConfigDescriptor = {
 									.bDescriptorType = USB_ENDPOINT_DESCRIPTOR_TYPE,
 									.bEndpointAddress = 0x81,   /* bEndpointAddress: Endpoint Address (IN) */
 									.bmAttributes = 0x03,       /* bmAttributes: Interrupt endpoint */
-									.wMaxPacketSize = 0x0A,   /* wMaxPacketSize: size Bytes max */
-									.bInterval =  10,           /* bInterval: Polling Interval, ms */
+									.wMaxPacketSize = EP_COUNT,   /* wMaxPacketSize: size Bytes max */
+									.bInterval = 1,           /* bInterval: Polling Interval, ms */
 		},
 		.userDesc.EndPointDesc[1] = {
 									.bLength = sizeof(sEndPointDescriptor),          /* bLength: Endpoint Descriptor size */
 									.bDescriptorType = USB_ENDPOINT_DESCRIPTOR_TYPE,
 									.bEndpointAddress = 0x01,   /* bEndpointAddress: Endpoint Address (OUT) */
 									.bmAttributes = 0x03,       /* bmAttributes: Interrupt endpoint */
-									.wMaxPacketSize = 0x0A,   /* wMaxPacketSize: size Bytes max */
-									.bInterval = 10,           /* bInterval: Polling Interval, ms */
-		},
-		.userDesc.EndPointDesc[2] = {
-									.bLength = sizeof(sEndPointDescriptor),          /* bLength: Endpoint Descriptor size */
-									.bDescriptorType = USB_ENDPOINT_DESCRIPTOR_TYPE,
-									.bEndpointAddress = 0x82,   /* bEndpointAddress: Endpoint Address (IN) */
-									.bmAttributes = 0x03,       /* bmAttributes: Interrupt endpoint */
-									.wMaxPacketSize = 0x0A,   /* wMaxPacketSize: size Bytes max */
-									.bInterval =  200,           /* bInterval: Polling Interval, ms */
-		},
-		.userDesc.EndPointDesc[3] = {
-									.bLength = sizeof(sEndPointDescriptor),          /* bLength: Endpoint Descriptor size */
-									.bDescriptorType = USB_ENDPOINT_DESCRIPTOR_TYPE,
-									.bEndpointAddress = 0x02,   /* bEndpointAddress: Endpoint Address (OUT) */
-									.bmAttributes = 0x03,       /* bmAttributes: Interrupt endpoint */
-									.wMaxPacketSize = 0x0A,   /* wMaxPacketSize: size Bytes max */
-									.bInterval = 200,           /* bInterval: Polling Interval, ms */
-		},
+									.wMaxPacketSize = EP_COUNT,   /* wMaxPacketSize: size Bytes max */
+									.bInterval = 1,           /* bInterval: Polling Interval, ms */
+		}
 };
 
 

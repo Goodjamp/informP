@@ -34,13 +34,16 @@ void addHIDEndPointOutCallBack(uint8_t EndPointNum,rxHIDHandler rxHandler, HIDRx
 /*
  * Tx Data to host
  */
-void txDataToHost(uint8_t endPointNum,uint8_t *data, uint8_t dataSize){
+uint8_t usbTx(uint8_t endPointNum,uint8_t *data, uint8_t dataSize){
+
 	if((PrevXferComplete[endPointNum] != 1) || (bDeviceState != CONFIGURED))
 	{
-		return;
+		return 0;
 	}
-	USB_SIL_Write(endPointNum, data, dataSize);
-	SetEPTxValid(endPointNum);
 	PrevXferComplete[endPointNum]=0;
-	return;
+
+	USB_SIL_Write( (0b10000000 | endPointNum) , data, dataSize);
+	SetEPTxValid(endPointNum);
+
+	return 1;
 }

@@ -9,10 +9,12 @@
 
 
 /* Includes ------------------------------------------------------------------*/
+#include "stdint.h"
 
 #include "hw_config.h"
 #include "usb_lib.h"
 #include "usb_istr.h"
+#include "usb_user_setings.h"
 
 #include "debugStuff.h"
 
@@ -20,8 +22,8 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-uint8_t Receive_Buffer[10];
-__IO uint8_t PrevXferComplete[EP_NUM_MAX] = {0,0,0,0,0,0,0,0};
+uint8_t Receive_Buffer[EP_COUNT+1];
+__IO uint8_t PrevXferComplete[EP_NUM_MAX] = {1,1,1,1,1,1,1,1};
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 /*******************************************************************************
@@ -37,24 +39,18 @@ typedef struct{
 	uint8_t *recBuffer;
 }endPointReceiv;
 
-
+extern uint8_t rxF;
 void EP1_OUT_Callback(void)
 {
 	USB_SIL_Read(EP1_OUT, Receive_Buffer);
 
 	//setFetureCallback();
-
+	rxF = 1;
 	SetEPRxStatus(ENDP1, EP_RX_VALID);
 }
 
 
-void EP2_OUT_Callback(void)
-{
-  USB_SIL_Read(EP2_OUT, Receive_Buffer);
 
-  SetEPRxStatus(ENDP2, EP_RX_VALID);
-
-}
 
 /*******************************************************************************
 * Function Name  : EP1_IN_Callback.
@@ -65,14 +61,14 @@ void EP2_OUT_Callback(void)
 *******************************************************************************/
 void EP1_IN_Callback(void)
 {
+	static uint8_t cnt = 0;
+	if(cnt++ & 0b1)
+		debugPin_1_Set;
+	else
+		debugPin_1_Clear;
   PrevXferComplete[ENDP1] = 1;
 }
 
-
-void EP2_IN_Callback(void)
-{
-	PrevXferComplete[ENDP2] = 1;
-}
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 

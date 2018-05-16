@@ -29,6 +29,6 @@ void addHIDEndPointOutCallBack(uint8_t EndPointNum,rxHIDHandler rxHandler, HIDRx
 /*
  * Tx Data to host
  */
-void txDataToHost(uint8_t endPointNum,uint8_t *data, uint8_t dataSize);
+uint8_t usbTx(uint8_t endPointNum,uint8_t *data, uint8_t dataSize);
 
 #endif

@@ -5,6 +5,7 @@
 /* Kernel includes. */
 #include "misc.h"
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <stddef.h>
 #include "stm32f10x.h"
@@ -28,6 +29,7 @@
 #include "processing_simple_gpio.h"
 #include "processing_reset_control.h"
 #include "HIDInterface.h"
+#include "usb_user_setings.h"
 #include "debugStuff.h"
 
 #include "GPSprocessing.h"
@@ -41,15 +43,15 @@
 #define mainQUEUE_RECEIVE_TASK_PRIORITY		1
 
 
-//указатель на структуру с указателями на буфера приема и передачи USART. из processing_USART.с
+//указатель на структуру с указателями на ,уфера приема и передачи USART. из processing_USART.с
 extern S_Task_parameters *ptask_parameters;
 extern S_connectmodbus *ps_connectmodbus_global;
 //структура описания карты памяти (из  mem_map_processing.c)
 extern S_mem_map s_mem_map;
 //масив указателей на USART которые пользователь разрешил использовать (из  processing_USART.c)
 extern USART_TypeDef *present_usart[NUMBER_USART];
-S_config_moduls s_config_moduls; // глобальная структура настроек МОДУЛЕЙ устройства, которая используеться програмными модулями в процесе работы програмы,
-// в отличии от карты памяти (в карте памяти область настроек можно изменить, но до перезагрузки изменения не
+S_config_moduls s_config_moduls; // гло,альная структура настроек МОДУЛЕЙ устройства, которая используеться програмными модулями в процесе ра,оты програмы,
+// в отличии от карты памяти (в карте памяти о,ласть настроек можно изменить, но до перезагрузки изменения не
 // активизируються !! )
 
 
@@ -60,7 +62,7 @@ void delay_loop(){
 	}
 }
 
-
+uint8_t rxF = 0;
 S_modbus_tsk_par s_modbus_tsk_par[NUM_PORT_MODBUS];
 //---------------------------------------------------------------------------
 int main(void)
@@ -68,7 +70,20 @@ int main(void)
 	u8 k1;
     debugPinConfig();
 	//Run HID (usb)
-	//USB_HIDInit();
+	USB_HIDInit();
+	uint8_t usbHIDBuff[EP_COUNT] = {0,1,1,1,1,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24};
+// CustomHID_init
+
+	while(1){
+		if( rxF != 1 )
+		{
+			continue;
+		}
+		if( usbTx( 1, usbHIDBuff, sizeof(usbHIDBuff)) )
+		{
+			usbHIDBuff[0]++;
+		}
+	}
 	//t_processing_display((void*)&k1);
 	//t_processing_sensor((void*)&k1);
 
@@ -97,10 +112,10 @@ int main(void)
 
 
 	// продолжаем конфигурацию устройства (см. описание функции) (копирую настройки из карты памяти в структуру,
-	// которая будет использоваться для иницииоизации и конфигурации модулей)
+	// которая ,удет использоваться для иницииоизации и конфигурации модулей)
 	processing_config_dev_init();
 	// Если устройство находиться в режиме "конфигурация по умолчанию", нужно в карту памяти считать к-цию пользователя
-	// Это зделано для того, чтобы при считывании конфигурации, когда устройство находиться в режиме
+	// Это зделано для того, что,ы при считывании конфигурации, когда устройство находиться в режиме
 	// "конфигурация по умолчанию", пользователь считывал к-цию пользователя, а не к-цию по умолчанию (к-ция
 	// по умолчанию известна из документации на устройство).
 	if(!STATE_JAMPER1){ // если джампер №1 установлен (лог 0 на входе) - считать конфигурацию пользователя
@@ -291,7 +306,7 @@ int main(void)
 	}
 #endif
 
-// задача управления процесом програмной презагрузки и световой индикации режима работы
+// задача управления процесом програмной презагрузки и световой индикации режима ра,оты
 	xTaskCreate(  t_processing_reset_control, ( const char * ) "WatcDogTask", 70,	NULL, 4, NULL );
 
 	NVIC_SetPriorityGrouping(NVIC_PriorityGroup_4);

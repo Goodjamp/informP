@@ -104,7 +104,7 @@ typedef struct{
 typedef struct {
 	sInetrfaceDescriptor sInetrfaceDesc;
 	sHIDDescriptor       HIDDesc;
-	sEndPointDescriptor  EndPointDesc[EP_NUM_INTERFACE_1];
+	sEndPointDescriptor  EndPointDesc[EP_NUM];
 }sInetrfaceDescUser;
 
 typedef struct{
