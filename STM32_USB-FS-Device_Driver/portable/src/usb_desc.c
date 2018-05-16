@@ -121,7 +121,7 @@ const sUSBHIDDescriptor CustomHID_ConfigDescriptor = {
 									.bEndpointAddress = 0x81,   /* bEndpointAddress: Endpoint Address (IN) */
 									.bmAttributes = 0x03,       /* bmAttributes: Interrupt endpoint */
 									.wMaxPacketSize = EP_COUNT,   /* wMaxPacketSize: size Bytes max */
-									.bInterval = 1,           /* bInterval: Polling Interval, ms */
+									.bInterval = 8,           /* bInterval: Polling Interval, ms */
 		},
 		.userDesc.EndPointDesc[1] = {
 									.bLength = sizeof(sEndPointDescriptor),          /* bLength: Endpoint Descriptor size */
@@ -129,7 +129,7 @@ const sUSBHIDDescriptor CustomHID_ConfigDescriptor = {
 									.bEndpointAddress = 0x01,   /* bEndpointAddress: Endpoint Address (OUT) */
 									.bmAttributes = 0x03,       /* bmAttributes: Interrupt endpoint */
 									.wMaxPacketSize = EP_COUNT,   /* wMaxPacketSize: size Bytes max */
-									.bInterval = 1,           /* bInterval: Polling Interval, ms */
+									.bInterval = 8,           /* bInterval: Polling Interval, ms */
 		}
 };
 

@@ -11,7 +11,7 @@
 
 /* EP_NUM */
 #define EP_NUM     (2)
-#define EP_COUNT    (uint8_t)(0x40)
+#define EP_COUNT    (uint8_t)(0x20)
 
 
 /* Selected EP definition  (uncoment selected)*/

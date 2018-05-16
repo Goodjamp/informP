@@ -80,8 +80,9 @@ int main(void)
 			continue;
 		}
 		if( usbTx( 1, usbHIDBuff, sizeof(usbHIDBuff)) )
-		{
+		{   debugPin_1_Set;
 			usbHIDBuff[0]++;
+			debugPin_1_Clear;
 		}
 	}
 	//t_processing_display((void*)&k1);
