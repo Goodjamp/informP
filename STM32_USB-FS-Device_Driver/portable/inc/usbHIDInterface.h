@@ -9,14 +9,9 @@
 #ifndef HIDINTARFACE_H_
 #define HIDINTARFACE_H_
 
+#include "stdint.h"
 
-typedef void (*rxHIDHandler)(uint8_t);
-
-typedef struct {
-	uint8_t *pBuff;
-	uint8_t sizeBuff;
-}HIDRxBuff;
-
+typedef void (*rxHIDHandler)(uint8_t epNumber, uint8_t numRx, uint8_t* rxData);
 
 
 void USB_HIDInit(void);
@@ -29,6 +24,6 @@ void addHIDEndPointOutCallBack(uint8_t EndPointNum,rxHIDHandler rxHandler, HIDRx
 /*
  * Tx Data to host
  */
-void txDataToHost(uint8_t endPointNum,uint8_t *data, uint8_t dataSize);
+uint8_t usbTx(uint8_t endPointNum,uint8_t *data, uint8_t dataSize);
 
 #endif

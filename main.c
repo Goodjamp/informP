@@ -5,6 +5,7 @@
 /* Kernel includes. */
 #include "misc.h"
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <stddef.h>
 #include "stm32f10x.h"
@@ -27,8 +28,9 @@
 #include "processing_modbus.h"
 #include "processing_simple_gpio.h"
 #include "processing_reset_control.h"
-#include "HIDInterface.h"
+
 #include "debugStuff.h"
+#include "processing_configurationHID.h"
 
 #include "GPSprocessing.h"
 
@@ -41,15 +43,15 @@
 #define mainQUEUE_RECEIVE_TASK_PRIORITY		1
 
 
-//указатель на структуру с указателями на буфера приема и передачи USART. из processing_USART.с
+//указатель на структуру с указателями на ,уфера приема и передачи USART. из processing_USART.с
 extern S_Task_parameters *ptask_parameters;
 extern S_connectmodbus *ps_connectmodbus_global;
 //структура описания карты памяти (из  mem_map_processing.c)
 extern S_mem_map s_mem_map;
 //масив указателей на USART которые пользователь разрешил использовать (из  processing_USART.c)
 extern USART_TypeDef *present_usart[NUMBER_USART];
-S_config_moduls s_config_moduls; // глобальная структура настроек МОДУЛЕЙ устройства, которая используеться програмными модулями в процесе работы програмы,
-// в отличии от карты памяти (в карте памяти область настроек можно изменить, но до перезагрузки изменения не
+S_config_moduls s_config_moduls; // гло,альная структура настроек МОДУЛЕЙ устройства, которая используеться програмными модулями в процесе ра,оты програмы,
+// в отличии от карты памяти (в карте памяти о,ласть настроек можно изменить, но до перезагрузки изменения не
 // активизируються !! )
 
 
@@ -66,13 +68,8 @@ S_modbus_tsk_par s_modbus_tsk_par[NUM_PORT_MODBUS];
 int main(void)
 {
 	u8 k1;
-    debugPinConfig();
-	//Run HID (usb)
-	//USB_HIDInit();
 	//t_processing_display((void*)&k1);
 	//t_processing_sensor((void*)&k1);
-
-
 
 	delay_loop();
 	// настройка портов логического управления
@@ -97,10 +94,10 @@ int main(void)
 
 
 	// продолжаем конфигурацию устройства (см. описание функции) (копирую настройки из карты памяти в структуру,
-	// которая будет использоваться для иницииоизации и конфигурации модулей)
+	// которая ,удет использоваться для иницииоизации и конфигурации модулей)
 	processing_config_dev_init();
 	// Если устройство находиться в режиме "конфигурация по умолчанию", нужно в карту памяти считать к-цию пользователя
-	// Это зделано для того, чтобы при считывании конфигурации, когда устройство находиться в режиме
+	// Это зделано для того, что,ы при считывании конфигурации, когда устройство находиться в режиме
 	// "конфигурация по умолчанию", пользователь считывал к-цию пользователя, а не к-цию по умолчанию (к-ция
 	// по умолчанию известна из документации на устройство).
 	if(!STATE_JAMPER1){ // если джампер №1 установлен (лог 0 на входе) - считать конфигурацию пользователя
@@ -196,7 +193,7 @@ int main(void)
 #if (TASK_PRIORITY(DEV_1)<MIN_T_PRIORITY)||(TASK_PRIORITY(DEV_1)>MAX_T_PRIORITY)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
-	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_5).state){// если в конфигурации поточный модуль выключен
+	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_5).state){// frq metter task
 		xTaskCreate(  TASK_PROCESSING(DEV_5), ( const char * ) TASK_IDENT(DEV_5), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_5), TASK_PRIORITY(DEV_5), NULL );
 	}
 #endif
@@ -205,7 +202,7 @@ int main(void)
 #if (TASK_PRIORITY(DEV_1)<MIN_T_PRIORITY)||(TASK_PRIORITY(DEV_1)>MAX_T_PRIORITY)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
-	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_6).state){// если в конфигурации поточный модуль выключен
+	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_6).state){// time processing task
 		xTaskCreate(  TASK_PROCESSING(DEV_6), ( const char * ) TASK_IDENT(DEV_6), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_6), TASK_PRIORITY(DEV_6), NULL );
 	}
 #endif
@@ -214,7 +211,7 @@ int main(void)
 #if (TASK_PRIORITY(DEV_1)<MIN_T_PRIORITY)||(TASK_PRIORITY(DEV_1)>MAX_T_PRIORITY)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
-	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_7).state){// если в конфигурации поточный модуль выключен
+	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_7).state){// meteo sensor processing task
 		xTaskCreate(  TASK_PROCESSING(DEV_7), ( const char * ) TASK_IDENT(DEV_7), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_7), TASK_PRIORITY(DEV_7), NULL );
 	}
 #endif
@@ -223,7 +220,7 @@ int main(void)
 #if (TASK_PRIORITY(DEV_1)<MIN_T_PRIORITY)||(TASK_PRIORITY(DEV_1)>MAX_T_PRIORITY)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
-	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_8).state){// если в конфигурации поточный модуль выключен
+	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_8).state){// display processing
 		xTaskCreate(  TASK_PROCESSING(DEV_8), ( const char * ) TASK_IDENT(DEV_8), 300,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_8), TASK_PRIORITY(DEV_8), NULL );
 	}
 #endif
@@ -291,7 +288,10 @@ int main(void)
 	}
 #endif
 
-// задача управления процесом програмной презагрузки и световой индикации режима работы
+    // reset, watch dog and status indication processing
+	xTaskCreate(  t_processing_configurationHID, ( const char * ) "configuration", 70,	NULL, 4, NULL );
+
+    // reset, watch dog and status indication processing
 	xTaskCreate(  t_processing_reset_control, ( const char * ) "WatcDogTask", 70,	NULL, 4, NULL );
 
 	NVIC_SetPriorityGrouping(NVIC_PriorityGroup_4);

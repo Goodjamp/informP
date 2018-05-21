@@ -41,9 +41,9 @@
 
 typedef enum
 {
-  FALSE = 0, TRUE  = !FALSE
-}
-bool;
+  FALSE = 0,
+  TRUE  = !FALSE
+}bool;
 
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */

@@ -15,7 +15,6 @@
 
 #include "stm32f10x.h"
 #include "stm32f10x_gpio.h"
-#include "HIDInterface.h"
 
 #include "i2c_user_interface.h"
 #include "DS1621_source.h"

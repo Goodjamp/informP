@@ -35,7 +35,7 @@
 #include "usb_prop.h"
 #include "usb_desc.h"
 #include "usb_pwr.h"
-
+#include "usb_user_setings.h"
 
 /* Private typedef -----------------------------------------------------------*/ 
 /* Private define ------------------------------------------------------------*/
@@ -99,7 +99,7 @@ ONE_DESCRIPTOR Config_Descriptor =
 ONE_DESCRIPTOR CustomHID_Report_Descriptor =
   {
     (uint8_t *)CustomHID_ReportDescriptor,
-    0 // set in CustomHID_init() function
+    27 // set in CustomHID_init() function
   };
 
 ONE_DESCRIPTOR CustomHID_Hid_Descriptor =
@@ -137,7 +137,8 @@ uint8_t *CustomHID_SetReport_Feature(uint16_t Length);
 void CustomHID_init(void)
 {
   /*Get size of Report Descroptor*/
-  CustomHID_Report_Descriptor.Descriptor_Size = getSizeReportDescriptor();
+  //CustomHID_Report_Descriptor.Descriptor_Size = getSizeReportDescriptor();
+  pInformation->Current_Feature = CustomHID_ConfigDescriptor.ConfigurationDescriptor.bmAttributes;
 
   pInformation->Current_Configuration = 0;
   /* Connect the device */
@@ -180,21 +181,10 @@ void CustomHID_Reset(void)
   SetEPType(ENDP1, EP_INTERRUPT);
   SetEPTxAddr(ENDP1, ENDP1_TXADDR);
   SetEPRxAddr(ENDP1, ENDP1_RXADDR);
-  SetEPTxCount(ENDP1, 2);
-  SetEPRxCount(ENDP1, 2);
+  SetEPTxCount(ENDP1, EP_COUNT);
+  SetEPRxCount(ENDP1, EP_COUNT);
   SetEPRxStatus(ENDP1, EP_RX_VALID);
   SetEPTxStatus(ENDP1, EP_TX_NAK);
-
-  /* Initialize Endpoint 2 */
-
-  SetEPType(ENDP2, EP_INTERRUPT);
-  SetEPTxAddr(ENDP2, ENDP2_TXADDR);
-  SetEPRxAddr(ENDP2, ENDP2_RXADDR);
-  SetEPTxCount(ENDP2, 2);
-  SetEPRxCount(ENDP2, 2);
-  SetEPRxStatus(ENDP2, EP_RX_VALID);
-  SetEPTxStatus(ENDP2, EP_TX_NAK);
-
 
   /* Set this device to response on default address */
   SetDeviceAddress(0);
