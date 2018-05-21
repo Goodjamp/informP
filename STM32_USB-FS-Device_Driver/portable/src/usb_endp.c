@@ -9,8 +9,8 @@
 
 
 /* Includes ------------------------------------------------------------------*/
-#include "stdint.h"
 #include "stdbool.h"
+#include "stdint.h"
 #include "stddef.h"
 
 #include "hw_config.h"
@@ -26,10 +26,10 @@ extern __IO uint32_t bDeviceState;
 
 uint8_t Receive_Buffer[EP_COUNT+1];
 __IO uint8_t PrevXferComplete[EP_NUM_MAX] = {[0 ... EP_NUM_MAX -1 ] = 1};
-/* user callback function*/
-rxHIDHandler rxCB;
-rxHIDHandler txCompleteCB;
 
+/* user callback function*/
+usbHIDRxHandlCB         rxCB;
+usbHIDTxCompleteHandlCB txCompleteCB;
 
 /*******************************************************************************
 * Function Name  : EP1_OUT_Callback.
@@ -45,7 +45,7 @@ void EP1_OUT_Callback(void)
 	uint32_t numRx = USB_SIL_Read(EP1_OUT, Receive_Buffer);
 
 	SetEPRxStatus(ENDP1, EP_RX_VALID);
-	//user CallbackFunction
+	//user call back function
 	if(rxCB == NULL)
 	{
 		return;
@@ -64,12 +64,18 @@ void EP1_OUT_Callback(void)
 *******************************************************************************/
 void EP1_IN_Callback(void)
 {
-  PrevXferComplete[ENDP1] = 1;
+    PrevXferComplete[ENDP1] = 1;
+    //user call back function
+    if(txCompleteCB == NULL)
+    {
+       return;
+    }
+    txCompleteCB();
 }
 
+/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 
-
-void USB_HIDInit(void){
+void usbHIDInit(void){
 	USB_Interrupts_Config();
     Set_USBClock();
     USB_Init();
@@ -77,44 +83,35 @@ void USB_HIDInit(void){
 
 
 
-void usbHIDAddRxCB(rxHIDHandler inRxCB)
+void usbHIDAddRxCB(usbHIDRxHandlCB inRxCB)
 {
 	rxCB = inRxCB;
 }
 
 
-void usbHIDAddTxCompleteCB(rxHIDHandler inTxCompleteCB)
+void usbHIDAddTxCompleteCB(usbHIDTxCompleteHandlCB inTxCompleteCB)
 {
 	txCompleteCB = inTxCompleteCB;
 }
 
 
-uint8_t usbHIDTx(uint8_t endPointNum, uint8_t *data, uint8_t dataSize)
+bool usbHIDTx(uint8_t endPointNum, uint8_t *data, uint8_t dataSize)
 {
-
 	if((PrevXferComplete[endPointNum] != 1) || (bDeviceState != CONFIGURED))
 	{
-		return 0;
+		return false;
 	}
 	PrevXferComplete[endPointNum]=0;
 
 	USB_SIL_Write( (0b10000000 | endPointNum) , data, dataSize);
 	SetEPTxValid(endPointNum);
 
-	return 1;
+	return true;
 }
 
 
-uint8_t usbHIDEPIsReadyToTx(uint8_t numEP)
+bool usbHIDEPIsReadyToTx(uint8_t numEP)
 {
-	return (PrevXferComplete[numEP] == 1) ? (1) : (1);
+	return (PrevXferComplete[numEP] == 1) ? (true) : (false);
 }
-
-
-
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
-
-
-
 

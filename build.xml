@@ -90,6 +90,7 @@
       <includepath path="P_dev_model/P_DISPLAY/menuProcessing"/>
       <includepath path="P_dev_model/P_TIME/clockProcessing"/>
       <includepath path="P_dev_model/configurationHID"/>
+      <includepath path="P_dev_model/P_configurationHID"/>
       
       <!-- arm-none-eabi-gcc compiler arguments -->
       <compilerarg value="-mcpu=cortex-m3"/>

@@ -11,19 +11,14 @@
 
 #include "stdint.h"
 
-typedef void (*rxHIDHandler)(uint8_t epNumber, uint8_t numRx, uint8_t* rxData);
+typedef void (*usbHIDRxHandlCB)        (uint8_t epNumber, uint8_t numRx, uint8_t* rxData);
+typedef void (*usbHIDTxCompleteHandlCB)(void);
 
 
-void USB_HIDInit(void);
-
-/*
- * Add callback for Rx data from Host
- */
-void addHIDEndPointOutCallBack(uint8_t EndPointNum,rxHIDHandler rxHandler, HIDRxBuff *pBuff);
-
-/*
- * Tx Data to host
- */
-uint8_t usbTx(uint8_t endPointNum,uint8_t *data, uint8_t dataSize);
+void usbHIDInit(void);
+void usbHIDAddRxCB(usbHIDRxHandlCB inRxCB);
+void usbHIDAddTxCompleteCB(usbHIDTxCompleteHandlCB inTxCompleteCB);
+bool usbHIDTx(uint8_t endPointNum, uint8_t *data, uint8_t dataSize);
+bool usbHIDEPIsReadyToTx(uint8_t numEP);
 
 #endif

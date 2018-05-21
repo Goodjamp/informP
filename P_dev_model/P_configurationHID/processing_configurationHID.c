@@ -13,19 +13,19 @@
 #include "stm32f10x.h"
 
 #include "usbHIDInterface.h"
-
+#include "usb_user_setings.h"
 
 
 void t_processing_configurationHID(void *in_Data)
 {
-    debugPinConfig();
-	//Run HID (usb)
-	USB_HIDInit();
+
+    usbHIDInit();
 	uint8_t usbHIDBuff[EP_COUNT] = {0,1,1,1,1,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24};
 // CustomHID_init
 
 	while(1){
-		usbTx( 1, usbHIDBuff, sizeof(usbHIDBuff))
+		dataBSS[0]++;
+		if( !usbHIDTx( 1, usbHIDBuff, sizeof(usbHIDBuff)) )
 		{
 			usbHIDBuff[0]++;
 		}
