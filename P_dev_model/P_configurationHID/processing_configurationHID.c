@@ -21,6 +21,7 @@
 #include "usb_user_setings.h"
 
 #include "processing_mem_map.h"
+#include "processing_config_dev.h"
 
 
 
@@ -95,6 +96,8 @@ typedef struct
 
 #pragma pack(pop)
 
+static uint16_t calcConigurationCRC(void);
+
 
 void rxDataCB(uint8_t epNumber, uint8_t numRx, uint8_t* rxData)
 {
@@ -143,10 +146,19 @@ void t_processing_configurationHID(void *in_Data) {
 									                                           : (STATUS_RESP_ERROR);
 			break;
 		case COMUNICATION_RESET:
+			//check new CRC before copy configuration
+			uint16_t configurationCRC = CRC16(u8 *puchMsg, sizeof(S_config_moduls));
 			NVIC_SystemReset();
 			break;
 		default:
 			break;
 		}
 	}
+}
+
+
+static uint16_t calcConigurationCRC(void)
+{
+
+
 }

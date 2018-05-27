@@ -34,7 +34,6 @@ void default_config_table(S_global_config *ps_mem_data_set) {
 	//----------------íàñòðîéêè ÏÎÐÒÎÂ È ÏÐÎÒÎÊÎËÎÂ----------------------------------
 	//-------------------------------------------------------------------------------
 
-
 	ps_mem_data_set->s_config_moduls.s_connectmodbus_global[0].state = ENABLE;
 	ps_mem_data_set->s_config_moduls.s_connectmodbus_global[0].s_port_config.baudrate= 9600;
 	ps_mem_data_set->s_config_moduls.s_connectmodbus_global[0].s_port_config.stopbits = 1;
