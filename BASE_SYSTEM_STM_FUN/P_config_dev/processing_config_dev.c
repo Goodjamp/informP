@@ -19,7 +19,7 @@ extern S_mem_map s_mem_map;
 // функция processing_config_firest_on - если конфигурация по умолчанию не записана - записать
 //                                       если конфигурация пользователя не записана - записать конфигурацию по умолчанию
 // При первом включении выполняеться запись конфигураций пользователя и по умолчанию
-void processing_config_firest_on(void){
+void processing_config_first_on(void){
 	S_global_config s_mem_data_set;
 	u16 CRC_dev;
 	// ----------------------КОНФИГУРАЦИЯ "ПО УМОЛЧАНИЮ"-------------------------
@@ -31,7 +31,7 @@ void processing_config_firest_on(void){
 		default_config_table(&s_mem_data_set);  // записываю конфигурацию по умолчанию
 		// очистка конфигурационной области флеш
 		FLASH_OPERATION_erase_page(PAGE_DEFAULT_CONFIG);
-		FLASH_OPERATION_write_flash_16b((u16*) &s_mem_data_set,(sizeof(s_mem_data_set)+1) / 2 , PAGE(PAGE_DEFAULT_CONFIG ));
+		FLASH_OPERATION_write_flash_16b((u16*) &s_mem_data_set,(sizeof(s_mem_data_set)+1) / 2 , PAGE_ABS_ADDRESS(PAGE_DEFAULT_CONFIG ));
 	}
 	// ----------------------КОНФИГУРАЦИЯ "ПОЛЬЗОВАТЕЛЯ"-------------------------
 	INIT_MBB_read_addjust_table(s_mem_map.p_start_config_data,sizeof(S_dev_staff), PAGE_USER_CONFIG);
@@ -42,7 +42,7 @@ void processing_config_firest_on(void){
 		default_config_table(&s_mem_data_set);  // записываю конфигурацию по умолчанию
 		// очистка конфигурационной области флеш
 		FLASH_OPERATION_erase_page(PAGE_USER_CONFIG);
-		FLASH_OPERATION_write_flash_16b((u16*) &s_mem_data_set,(sizeof(s_mem_data_set)+1) / 2 , PAGE(PAGE_USER_CONFIG ));
+		FLASH_OPERATION_write_flash_16b((u16*) &s_mem_data_set,(sizeof(s_mem_data_set)+1) / 2 , PAGE_ABS_ADDRESS(PAGE_USER_CONFIG ));
 
 	}
 }
@@ -256,7 +256,7 @@ u8 update_config_data(void* req,u8 num_peyload_data, u16 addres_data){
 		count_config_data=0;
 		f_rx_config_data=0; //
 		FLASH_OPERATION_erase_page(PAGE_USER_CONFIG);
-		FLASH_OPERATION_write_flash_16b((u16*)s_mem_map.p_start_config_data,sizeof(S_global_config) / 2 + 1, START_ADDRESS_DATA);
+		FLASH_OPERATION_write_flash_16b((u16*)s_mem_map.p_start_config_data,sizeof(S_global_config) / 2 + 1, PAGE_ABS_ADDRESS(PAGE_USER_CONFIG ));
 		xTaskResumeAll();
 		// ---------здесь выполнить проверку приннятой посылки----------
 
@@ -269,4 +269,30 @@ u8 update_config_data(void* req,u8 num_peyload_data, u16 addres_data){
 		return 1;
 	}
 		return 0;
+}
+
+
+uint16_t processing_config_get_user_config_CRC(void)
+{
+    return ((S_global_config*)(s_mem_map.p_start_config_data))->s_config_moduls.configurationCRC16;
+}
+
+
+uint16_t processing_config_get_saved_user_config_CRC(void)
+{
+    return ((S_global_config*)(PAGE_ABS_ADDRESS(PAGE_USER_CONFIG )))->s_config_moduls.configurationCRC16;
+}
+
+
+u16 processing_config_calc_user_config_CRC(void)
+{
+    return  CRC16( (uint8_t*)&((S_global_config*)(s_mem_map.p_start_config_data))->s_config_moduls, sizeof(S_config_moduls) - 2 );
+}
+
+void processing_config_write_configuration(void)
+{
+	FLASH_OPERATION_erase_page(PAGE_USER_CONFIG);
+	FLASH_OPERATION_write_flash_16b((u16*)s_mem_map.p_start_config_data,
+			                        (sizeof(S_global_config) % 2 != 0) ? (sizeof(S_global_config) + 1) : (sizeof(S_global_config)),
+			                        PAGE_ABS_ADDRESS(PAGE_USER_CONFIG ));
 }

@@ -9,6 +9,7 @@
 
 #include "stdint.h"
 #include "stdbool.h"
+#include "stddef.h"
 
 #include "stm32f10x.h"
 
@@ -29,8 +30,11 @@
 #define QUEUE_MESSAGE_SIZE  64
 
 QueueHandle_t inMessageQueue;
+QueueHandle_t outMessageQueue;
 uint8_t reqBuf[QUEUE_MESSAGE_SIZE];
 uint8_t respBuf[QUEUE_MESSAGE_SIZE];
+//buffer inside usb ready Tx CB
+uint8_t respBufCB[QUEUE_MESSAGE_SIZE];
 
 typedef enum
 {
@@ -93,22 +97,24 @@ typedef struct
 	}payload;;
 }headOfRes_t;
 
-
 #pragma pack(pop)
-
-static uint16_t calcConigurationCRC(void);
 
 
 void rxDataCB(uint8_t epNumber, uint8_t numRx, uint8_t* rxData)
 {
-	xQueueSendToBackFromISR(inMessageQueue, (void*)&rxData, 0);
+	BaseType_t  rezPush = xQueueSendToBackFromISR(inMessageQueue, (void*)rxData, NULL);
 }
 
 
 void txDataComplete(void)
 {
-
+	if( pdTRUE != xQueueReceiveFromISR( outMessageQueue, (void*)respBufCB, NULL ) )
+	{
+		return;
+	}
+	usbHIDTx( EP_01, respBufCB, sizeof(respBufCB));
 }
+
 
 void t_processing_configurationHID(void *in_Data) {
 	/*init USB HID */
@@ -116,23 +122,32 @@ void t_processing_configurationHID(void *in_Data) {
 	usbHIDAddRxCB(rxDataCB);
 	usbHIDAddTxCompleteCB(txDataComplete);
 
-	inMessageQueue = xQueueCreate(NUM_QUEUE_MESSAGE, QUEUE_MESSAGE_SIZE);
-
+	inMessageQueue  = xQueueCreate(NUM_QUEUE_MESSAGE, QUEUE_MESSAGE_SIZE);
+	outMessageQueue = xQueueCreate(NUM_QUEUE_MESSAGE, QUEUE_MESSAGE_SIZE);
 	while (1) {
 		//Wait for receive message
 		xQueueReceive( inMessageQueue, (void*)reqBuf, portMAX_DELAY);
 
-		switch ( ((headOfReq_t*) reqBuf)->reqType) {
+		switch ( ((headOfReq_t*) reqBuf)->reqType)
+		{
 		case COMUNICATION_GET_REG:
 			((headOfRes_t*) respBuf)->reqType = COMUNICATION_GET_REG;
 			((headOfRes_t*) respBuf)->payload.getRegResp.numberOfReg = ((headOfReq_t*) reqBuf)->payload.getRegReq.numberOfReg;
 			((headOfRes_t*) respBuf)->payload.getRegResp.reAddress   = ((headOfReq_t*) reqBuf)->payload.getRegReq.reAddress;
 			((headOfRes_t*) respBuf)->respStatus = (MEM_ERROR == processing_mem_map_read_s_proces_object_modbus(
 									                                           (uint16_t*)((headOfRes_t*) respBuf)->payload.getRegResp.payload,
-									                                           (uint16_t) ((headOfReq_t*) reqBuf)->payload.getRegReq.reAddress,
-									                                           (uint16_t) ((headOfReq_t*) reqBuf)->payload.getRegReq.numberOfReg) )
-									                                           ? (STATUS_RESP_OK)
-									                                           : (STATUS_RESP_ERROR);
+									                                           (uint16_t) ((headOfReq_t*) reqBuf)->payload.getRegReq.numberOfReg,
+									                                           (uint16_t) ((headOfReq_t*) reqBuf)->payload.getRegReq.reAddress) )
+									                                           ? (STATUS_RESP_ERROR)
+									                                           : (STATUS_RESP_OK);
+			if( usbHIDEPIsReadyToTx(EP_01) )
+			{
+				usbHIDTx( EP_01, respBuf, sizeof(respBuf));
+			}
+			else
+			{
+				xQueueSendToBack(inMessageQueue, (void*)&respBuf, 0);
+			}
 			break;
 		case COMUNICATION_SET_REG:
 			((headOfRes_t*) respBuf)->reqType = COMUNICATION_GET_REG;
@@ -140,25 +155,31 @@ void t_processing_configurationHID(void *in_Data) {
 			((headOfRes_t*) respBuf)->payload.getRegResp.reAddress   = ((headOfReq_t*) reqBuf)->payload.getRegReq.reAddress;
 			((headOfRes_t*) respBuf)->respStatus = (MEM_ERROR == processing_mem_map_write_s_proces_object_modbus(
 									                                           (uint16_t*)((headOfRes_t*) reqBuf)->payload.getRegResp.payload,
-									                                           (uint16_t) ((headOfReq_t*) reqBuf)->payload.getRegReq.reAddress,
-									                                           (uint16_t) ((headOfReq_t*) reqBuf)->payload.getRegReq.numberOfReg) )
-									                                           ? (STATUS_RESP_OK)
-									                                           : (STATUS_RESP_ERROR);
+									                                           (uint16_t) ((headOfReq_t*) reqBuf)->payload.getRegReq.numberOfReg,
+									                                           (uint16_t) ((headOfReq_t*) reqBuf)->payload.getRegReq.reAddress ) )
+									                                           ? (STATUS_RESP_ERROR)
+									                                           : (STATUS_RESP_OK);
 			break;
 		case COMUNICATION_RESET:
-			//check new CRC before copy configuration
-			uint16_t configurationCRC = CRC16(u8 *puchMsg, sizeof(S_config_moduls));
+		{
+			uint16_t currentCRC = processing_config_get_user_config_CRC();
+			if(currentCRC ==  processing_config_get_saved_user_config_CRC())
+			{
+				NVIC_SystemReset();
+			}
+			//
+			if( currentCRC == processing_config_calc_user_config_CRC())
+			{
+				//copy new configuration data to flash
+				vTaskSuspendAll();
+				processing_config_write_configuration();
+			}
+            // reset system
 			NVIC_SystemReset();
 			break;
+		}
 		default:
 			break;
 		}
 	}
-}
-
-
-static uint16_t calcConigurationCRC(void)
-{
-
-
 }

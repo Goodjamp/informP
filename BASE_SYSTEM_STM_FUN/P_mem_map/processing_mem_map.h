@@ -34,7 +34,7 @@
 #define MODBUS_USART        (WORKED_USART1)
 
 // максимально - возможное к-во одновременно задействованых независимых модулей
-#define MAX_NUM_MODULS     NUM_PORT_MODBUS+3
+#define MAX_NUM_MODULS     (NUM_PORT_MODBUS + 4)
 
 //Общее количество регистров ввода/вывода общего назначения
 #define NUM_REG_DATA              0

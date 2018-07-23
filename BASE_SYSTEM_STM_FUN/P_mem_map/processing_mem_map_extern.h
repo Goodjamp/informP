@@ -22,8 +22,8 @@
 
 // —труктура адресов статус регистров устройства
 typedef struct{
-	u16 address_device_rcr;              //  device reset_control_register адрес
-	u16 address_device_statys;	         // device status register адрес
+	u16 address_device_rcr;              //  device reset_control_register
+	u16 address_device_statys;	         // device status register
 } S_address_devise_reset_status;
 
 // —труктура  статус регистров устройства

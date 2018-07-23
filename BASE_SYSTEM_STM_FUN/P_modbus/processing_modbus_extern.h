@@ -47,8 +47,8 @@ typedef enum{
 
 // -----------Протокол даного порта--------------------
 typedef enum {
-	PROTOCOL_MODBUS_MASTER,
-	PROTOCOL_MODBUS_SLAVE,
+	PROTOCOL_MODBUS_MASTER = (uint8_t)0,
+	PROTOCOL_MODBUS_SLAVE  = (uint8_t)1,
 } PORT_PROTOCOL;
 
 #pragma pack(push, 1)
@@ -80,7 +80,7 @@ typedef struct {
 typedef struct {
 	u16 state;         // состояние програмного модуля: ENABLE/DISABLE
 	S_port_config s_port_config;   //
-	PORT_PROTOCOL type;            // (A)    протокол для порта
+	uint8_t type;            // (A)    протокол для порта
 
 	//---настройки Master (глобальные для всех запросов на даном порту)
 
@@ -88,11 +88,8 @@ typedef struct {
 	//unsigned int nextmessage;    // (S)    таймаут на считывание одного символа в ф-и очистки буфера приема
 	u8 number_of_pribor;           // (M)    количество приборов (имееться в виду к-во разных запросов, а не приборов, у нас всегда 1)
 	u8 number_no_answer;           // (M)    допустимое к-во неотвеченых запросов для установки флагоа обрыва связ
-
 	//---настройки Slave
-
 	u8 adress_kp;                   // (S)    адрес моего КП
-
 } S_connectmodbus;
 
 #pragma pack(pop)

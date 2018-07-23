@@ -31,8 +31,8 @@ struct {
 	uint16_t addressValue;
 }paramIndication[NUMBER_OF_VALUE] = {
 		[PAR_TEMPERATURE] = { .sumbol = { SYMBOL_TEMPERATURE }, },
-		[PAR_PRESSURE_PA]    = { .sumbol = { SYMBOL_PRESSURE_PA}, },
-		[PAR_PRESSURE_MM]    = { .sumbol = { SYMBOL_PRESSURE_MM}, },
+		[PAR_PRESSURE_PA] = { .sumbol = { SYMBOL_PRESSURE_PA}, },
+		[PAR_PRESSURE_MM] = { .sumbol = { SYMBOL_PRESSURE_MM}, },
 		[PAR_HUMIDITY]    = { .sumbol = { SYMBOL_HUMIDITY }, },
 		[PAR_DATE]        = { .sumbol = { SYMBOL_DATE }, },
 		[PAR_TIME]        = { .sumbol = { SYMBOL_TIME }, },

@@ -23,7 +23,7 @@ struct{
 	uint8_t       widjetCnt;           // ordering number selected widget
 	uint8_t       widgetNum;           // total number of screen
 	listBoxDef    listBox[NUMBER_OF_LCD_STRING]; // pointer on the list of ListBox
-	DISPLAY_MENU displayState;        // display state: test, work
+	DISPLAY_MENU  displayState;        // display state: test, work
 }menuDescription = {
 		.widgetNum = DEFAULT_NUM_WIDGETS,
 		.widjetCnt = DEFAULT_CURSOR_POS,

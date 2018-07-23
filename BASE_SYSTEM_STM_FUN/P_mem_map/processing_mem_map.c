@@ -9,15 +9,22 @@
 #include "processing_mem_map.h"
 #include "processing_mem_map_extern.h"
 
-//структура с адресами РАЗДЕЛОВ (пользовательський, статусный, конфигурационный) карты памяти
+
+/* dedicate memory in MCU RAM for store all memory map. this memory use for:
+ * - store operation data
+ * - store new configuration in case of receive new configuration from MCU
+*/
+u8 mem_map[SIZE_MEM_MAP];
+/*S_mem_map structure include total size of memory map and start address (in MCU RAM) of next staff of memory map:
+ * - address of memory that was dedicated for store all memory map
+ * - start address (in MCU RAM) of user data registers
+ * - start address (in MCU RAM) of operation registers
+ * - start address (in MCU RAM) of configuration registers
+*/
 S_mem_map s_mem_map;
-// структура адресов оперативных регистров
+//S_address_oper_data structure include address of all operation registers in MODBUS mem map
 S_address_oper_data s_address_oper_data;
-// выделяю память под карту памяти
-u8 mem_map[SIZE_MEM_MAP]={[0 ... (SIZE_MEM_MAP-1)]=0};
-// Укзатель на начало карты памяти, приведенный к proces_object
-S_proces_object_modbus *p_proces_object;
-// Мютекс доступа к карте памяти, глобальный
+// Semaphore for processing axes to memory map (located in mem_map)
 xSemaphoreHandle h_mutex_mem_map_axes;
 
 
@@ -26,8 +33,6 @@ xSemaphoreHandle h_mutex_mem_map_axes;
 //-----функция  processing_mem_map_init ---------
 // функция начальной конфигурации и разлинеивания карты памяти
 void processing_mem_map_init(void){
-	// Укзатель на начало карты памяти, приведенный к proces_object
-	p_proces_object=(S_proces_object_modbus*)mem_map;
 	// создаю мютекс для доступа к MEM MAP
 	h_mutex_mem_map_axes=xSemaphoreCreateMutex();
 	// разлинеиваю карту памяти

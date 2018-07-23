@@ -12,7 +12,6 @@
 #include "stm32f10x_usart.h"
 #include "stm32f10x_tim.h"
 #include "stm32f10x_gpio.h"
-
 #include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
@@ -34,8 +33,6 @@
 
 #include "GPSprocessing.h"
 
-
-// файл с хидерами процессов устройства
 #include "processing_includ.h"
 
 
@@ -78,7 +75,7 @@ int main(void)
 	processing_mem_map_init();
 	// -----------------------------ЕСЛИ ПЕРВОЕ ВКЛЮЧЕНИЕ------------------------------------
 	// если конфигурация по умолчанию и конфигурация пользователя не записаны - записываю
-	processing_config_firest_on();
+	processing_config_first_on();
 	// Считываю конфигурационные данные из FLESH памяти
 	INIT_MBB_read_addjust_table(s_mem_map.p_start_config_data,sizeof(S_global_config),
 				               ((STATE_JAMPER1) ? (PAGE_USER_CONFIG): (PAGE_DEFAULT_CONFIG)));

@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    processing_FRQmetter.h
+  * @file    processing_FRQmetter.hprocessing_config_dev_init
   * @author  Gerasimchuk A.
   * @version V1.0.0
   * @date    3-Mach-2017

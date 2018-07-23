@@ -64,6 +64,8 @@ typedef struct{
 typedef struct{
 	uint16_t  state;          // state of module ENABLE/DISABLE
 	uint16_t  timeCorection;  // time correction in hours
+    uint16_t  isDaylightSaving:1;
+    uint16_t  synchronizationSource:15;  // time correction in hours
 }S_TIME_user_config;
 //--------------------------------------------------------------------------------------------------------------------------------------
 #pragma pack(pop)

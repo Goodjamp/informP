@@ -11,7 +11,7 @@
 
 /* EP_NUM */
 #define EP_NUM     (2)
-#define EP_COUNT    (uint8_t)(0x20)
+#define EP_COUNT    (uint8_t)(0x40)
 
 
 /* Selected EP definition  (uncoment selected)*/
@@ -19,8 +19,8 @@
  *0n - EPn_OUT endpoint (host OUT)
  */
 /*----EP 1----*/
-#define EP_01
-#define EP_81
+#define EP_01 0x1
+#define EP_81 0x81
 /*----EP 2----*/
 //#define EP_02
 //#define EP_82

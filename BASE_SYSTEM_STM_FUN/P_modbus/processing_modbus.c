@@ -9,7 +9,6 @@
 #include "processing_modbus.h"
 #include "processing_mem_map_extern.h"
 
-extern S_proces_object_modbus *p_proces_object;
 // структура оперативных регистров (из mem_map_processing.c)
 //extern S_oper_data *ps_oper_data;
 // структура адресов оперативных регистров (из mem_map_processing.c)

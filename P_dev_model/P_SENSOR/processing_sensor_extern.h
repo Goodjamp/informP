@@ -49,8 +49,8 @@ typedef struct{
 
 //----------------------------- Конфигурация процесса sensor--------------------------------------------------------------------------------
 typedef struct{
-	uint16_t state;         // state of module ENABLE/DISABLE
-	uint16_t pressureSens;  // pressure sensitivity
+	uint16_t state;   // state of module ENABLE/DISABLE
+	uint16_t source;  // source of data: local/remote
 }S_sensor_user_config;
 //--------------------------------------------------------------------------------------------------------------------------------------
 #pragma pack(pop)

@@ -95,11 +95,11 @@ uint32_t  sensorGetTime(void)
  *
  */
 u16 sensor_calc_address_oper_reg(S_sensor_address *ps_sensor_address, u16 adres_start){
-	ps_sensor_address->status_sensor = adres_start;
-	ps_sensor_address->rezTemperature = ps_sensor_address->status_sensor + structFieldRegSize(S_sensor_oper_data,status_sensor);
-	ps_sensor_address->rezHumidity    = ps_sensor_address->rezTemperature + structFieldRegSize(S_sensor_oper_data,rezTemperature);
-	ps_sensor_address->rezPressure_mmHg    = ps_sensor_address->rezHumidity + structFieldRegSize(S_sensor_oper_data,rezHumidity);
-	ps_sensor_address->rezPressure_GPasc    = ps_sensor_address->rezPressure_mmHg + structFieldRegSize(S_sensor_oper_data,rezPressure_mmHg);
+	ps_sensor_address->status_sensor     = adres_start;
+	ps_sensor_address->rezTemperature    = ps_sensor_address->status_sensor + structFieldRegSize(S_sensor_oper_data,status_sensor);
+	ps_sensor_address->rezHumidity       = ps_sensor_address->rezTemperature + structFieldRegSize(S_sensor_oper_data,rezTemperature);
+	ps_sensor_address->rezPressure_mmHg  = ps_sensor_address->rezHumidity + structFieldRegSize(S_sensor_oper_data,rezHumidity);
+	ps_sensor_address->rezPressure_GPasc = ps_sensor_address->rezPressure_mmHg + structFieldRegSize(S_sensor_oper_data,rezPressure_mmHg);
 	adres_start = ps_sensor_address->rezPressure_GPasc + structFieldRegSize(S_sensor_oper_data,rezPressure_GPasc);
 	return adres_start;
 }

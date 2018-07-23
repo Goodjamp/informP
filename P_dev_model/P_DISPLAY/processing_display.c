@@ -76,6 +76,26 @@ struct{
 /*============================================================================================*/
 
 
+static uint8_t getNumberOfParamiter(uint16_t configBitField, uint8_t selectPos)
+{
+	uint16_t mask = 0b1;
+	uint8_t  cntBit = 0;
+	uint8_t  cntPar = 0;
+	for(;cntPar < NUMBER_OF_VALUE; cntPar++)
+	{
+		if(configBitField & mask)
+		{
+			cntBit++;
+		}
+		if(cntBit == selectPos)
+		{
+			return cntPar;
+		}
+		mask <<= 1;
+	}
+	return 0;
+}
+
 void updateLcdVal(BLINK_STATE blinkState) {
 	uint8_t cnt;
 	uint8_t k;
@@ -90,7 +110,8 @@ void updateLcdVal(BLINK_STATE blinkState) {
 				        blinkState,
 				        menuGetCurrentMenu(),
 				        (cnt == menuGetListbox() ) ? (true):(false),
-				        displayUserConfig->screenConfig[cnt].listOfParamiters[ menuGetListboxItemIndex(cnt)] )
+				        getNumberOfParamiter(displayUserConfig->screenConfig[menuGetListboxItemIndex(cnt)].bitsOfParamiters, cnt))
+				        //displayUserConfig->screenConfig[cnt].listOfParamiters[ menuGetListboxItemIndex(cnt)] )
 		    )
 			continue;
 
@@ -225,7 +246,7 @@ static void initUserMenu(S_display_user_config *configData){
 static void getLastMenuData(void){
 	uint8_t cnt;
 	uint8_t cursorPos[NUMBER_OF_LCD_STRING];
-	memcpy(cursorPos, (void*)(PAGE(FLASH_PAGE_MENU_DATA)),  sizeof(cursorPos));
+	memcpy(cursorPos, (void*)(PAGE_ABS_ADDRESS(FLASH_PAGE_MENU_DATA)),  sizeof(cursorPos));
 	for(cnt=0; cnt < NUMBER_OF_LCD_STRING;cnt++)
 	{
 		if( displayUserConfig->screenConfig[cnt].numParamiterPerScreen <= cursorPos[cnt])

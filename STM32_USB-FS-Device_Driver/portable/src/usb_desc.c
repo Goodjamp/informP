@@ -152,25 +152,25 @@ const uint8_t CustomHID_StringVendor[CUSTOMHID_SIZ_STRING_VENDOR] =
     CUSTOMHID_SIZ_STRING_VENDOR, /* Size of Vendor string */
     USB_STRING_DESCRIPTOR_TYPE,  /* bDescriptorType*/
     /* Manufacturer: "STMicroelectronics" */
-    'G', 0, 'e', 0, 'r', 0, 'a', 0, 's', 0, 'i', 0, 'm', 0, 'c', 0,
-    'h', 0, 'u', 0, 'k', 0, ' ', 0, 'L', 0, 'i', 0, 'm', 0, '.', 0,
-    ' ', 0, ' ', 0
+    'N', 0, 'T', 0, 'C', 0, ' ', 0, 'E', 0, 'N', 0, 'E', 0, 'R', 0,
+    'G', 0, 'O', 0, 'S', 0, 'V', 0, ' ', 0, 'L', 0, 'I', 0, 'M', 0,
+    '.', 0, ' ', 0
   };
 
 const uint8_t CustomHID_StringProduct[CUSTOMHID_SIZ_STRING_PRODUCT] =
   {
     CUSTOMHID_SIZ_STRING_PRODUCT,          /* bLength */
     USB_STRING_DESCRIPTOR_TYPE,        /* bDescriptorType */
-    'B', 0, 'l', 0, 'u', 0, 'm', 0, ' ', 0, 'B', 0, 'l', 0,
-    'u', 0, 'm', 0, ' ', 0, 'C', 0, ' ', 0, 'H', 0, 'I', 0,
-    'D', 0
+    'I', 0, 'N', 0, 'F', 0, 'O', 0, 'R', 0, 'M', 0, 'P', 0,
+    ' ', 0, '0', 0, '0', 0, '1', 0, ' ', 0, ' ', 0, ' ', 0,
+    ' ', 0
   };
 uint8_t CustomHID_StringSerial[CUSTOMHID_SIZ_STRING_SERIAL] =
   {
     CUSTOMHID_SIZ_STRING_SERIAL,           /* bLength */
     USB_STRING_DESCRIPTOR_TYPE,        /* bDescriptorType */
-    'N', 0, 'T', 0, 'C', 0,' ', 0,'E', 0, 'N', 0, 'E', 0, 'R', 0,
-    'G',0, 'O',0, ' ',0, 'S',0, 'V',0, '_', 0,
+    '0', 0, '0', 0, '0', 0, '0', 0, '0', 0, '0', 0, '0', 0, '0', 0,
+    '0', 0, '0', 0, '0', 0, '0', 0, '0', 0, '1', 0,
   };
 
 const uint8_t CustomHID_StringInterface[CUSTOMHID_SIZ_STRING_PRODUCT] =
