@@ -64,12 +64,12 @@ void default_config_table(S_global_config *ps_mem_data_set) {
 	ps_mem_data_set->s_config_moduls.s_display_user_config.screenConfig[0].bitsOfParamiters      =0b111;
 
 	ps_mem_data_set->s_config_moduls.s_display_user_config.screenConfig[1].numParamiterPerScreen = 2;
-	ps_mem_data_set->s_config_moduls.s_display_user_config.screenConfig[1].bitsOfParamiters      =0b1110;
+	ps_mem_data_set->s_config_moduls.s_display_user_config.screenConfig[1].bitsOfParamiters      =0b110;
 
 	ps_mem_data_set->s_config_moduls.s_display_user_config.screenConfig[2].numParamiterPerScreen = 1;
 	ps_mem_data_set->s_config_moduls.s_display_user_config.screenConfig[2].bitsOfParamiters      =0b1000;
 
-	ps_mem_data_set->s_config_moduls.s_display_user_config.screenConfig[3].numParamiterPerScreen = 4;
+	ps_mem_data_set->s_config_moduls.s_display_user_config.screenConfig[3].numParamiterPerScreen = 3;
 	ps_mem_data_set->s_config_moduls.s_display_user_config.screenConfig[3].bitsOfParamiters      =0b1110000;
     // add crc16 off user configuration part of memory map
 	ps_mem_data_set->s_config_moduls.configurationCRC16 = CRC16((u8*)&ps_mem_data_set->s_config_moduls, sizeof(S_config_moduls) - 2);

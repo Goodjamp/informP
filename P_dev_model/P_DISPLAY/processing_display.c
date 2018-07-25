@@ -81,6 +81,7 @@ static uint8_t getNumberOfParamiter(uint16_t configBitField, uint8_t selectPos)
 	uint16_t mask = 0b1;
 	uint8_t  cntBit = 0;
 	uint8_t  cntPar = 0;
+	selectPos++;
 	for(;cntPar < NUMBER_OF_VALUE; cntPar++)
 	{
 		if(configBitField & mask)
@@ -110,8 +111,7 @@ void updateLcdVal(BLINK_STATE blinkState) {
 				        blinkState,
 				        menuGetCurrentMenu(),
 				        (cnt == menuGetListbox() ) ? (true):(false),
-				        getNumberOfParamiter(displayUserConfig->screenConfig[menuGetListboxItemIndex(cnt)].bitsOfParamiters, cnt))
-				        //displayUserConfig->screenConfig[cnt].listOfParamiters[ menuGetListboxItemIndex(cnt)] )
+				        getNumberOfParamiter(displayUserConfig->screenConfig[cnt].bitsOfParamiters, menuGetListboxItemIndex(cnt)))
 		    )
 			continue;
 

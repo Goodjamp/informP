@@ -75,7 +75,7 @@ int main(void)
 	processing_mem_map_init();
 	// -----------------------------ЕСЛИ ПЕРВОЕ ВКЛЮЧЕНИЕ------------------------------------
 	// если конфигурация по умолчанию и конфигурация пользователя не записаны - записываю
-	processing_config_first_on();
+	//processing_config_first_on();
 	// Считываю конфигурационные данные из FLESH памяти
 	INIT_MBB_read_addjust_table(s_mem_map.p_start_config_data,sizeof(S_global_config),
 				               ((STATE_JAMPER1) ? (PAGE_USER_CONFIG): (PAGE_DEFAULT_CONFIG)));
@@ -91,7 +91,7 @@ int main(void)
 	{
 		INIT_MBB_read_addjust_table(s_mem_map.p_start_config_data,sizeof(S_global_config), PAGE_USER_CONFIG);
 	}
-
+	S_global_config *configData = (S_global_config*)s_mem_map.p_start_config_data;
 	/*******************************************************************************/
 	//---------------ЗАПУСКАЮ ЗАДАЧИ ПРОТОКОЛОВ СОГЛАСНО НАСТРОЕК--------------------
 	//*******************************************************************************/

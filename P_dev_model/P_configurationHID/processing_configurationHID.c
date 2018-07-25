@@ -131,6 +131,7 @@ void t_processing_configurationHID(void *in_Data) {
 		switch ( ((headOfReq_t*) reqBuf)->reqType)
 		{
 		case COMUNICATION_GET_REG:
+		{
 			((headOfRes_t*) respBuf)->reqType = COMUNICATION_GET_REG;
 			((headOfRes_t*) respBuf)->payload.getRegResp.numberOfReg = ((headOfReq_t*) reqBuf)->payload.getRegReq.numberOfReg;
 			((headOfRes_t*) respBuf)->payload.getRegResp.reAddress   = ((headOfReq_t*) reqBuf)->payload.getRegReq.reAddress;
@@ -149,32 +150,34 @@ void t_processing_configurationHID(void *in_Data) {
 				xQueueSendToBack(inMessageQueue, (void*)&respBuf, 0);
 			}
 			break;
+		}
 		case COMUNICATION_SET_REG:
+		{
+			S_global_config *configData = (S_global_config*)((headOfReq_t*) reqBuf)->payload.setRegReq.payload;
 			((headOfRes_t*) respBuf)->reqType = COMUNICATION_GET_REG;
-			((headOfRes_t*) respBuf)->payload.getRegResp.numberOfReg = ((headOfReq_t*) reqBuf)->payload.getRegReq.numberOfReg;
-			((headOfRes_t*) respBuf)->payload.getRegResp.reAddress   = ((headOfReq_t*) reqBuf)->payload.getRegReq.reAddress;
 			((headOfRes_t*) respBuf)->respStatus = (MEM_ERROR == processing_mem_map_write_s_proces_object_modbus(
-									                                           (uint16_t*)((headOfRes_t*) reqBuf)->payload.getRegResp.payload,
+									                                           (uint16_t*)((headOfReq_t*) reqBuf)->payload.setRegReq.payload,
 									                                           (uint16_t) ((headOfReq_t*) reqBuf)->payload.getRegReq.numberOfReg,
 									                                           (uint16_t) ((headOfReq_t*) reqBuf)->payload.getRegReq.reAddress ) )
 									                                           ? (STATUS_RESP_ERROR)
 									                                           : (STATUS_RESP_OK);
+			// write new configuration data
+			vTaskSuspendAll();
+			FLASH_OPERATION_erase_page(PAGE_USER_CONFIG);
+			processing_config_write_configuration();
+			xTaskResumeAll();
+			if( usbHIDEPIsReadyToTx(EP_01) )
+			{
+				usbHIDTx( EP_01, respBuf, sizeof(respBuf));
+			}
+			else
+			{
+				xQueueSendToBack(inMessageQueue, (void*)&respBuf, 0);
+			}
 			break;
+	    }
 		case COMUNICATION_RESET:
 		{
-			uint16_t currentCRC = processing_config_get_user_config_CRC();
-			if(currentCRC ==  processing_config_get_saved_user_config_CRC())
-			{
-				NVIC_SystemReset();
-			}
-			//
-			if( currentCRC == processing_config_calc_user_config_CRC())
-			{
-				//copy new configuration data to flash
-				vTaskSuspendAll();
-				processing_config_write_configuration();
-			}
-            // reset system
 			NVIC_SystemReset();
 			break;
 		}

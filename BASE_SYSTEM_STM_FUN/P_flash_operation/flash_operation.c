@@ -77,11 +77,8 @@ FLASH_Status FLASH_OPERATION_write_flash_page_16b(u16 *data, u32 length, u16 num
 u32 k1_count;
 FLASH_Status FLASH_OPERATION_write_flash_16b(u16 *data, u32 length, u32 address) {
 	FLASH_Status rez_write;
-	u32 k1;
 	FLASH_Unlock();
 	for (k1_count = 0; k1_count < length; k1_count ++) {
-		if(k1_count>=135){
-			k1++;}
 		rez_write = FLASH_ProgramHalfWord(address, (*data));
 		data++;
 		address += 2;
