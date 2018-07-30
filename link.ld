@@ -35,6 +35,22 @@ SECTIONS
         _edata = . ;
     } > ram
 
+
+    defaultConfigurationAddress = 0x8000000 + 0x400 * 126;
+    /*This section use for save default configuration data*/
+    defaultConfigurationSection defaultConfigurationAddress :
+	{
+	    *(defaultConfigurationSection*)
+	} > rom
+	
+	
+	userConfigurationAddress = 0x8000000 + 0x400 * 127;
+	/*This section use for save user configuration data*/
+    userConfigurationSection userConfigurationAddress :
+	{
+	    *(userConfigurationSection*)
+	} > rom
+
     /* .bss section which is used for uninitialized data */ 
     .bss (NOLOAD) : 
     { 

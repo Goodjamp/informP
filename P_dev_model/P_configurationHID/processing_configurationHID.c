@@ -161,7 +161,7 @@ void t_processing_configurationHID(void *in_Data) {
 									                                           (uint16_t) ((headOfReq_t*) reqBuf)->payload.getRegReq.reAddress ) )
 									                                           ? (STATUS_RESP_ERROR)
 									                                           : (STATUS_RESP_OK);
-			// write new configuration data
+			//write new configuration data
 			vTaskSuspendAll();
 			FLASH_OPERATION_erase_page(PAGE_USER_CONFIG);
 			processing_config_write_configuration();

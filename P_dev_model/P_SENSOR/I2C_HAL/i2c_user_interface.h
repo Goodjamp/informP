@@ -1,5 +1,5 @@
 /********************************************************************************
-  * @file    i2c_user_interface.c
+  * @file    i2c_user_interface.h
   * @author  Gerasimchuk A.
   * @version V1.0.0
   * @date    27-October-2017
@@ -38,4 +38,5 @@ I2C_STATUS i2cRxData(I2C_DEF i2c, uint8_t address_dev, uint8_t address_reg, uint
 //user implement function
 void     i2cInitGpio(uint8_t step);
 uint32_t i2cgetTimeMs(void);
+void     i2cRecover(uint32_t i2cFRQ);
 #endif

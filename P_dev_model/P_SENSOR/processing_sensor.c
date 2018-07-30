@@ -16,6 +16,7 @@
 #include "stm32f10x.h"
 #include "stm32f10x_gpio.h"
 
+#include "processing_sensor.h"
 #include "i2c_user_interface.h"
 #include "DS1621_source.h"
 #include "BME280_user_interface.h"
@@ -36,7 +37,6 @@ static BME280_STATUS bmeStatus;
 void i2cInitGpio(uint8_t step){
 
 	GPIO_InitTypeDef GPIO_InitStructure;
-	/*I2C1 pins config*/
 
 	RCC_APB2PeriphClockCmd(RCC_APB2ENR_IOPBEN, ENABLE);
 
@@ -45,8 +45,6 @@ void i2cInitGpio(uint8_t step){
 	GPIO_InitStructure.GPIO_Pin = I2C1_SCL;
 	GPIO_InitStructure.GPIO_Mode = (step) ? (GPIO_Mode_AF_OD) : (GPIO_Mode_IPU);
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
-	/*Config CSL functions of I2C1*/
 	GPIO_Init(I2C1_SCL_PORT, &GPIO_InitStructure);
 
 	// config I2C CSDA GPIO
@@ -54,10 +52,72 @@ void i2cInitGpio(uint8_t step){
 	GPIO_InitStructure.GPIO_Mode =  (step) ? (GPIO_Mode_AF_OD) : ( GPIO_Mode_IPU);
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
 	GPIO_Init(I2C1_SDA_PORT, &GPIO_InitStructure);
-	// Enable Alternate function
 
+	// Enable Alternate function
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 }
+
+void delay_us(uint32_t timeout)
+{
+	uint32_t steps = timeout/10;
+    volatile uint32_t cnt = 0;
+	while( cnt++ < steps){};
+}
+
+
+#include "debugStuff.h"
+
+void i2cRecover(uint32_t i2cFRQ)
+{
+	GPIO_InitTypeDef GPIO_InitStructure;
+	RCC_APB2PeriphClockCmd(RCC_APB2ENR_IOPBEN, ENABLE);
+
+	if(GPIO_ReadInputDataBit(I2C1_SCL_PORT, I2C1_SDA) == Bit_SET)
+	{
+		return;
+	}
+
+	debugPin_1_Set;
+	GPIO_SetBits(I2C1_SCL_PORT, I2C1_SCL);
+	// config I2C CSCL GPIO
+	GPIO_InitStructure.GPIO_Pin   = I2C1_SCL;
+	GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_OD;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	/*Config CSL functions of I2C1*/
+	GPIO_Init(I2C1_SCL_PORT, &GPIO_InitStructure);
+
+
+	GPIO_SetBits(I2C1_SDA_PORT, I2C1_SDA);
+	// config I2C CSDA GPIO
+	GPIO_InitStructure.GPIO_Pin   = I2C1_SDA;
+	GPIO_InitStructure.GPIO_Mode  =  GPIO_Mode_Out_OD;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_Init(I2C1_SDA_PORT, &GPIO_InitStructure);
+
+
+	//gen 9 pulses
+	uint32_t halfPeriodUs = SystemCoreClock/(i2cFRQ * 2);
+    volatile uint8_t cnt = 0;
+	#define NUMBER_PULSES    9
+	while(cnt++ < NUMBER_PULSES)
+	{
+		GPIO_ResetBits(I2C1_SCL_PORT, I2C1_SCL);
+		delay_us(halfPeriodUs);
+		GPIO_SetBits(I2C1_SCL_PORT, I2C1_SCL);
+		delay_us(halfPeriodUs);
+	}
+
+	// generate stop order
+	GPIO_ResetBits(I2C1_SCL_PORT, I2C1_SCL);
+	GPIO_ResetBits(I2C1_SCL_PORT, I2C1_SDA);
+	delay_us(halfPeriodUs);
+	GPIO_SetBits(I2C1_SCL_PORT, I2C1_SCL);
+	delay_us(halfPeriodUs);
+	GPIO_SetBits(I2C1_SCL_PORT, I2C1_SDA);
+
+	debugPin_1_Clear;
+}
+
 
 uint32_t i2cgetTimeMs(void)
 {
@@ -193,12 +253,18 @@ static void updateSensorStatus(SENSOR_STATUS newStatus){
 }
 
 void t_processing_sensor(void *pvParameters){
-	//S_sensor_user_config *s_FRQConfig =(S_sensor_user_config*)pvParameters;
+	S_sensor_user_config *s_sensorUserConfig =(S_sensor_user_config*)pvParameters;
 	uint16_t rezMes = 0;
 	float rezMesHumidity;
 	float rezMesTemperature;
 	float rezMesPressure;
-	//uint16_t status;
+
+    // stop task if it disable on configuration
+	if(s_sensorUserConfig->state == DISABLE)
+	{
+		vTaskDelete(NULL);
+	}
+
 	bmeStatus = initI2C_Sensor();
 
 	//status = (bmeStatus == BME280_STATUS_OK) ? SENSOR_STATUS_OK : SENSOR_STATUS_ERROR;
@@ -239,7 +305,7 @@ void t_processing_sensor(void *pvParameters){
 		    processing_mem_map_write_s_proces_object_modbus(&rezMes, 1, s_address_oper_data.s_sensor_address.rezPressure_GPasc);
 		    rezMes = (rezMesPressure * PASCAL_TO_MMHG_COEF);
 		    processing_mem_map_write_s_proces_object_modbus(&rezMes, 1, s_address_oper_data.s_sensor_address.rezPressure_mmHg);
-		    vTaskDelay(500);
+		    vTaskDelay(50);
 		}
 	}
 }

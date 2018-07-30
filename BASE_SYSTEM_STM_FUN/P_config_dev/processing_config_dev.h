@@ -7,6 +7,9 @@
  */
 #ifndef  CONFIG_DEV_H_
 #define  CONFIG_DEV_H_
+#include "stdint.h"
+#include "stdbool.h"
+
 #include "stm32f10x.h"
 #include "funct.h"
 #include "global_dev.h"
@@ -70,8 +73,6 @@ typedef struct{
 }BF_date_config;
 
 
-
-
 // структура состава устройства (все програмные модули и данные необходимые дл€ конфигурации)
 typedef struct{
 	BF_dev_staff    bf_dev_staff;        // состав устройства
@@ -79,9 +80,7 @@ typedef struct{
 	u16             num_reg_data;        // размер пользовательской области карты пам€ти (в 2-х байтных регистрах)
 	u16             modbus_req_user;     // максимально к-во запросов modbus_master на канал
 	u16             program_version;     // верси€ микропрограмы
-	u16             CRC_dev;
 }S_dev_staff;
-
 
 // —труктура конфигураций всех програмных модулей, остаетс€ неизменной на
 // протежении всего процеса работы програмы до перезагрузки (в отличии от  области s_config_moduls карты пам€ти, в которую может быть
@@ -89,7 +88,6 @@ typedef struct{
 // — пол€ми даной структуры работают все переферийные модули (процесы) через указатели на них
 typedef struct{
 	S_connectmodbus s_connectmodbus_global[NUM_PORT_MODBUS];
-
 #ifdef DEV_0
 #define	DEV_0_CONTROL_BIT   0+NUM_PORT_MODBUS
 	    USER_CONFIG_FIELD(S,DEV_0) USER_CONFIG_FIELD(s,DEV_0);
@@ -154,32 +152,26 @@ typedef struct{
 #define	DEV_15_CONTROL_BIT   15+NUM_PORT_MODBUS
 	    USER_CONFIG_FIELD(S,DEV_15) USER_CONFIG_FIELD(s,DEV_15);
 #endif
-
-	u16             configurationCRC16;    // CRC16 of user configuration part of memory map
 } S_config_moduls;
 
 // структура конфигурации устройства
 typedef struct{
-	S_dev_staff     s_dev_staff;           //основные парамет
-	BF_date_config  bf_date_config;        // дата конфигурации
-	S_config_moduls s_config_moduls;       // конфигурационные структуры составаных частей устройства
+	S_dev_staff     s_dev_staff;
+	BF_date_config  bf_date_config;
+	S_config_moduls s_config_moduls;
+	u16             configurationCRC16;    // CRC16 of configuration part of memory map
 } S_global_config;
 
 #pragma pack(pop)
 
 //--------------------ѕрототипы ф-й конфигурации------------------
 void processing_config_first_on(void);
-void processing_config_init_not_user_config(S_dev_staff *ps_dev_staff);
+bool processing_config_init(bool isUserConfig);
 u8 update_config_data(void* req,u8 num_peyload_data, u16 addres_data);
-void processing_config_dev_init(void);
+void processing_config_add_modbus_callback(void);
 REZ_REQ_CHEACK_SLAVE processing_config_check_is_holding_reg(void* p_check_address);
 REZ_REQ_CHEACK_SLAVE processing_config_check_is_input_reg(void* p_check_address);
 REZ_REQ_CHEACK_SLAVE processing_config_check_is_preset_multiple_reg(void* p_check_address);
-u16 processing_config_get_user_config_CRC(void);
-u16 processing_config_get_saved_user_config_CRC(void);
-u16 processing_config_calc_user_config_CRC(void);
 void processing_config_write_configuration(void);
-// ----------------ѕрототипы функций файла конфигурации------------------
-void default_config_table(S_global_config *ps_mem_data_set);
 
 #endif

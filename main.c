@@ -1,13 +1,12 @@
 /*
-    FreeRTOS V7.0.2 - Copyright (C) 2011 Real Time Engineers Ltd.
+    FreeRTOS V---- - Copyright (C) 2011 Real Time Engineers Ltd.
 
 */
-/* Kernel includes. */
-#include "misc.h"
-
 #include <stdint.h>
 #include <stdlib.h>
 #include <stddef.h>
+
+#include "misc.h"
 #include "stm32f10x.h"
 #include "stm32f10x_usart.h"
 #include "stm32f10x_tim.h"
@@ -35,67 +34,39 @@
 
 #include "processing_includ.h"
 
-
 /* Priorities at which the tasks are created. */
 #define mainQUEUE_RECEIVE_TASK_PRIORITY		1
 
-
-//указатель на структуру с указателями на ,уфера приема и передачи USART. из processing_USART.с
 extern S_Task_parameters *ptask_parameters;
-extern S_connectmodbus *ps_connectmodbus_global;
-//структура описания карты памяти (из  mem_map_processing.c)
-extern S_mem_map s_mem_map;
-//масив указателей на USART которые пользователь разрешил использовать (из  processing_USART.c)
-extern USART_TypeDef *present_usart[NUMBER_USART];
-S_config_moduls s_config_moduls; // глобальная структура настроек МОДУЛЕЙ устройства, которая используеться програмными модулями в процесе ра,оты програмы,
-// в отличии от карты памяти (в карте памяти о,ласть настроек можно изменить, но до перезагрузки изменения не
-// активизируються !! )
+extern S_connectmodbus   *ps_connectmodbus_global;
+extern USART_TypeDef     *present_usart[NUMBER_USART];
+extern S_mem_map         s_mem_map;
+S_config_moduls          s_config_moduls;
+S_modbus_tsk_par         s_modbus_tsk_par[NUM_PORT_MODBUS];
 
 
 void delay_loop(){
 	u32 coutner=0;
-	while(coutner<100){
+	while(coutner<100)
+	{
 		coutner++;
 	}
 }
 
 
-S_modbus_tsk_par s_modbus_tsk_par[NUM_PORT_MODBUS];
-//---------------------------------------------------------------------------
 int main(void)
 {
 	u8 k1;
-	//t_processing_display((void*)&k1);
-	//t_processing_sensor((void*)&k1);
-
+	debugPinConfig();
 	delay_loop();
-	// настройка портов логического управления
 	processing_simple_gpio();
-	// настраиваю карту памяти и механизм доступа к ней
 	processing_mem_map_init();
-	// -----------------------------ЕСЛИ ПЕРВОЕ ВКЛЮЧЕНИЕ------------------------------------
-	// если конфигурация по умолчанию и конфигурация пользователя не записаны - записываю
-	//processing_config_first_on();
-	// Считываю конфигурационные данные из FLESH памяти
-	INIT_MBB_read_addjust_table(s_mem_map.p_start_config_data,sizeof(S_global_config),
-				               ((STATE_JAMPER1) ? (PAGE_USER_CONFIG): (PAGE_DEFAULT_CONFIG)));
+    processing_config_first_on();
+    // TODO if return false - error indication!!!!!
+    processing_config_init((STATE_JAMPER1) ? (true): (false));
 
-	// продолжаем конфигурацию устройства (см. описание функции) (копирую настройки из карты памяти в структуру,
-	// которая ,удет использоваться для иницииоизации и конфигурации модулей)
-	processing_config_dev_init();
-	// Если устройство находиться в режиме "конфигурация по умолчанию", нужно в карту памяти считать к-цию пользователя
-	// Это зделано для того, что,ы при считывании конфигурации на ПК, когда устройство находиться в режиме
-	// "конфигурация по умолчанию", пользователь считывал ИМЕННО к-цию пользователя, а не к-цию по умолчанию (к-ция
-	// по умолчанию известна из документации на устройство).
-	if(!STATE_JAMPER1)
-	{
-		INIT_MBB_read_addjust_table(s_mem_map.p_start_config_data,sizeof(S_global_config), PAGE_USER_CONFIG);
-	}
-	S_global_config *configData = (S_global_config*)s_mem_map.p_start_config_data;
-	/*******************************************************************************/
-	//---------------ЗАПУСКАЮ ЗАДАЧИ ПРОТОКОЛОВ СОГЛАСНО НАСТРОЕК--------------------
-	//*******************************************************************************/
-	// заполняю конфигурационные данные настройки портов и протоколов
+    /*********************CONFIG AND RUN MODBUS TASKS***************************/
+    processing_config_add_modbus_callback();
 	modbus_fill_S_connectmodbus((u8*)&s_config_moduls.s_connectmodbus_global);
 	u8 count_modbus=0;
 	for(k1=0;k1<NUMBER_USART;k1++){

@@ -18,7 +18,6 @@
 // номер первой и второй страниц флеша в которые проводиться запись и счтивание (сейчас используеться только первая !!!!)
 #define PAGE_DEFAULT_CONFIG             126
 #define PAGE_USER_CONFIG                127
-#define START_ADDRESS_CONFIG_DATA PAGE_ABS_ADDRESS(PAGE_USER_CONFIG )+4
 
 // -----------Результат инициилизации МВВ по результатам считывания из флеш
 typedef enum {

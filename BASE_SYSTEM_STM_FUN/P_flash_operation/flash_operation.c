@@ -96,7 +96,7 @@ void FLASH_OPERATION_erase_page(u16 num_page) {
 	u32 address;
 	address = PAGE_ABS_ADDRESS(num_page);
 	FLASH_Unlock();
-	FLASH_ErasePage(address);
+	FLASH_Status rezErace = FLASH_ErasePage(address);
 	FLASH_Lock();
 }
 

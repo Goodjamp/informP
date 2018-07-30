@@ -248,8 +248,12 @@ void t_processing_TIME(void *p_task_par){
 	struct tm *timeGet;
 	TickType_t errorIndTimeThresHold_ms;
 
-
 	configData = (S_TIME_user_config*)p_task_par;
+    // stop task if it disable on configuration
+	if(configData->state == DISABLE)
+	{
+		vTaskDelete(NULL);
+	}
 	// create event group for processing clock event
 	clockEventGroup= xEventGroupCreate();
 	// initialization module
@@ -287,7 +291,6 @@ void t_processing_TIME(void *p_task_par){
 		if( timeProcessingState.fineTuneClock )
 		{
 			// update RTC
-			debugPin_1_Set;
 			numRezRead = ReadUSART(task_parameters[gpsUSARTNum].RdUSART, (uint8_t*)usartReadBuff, USART_READ_BUFF_SIZE, USART_READ_BUFF_TIME_MS);
 			if( 0 != numRezRead)
 			{
@@ -305,7 +308,6 @@ void t_processing_TIME(void *p_task_par){
 				registerValue = TIME_STATUS_ALLARM;
 				processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.status_TIME);
 			}
-			debugPin_1_Clear;
 			// Take a last events without timeout
 		    rezWaiteEvent = xEventGroupWaitBits(
 			    	clockEventGroup,

@@ -106,7 +106,8 @@ I2C_STATUS i2cConfig( I2C_DEF i2cIn ,I2C_configDef *config){
 
 	RCC_APB1PeriphResetCmd(RCC_APB1Periph_I2C1, ENABLE);
 
-	i2cInitGpio(0);
+	//i2cInitGpio(0);
+	i2cRecover(I2CProcessing[i2cIn].frq);
 
 	RCC_APB1PeriphResetCmd(RCC_APB1Periph_I2C1, DISABLE);
 

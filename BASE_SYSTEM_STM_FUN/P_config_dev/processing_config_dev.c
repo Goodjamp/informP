@@ -5,139 +5,143 @@
  *      Author: Gerasimchuk
  *      Versin: 1
  */
+
+#include "stdint.h"
+#include "stdbool.h"
+#include "string.h"
+
 #include "processing_config_dev.h"
+#include "default_configuration_description.h"
 
-//структура адресов оперативных регистров
-extern S_address_oper_data s_address_oper_data;
-// глобальная структура настроек устройства (дублировання из карты памяти, не изменяеться в процесе работы устройства
-// до перезагрузки, если была задана новая конфигурация)), из main
-extern S_config_moduls s_config_moduls;
-//структура описания карты памяти (из  mem_map_processing.c)
-extern S_mem_map s_mem_map;
+static uint8_t          userConfiguration[]  __attribute__((section("userConfigurationSection")))    = FIRST_POWER_ON_ATTRIBUTE;
+static S_global_config  defaultConfiguration __attribute__((section("defaultConfigurationSection"))) = {
+		.s_dev_staff = {
+			.bf_dev_staff = {
 
-//-------------processing_config_firest_on------------------
-// функция processing_config_firest_on - если конфигурация по умолчанию не записана - записать
-//                                       если конфигурация пользователя не записана - записать конфигурацию по умолчанию
-// При первом включении выполняеться запись конфигураций пользователя и по умолчанию
-void processing_config_first_on(void){
-	S_global_config s_mem_data_set;
-	u16 CRC_dev;
-	// ----------------------КОНФИГУРАЦИЯ "ПО УМОЛЧАНИЮ"-------------------------
-	INIT_MBB_read_addjust_table(s_mem_map.p_start_config_data,sizeof(S_dev_staff), PAGE_DEFAULT_CONFIG);
-    // расчитываю контрольную сумму считанных данных и сравниваю с считанной контрольной суммой
-	CRC_dev=CRC16((u8*)&(((S_global_config*)s_mem_map.p_start_config_data)->s_dev_staff),(sizeof(S_dev_staff)-2));
-	if(CRC_dev !=((S_global_config*)s_mem_map.p_start_config_data)->s_dev_staff.CRC_dev)
-	{
-		default_config_table(&s_mem_data_set);  // записываю конфигурацию по умолчанию
-		// очистка конфигурационной области флеш
-		FLASH_OPERATION_erase_page(PAGE_DEFAULT_CONFIG);
-		FLASH_OPERATION_write_flash_16b((u16*) &s_mem_data_set,(sizeof(s_mem_data_set)+1) / 2 , PAGE_ABS_ADDRESS(PAGE_DEFAULT_CONFIG ));
-	}
-	// ----------------------КОНФИГУРАЦИЯ "ПОЛЬЗОВАТЕЛЯ"-------------------------
-	INIT_MBB_read_addjust_table(s_mem_map.p_start_config_data,sizeof(S_dev_staff), PAGE_USER_CONFIG);
-	// расчитываю контрольную сумму считанных данных и сравниваю с считанной контрольной суммой
-	CRC_dev=CRC16((u8*)&(((S_global_config*)s_mem_map.p_start_config_data)->s_dev_staff),(sizeof(S_dev_staff)-2));
-	if(CRC_dev != ((S_global_config*)s_mem_map.p_start_config_data)->s_dev_staff.CRC_dev)
-	{
-		default_config_table(&s_mem_data_set);  // записываю конфигурацию по умолчанию
-		// очистка конфигурационной области флеш
-		FLASH_OPERATION_erase_page(PAGE_USER_CONFIG);
-		FLASH_OPERATION_write_flash_16b((u16*) &s_mem_data_set,(sizeof(s_mem_data_set)+1) / 2 , PAGE_ABS_ADDRESS(PAGE_USER_CONFIG ));
+		        .MODULE_0=ENABLE,   /*Modbus master*/
 
-	}
-}
-
-
-//-------------processing_config_init_not_user_comfig------------------
-//функция processing_config_init_not_user_comfig - заполняет поля "не пользовательских" настроек, а именно:
-//                                               - состав устройства
-//                                               - к-во портов MODBUS
-//                                               - регистров пользователя
-//                                               - максимальное к-во запросов MODBUS MASTER для одного порта
-//                                               - версия внутренего ПО
-//                                               - CRC - идентефикатор устройства
-void processing_config_init_not_user_config(S_dev_staff *ps_dev_staff){
-	// заполняю поля состава устройства
-	ps_dev_staff->bf_dev_staff=(BF_dev_staff){1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1};
-	// Состав устройства
-#ifdef DEV_0
-	ps_dev_staff->bf_dev_staff.MODULE_0=ENABLE;
-#endif
 #ifdef DEV_1
-	ps_dev_staff->bf_dev_staff.MODULE_1=ENABLE;
+		        .MODULE_1=ENABLE,
 #endif
 #ifdef DEV_2
-	ps_dev_staff->bf_dev_staff.MODULE_2=ENABLE;
+		        .MODULE_2=ENABLE,
 #endif
 #ifdef DEV_3
-	ps_dev_staff->bf_dev_staff.MODULE_3=ENABLE;
+		        .MODULE_3=ENABLE,
 #endif
 #ifdef DEV_4
-	ps_dev_staff->bf_dev_staff.MODULE_4=ENABLE;
+		        .MODULE_4=ENABLE,
 #endif
 #ifdef DEV_5
-	ps_dev_staff->bf_dev_staff.MODULE_5=ENABLE;
+		        .MODULE_5=ENABLE,
 #endif
 #ifdef DEV_6
-	ps_dev_staff->bf_dev_staff.MODULE_6=ENABLE;
+		        .MODULE_6=ENABLE,
 #endif
 #ifdef DEV_7
-	ps_dev_staff->bf_dev_staff.MODULE_7=ENABLE;
+		        .MODULE_7=ENABLE,
 #endif
 #ifdef DEV_8
-	ps_dev_staff->bf_dev_staff.MODULE_8=ENABLE;
+		        .MODULE_8=ENABLE,
 #endif
 #ifdef DEV_9
-	ps_dev_staff->bf_dev_staff.MODULE_9=ENABLE;
+		        .MODULE_9=ENABLE,
 #endif
 #ifdef DEV_10
-	ps_dev_staff->bf_dev_staff.MODULE_10=ENABLE;
+		        .MODULE_10=ENABLE,
 #endif
 #ifdef DEV_11
-	ps_dev_staff->bf_dev_staff.MODULE_11=ENABLE;
+		        .MODULE_11=ENABLE,
 #endif
 #ifdef DEV_12
-	ps_dev_staff->bf_dev_staff.MODULE_12=ENABLE;
+		        .MODULE_12=ENABLE,
 #endif
 #ifdef DEV_13
-	ps_dev_staff->bf_dev_staff.MODULE_13=ENABLE;
+		        .MODULE_13=ENABLE,
 #endif
 #ifdef DEV_14
-	ps_dev_staff->bf_dev_staff.MODULE_14=ENABLE;
+		        .MODULE_14=ENABLE,
 #endif
 #ifdef DEV_15
-	ps_dev_staff->bf_dev_staff.MODULE_15=ENABLE;
+		        .MODULE_15=ENABLE,
 #endif
+			},
+		    .num_use_uart    = NUM_PORT_MODBUS,
+		    .num_reg_data    = NUM_REG_DATA,
+		    .modbus_req_user = MAX_NUM_MODBUS_REQ,
+		    .program_version = 1,
+	   },
+		.bf_date_config = {
+		    .year   = 18,
+			.mounth = 7,
+			.day    = 29,
+			.hour   = 16,
+			.minute = 39,
+			.second = 0,
+		},
+		DEFAULT_CONFIG_DESCRIPTION
+};
 
-     // заполняю поля свойств устройства. По идее эти значения должны храниться во флеш - памяти, и считываться вместе с конфигурацией,
-	 // но как сделать удобный интерфейс записи во флеш настроек, которые не меняються на протяжении всей жизни прибора (состав и т. д.) еще не придумал
+/*This structure containe address of all modulus and fild of modulus*/
+extern S_address_oper_data s_address_oper_data;
+/*This structure contain configuration of all modulus and use by modulus*/
+extern S_config_moduls s_config_moduls;
+/*This register containe of absolute pointers on all modulus*/
+extern S_mem_map s_mem_map;
 
-	ps_dev_staff->num_use_uart=NUM_PORT_MODBUS;//
-	ps_dev_staff->num_reg_data=NUM_REG_DATA;
-	ps_dev_staff->modbus_req_user=MAX_NUM_MODBUS_REQ;
-	ps_dev_staff->program_version=1;
-	ps_dev_staff->CRC_dev=CRC16((u8*)ps_dev_staff,(sizeof(S_dev_staff)-2));
+
+void processing_config_first_on(void){
+	if(memcmp(FIRST_POWER_ON_ATTRIBUTE, userConfiguration, strlen(FIRST_POWER_ON_ATTRIBUTE)) != 0) //first power on detect
+	{
+        return;
+	}
+	//calc CRC, eritw default configuration
+	S_global_config tempUserConfigBuff;
+	union dataBuff
+	{
+		uint8_t         *bufPoint;
+		uint16_t        *bufPointShort;
+		S_global_config *dataPoint;
+	};
+	union dataBuff defauldDataBuff = {.dataPoint = &defaultConfiguration};
+	union dataBuff userdDataBuff   = {.dataPoint = &tempUserConfigBuff};
+	memcpy(userdDataBuff.bufPoint, defauldDataBuff.bufPoint, (sizeof(S_global_config)-2));
+	tempUserConfigBuff.configurationCRC16 = CRC16(defauldDataBuff.bufPoint, (sizeof(S_global_config)-2));
+	//write default configuration on user configuration space
+	FLASH_OPERATION_erase_page(PAGE_USER_CONFIG);
+	FLASH_OPERATION_write_flash_16b(userdDataBuff.bufPointShort, NUM_REG_CONFIG, PAGE_ABS_ADDRESS(PAGE_USER_CONFIG ));
 }
 
+
+bool processing_config_init(bool isUserConfig)
+
+{
+	union
+	{
+		uint8_t         *bufPoint;
+		S_config_moduls *dataPoint;
+	}userdConfigBuff =
+	{
+		.dataPoint = &s_config_moduls
+	};
+    // user memory map include only user configuration data
+	memcpy(s_mem_map.p_start_config_data, userConfiguration, sizeof(S_global_config));
+	//configuration for that will be use by modulus
+	memcpy(userdConfigBuff.bufPoint,
+			(isUserConfig) ? &(((S_global_config*)PAGE_ABS_ADDRESS(PAGE_USER_CONFIG ))->s_config_moduls) :
+					         &(((S_global_config*)PAGE_ABS_ADDRESS(PAGE_DEFAULT_CONFIG ))->s_config_moduls),
+		    (sizeof(S_global_config)-2));
+	// calculaton CRC for detect
+	uint16_t calcCRC = CRC16((uint8_t*)PAGE_ABS_ADDRESS(PAGE_USER_CONFIG ), (sizeof(S_global_config)-2));
+    return (calcCRC == ((S_global_config*)s_mem_map.p_start_config_data)->configurationCRC16) ? (true) : (false);
+}
 
 
 //-------------processing_config_dev_init------------------
 //функция processing_config_dev_init - выполняет заполнение битового поля состава устройства согласно настройкам пользователя
 //                                     копирует данные конфигурации в рабочую структуру для доступа програмных модулей,
 //                                     задает callback приема функции 16 modbus
-void processing_config_dev_init(void){
-	// копирую настройки МОДУЛЕЙ устройства из карты памяти, в структуру настроек, которая будет использоваться програмными модулями.
-	// даная структура не изменяеться в процесе работы устройства (до презагрузки).
-	// НАСТРОЙКИ ПОЛЬЗОВАТЕЛЯ (НОВЫЕ) В ПРОЦЕСЕ КОНФИГУРАЦИИ СОХРАНЯЮТЬСЯ В КАРТЕ ПАМЯТИ !!!
-	// (u8*)&s_config_moduls - глобальная структура настроек МОДУЛЕЙ устройства, которая используеться програмными модулями в процесе работы програмы
-	//(S_global_config*)s_mem_map.p_start_config_data ->s_config_moduls - структура настроек устройства в карте памяти, не используеться модуляями
-	//                                                                    в процесе работы, но при обращении к карте памяти передаються/записываються
-	//                                                                    данные именно в эту область
-	memcpy((u8*)&s_config_moduls,
-			(u8*)&((S_global_config*)s_mem_map.p_start_config_data)->s_config_moduls,
-			sizeof(S_config_moduls)
-			);
-
+void processing_config_add_modbus_callback(void){
 	// задаю ф-ю callback которая вызываться процессом modbus_slave для проверки запрашиваимого адресса запросом №3
 	modbus_callback_address_check(&processing_config_check_is_holding_reg,READ_HOLDING_STATUS);
 	// задаю ф-ю callback которая вызываться процессом modbus_slave для проверки запрашиваимого адресса запросом №4
@@ -272,27 +276,21 @@ u8 update_config_data(void* req,u8 num_peyload_data, u16 addres_data){
 }
 
 
-uint16_t processing_config_get_user_config_CRC(void)
-{
-    return ((S_global_config*)(s_mem_map.p_start_config_data))->s_config_moduls.configurationCRC16;
-}
-
-
-uint16_t processing_config_get_saved_user_config_CRC(void)
-{
-    return ((S_global_config*)(PAGE_ABS_ADDRESS(PAGE_USER_CONFIG )))->s_config_moduls.configurationCRC16;
-}
-
-
-u16 processing_config_calc_user_config_CRC(void)
-{
-    return  CRC16( (uint8_t*)&((S_global_config*)(s_mem_map.p_start_config_data))->s_config_moduls, sizeof(S_config_moduls) - 2 );
-}
-
 void processing_config_write_configuration(void)
 {
+	union
+	{
+		uint8_t         *bufPoint;
+		uint16_t        *bufPointShort;
+		S_global_config *dataPoint;
+	} userdDataBuff =
+	{
+        .dataPoint = (S_global_config*)s_mem_map.p_start_config_data,
+	};
+	userdDataBuff.dataPoint->configurationCRC16 = CRC16(userdDataBuff.bufPoint, sizeof(S_global_config) - 2 );
 	FLASH_OPERATION_erase_page(PAGE_USER_CONFIG);
-	FLASH_OPERATION_write_flash_16b((u16*)s_mem_map.p_start_config_data,
-			                        (sizeof(S_global_config) % 2 != 0) ? (sizeof(S_global_config) + 1) : (sizeof(S_global_config)),
+	FLASH_OPERATION_write_flash_16b(userdDataBuff.bufPointShort,
+			                        NUM_REG_CONFIG,
 			                        PAGE_ABS_ADDRESS(PAGE_USER_CONFIG ));
 }
+

@@ -16,6 +16,7 @@
 #define debugPin1  GPIO_Pin_2
 //P5
 #define debugPin2  GPIO_Pin_3
+
 #define debugPort1 GPIOA
 #define debugPort2 GPIOA
 #define debugPin_1_Set     GPIO_SetBits(debugPort1, debugPin1)

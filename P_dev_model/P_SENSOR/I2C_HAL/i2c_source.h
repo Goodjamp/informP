@@ -45,15 +45,16 @@ typedef enum{
 
 typedef struct{
 	I2C_TypeDef*         I2C_SEL;           // I2C pointer
+	uint32_t             frq;               // frequency of SCL bus
 	I2C_STATUS           transactionStatus; // transaction status
 	I2C_TRANSACTION_TYPE transactionType;   // type of transaction (Tx/Rx)
-	uint32_t             I2C_periodUs;
+	uint32_t             I2C_periodUs;      //
 	uint8_t              stateCnt;          // counter state of I2C transaction, point on current state (tx/rx - I2C_TX_STATE/I2C_RX_STATE)
-	uint8_t              addressDev;   // slave address
-	uint8_t              addressReg;   // start register address for Tx/Rx data
-	uint8_t              numData;      // number of Tx/Rx data
-	uint8_t              *buffData;    // buffer for Tx/Rx data
-	uint16_t             cnt;          // counter Tx/Rx data
+	uint8_t              addressDev;        // slave address
+	uint8_t              addressReg;        // start register address for Tx/Rx data
+	uint8_t              numData;           // number of Tx/Rx data
+	uint8_t              *buffData;         // buffer for Tx/Rx data
+	uint16_t             cnt;               // counter Tx/Rx data
 }I2CProcessingDef;
 
 

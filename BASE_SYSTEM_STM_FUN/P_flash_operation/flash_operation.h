@@ -13,13 +13,8 @@
 #define FLASH_OPERATION
 
 
-// Начальный адрес области flash памяти
-#define START_MEM_ADRESS 0x08000000
-// Конечный адрес области flash памяти
-#define STOP_MEM_ADRESS 0x08000000+127*1024
-
-// Макрос для опредиления начала адреса страницы по номеру страницы
-#define PAGE_ABS_ADDRESS(NUM_PAGE) NUM_PAGE*0x0400+START_MEM_ADRESS
+// Calculate absolute page addres
+#define PAGE_ABS_ADDRESS(NUM_PAGE) (FLASH_BASE + 0x0400 * NUM_PAGE)
 
 
 // ----------------Прототипы функций файла работы с flash-памятью------------------

@@ -236,6 +236,11 @@ void t_processing_FRQmetter(void *pvParameters){
 
     // init state - ERROR (up to obtain first result)
 	updateFrqStatus(FRQ_STATUS_OK);
+	//stop task
+	if(s_FRQConfig->state == DISABLE)
+	{
+		vTaskDelete(NULL);
+	}
 
 	//	Configure all peripherals
 	frqGPIOConfig();
