@@ -62,4 +62,11 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>P_dev_model/P_SENSOR/NRF24L01</name>
+			<type>2</type>
+			<location>D:/Private/Programing/MCU/STM32/CooCox/INFORM_P/informP/P_dev_model/P_SENSOR/NRF24L01</location>
+		</link>
+	</linkedResources>
 </projectDescription>

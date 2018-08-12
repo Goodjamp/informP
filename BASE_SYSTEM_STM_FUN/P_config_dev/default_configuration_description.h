@@ -36,7 +36,7 @@
 	.s_config_moduls.s_TIME_user_config.synchronizationSource = 0,                       \
 	/*==========default SENSOR configuration========*/                                   \
 	.s_config_moduls.s_sensor_user_config.state = ENABLE,                                \
-	.s_config_moduls.s_sensor_user_config.source = 0,                                    \
+	.s_config_moduls.s_sensor_user_config.source = 1,                                    \
 	/*==========default DISPLAY configuration=======*/                                   \
 	.s_config_moduls.s_display_user_config.state = ENABLE,                               \
 	.s_config_moduls.s_display_user_config.numScreen = 4,                                \

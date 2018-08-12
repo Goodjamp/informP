@@ -265,14 +265,12 @@ u8 update_config_data(void* req,u8 num_peyload_data, u16 addres_data){
 		// ---------здесь выполнить проверку приннятой посылки----------
 
 		// можно так: вызов функций конфигурации из "main.c" сгрупировать в одну функцию перенести
-
 	}
-
 	if(count_config_data>NUM_REG_CONFIG)
 	{
 		return 1;
 	}
-		return 0;
+	return 0;
 }
 
 

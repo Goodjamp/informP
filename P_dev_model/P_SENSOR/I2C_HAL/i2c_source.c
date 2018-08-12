@@ -149,7 +149,6 @@ I2C_STATUS i2cTxData(I2C_DEF i2cIn, uint8_t address_dev, uint8_t address_reg, ui
 		   (I2C_ReadRegister(I2CProcessing[i2cIn].I2C_SEL, I2C_Register_CR1) & I2C_CR1_STOP) )
 	{
 		// user time check function
-
 		if( i2cgetTimeMs() >= maxTimeTransaction )
 		{
 			// timeout stop transaction

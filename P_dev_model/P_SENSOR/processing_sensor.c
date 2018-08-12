@@ -26,6 +26,10 @@
 #include "processing_mem_map_extern.h"
 #include "processing_reset_control.h"
 
+#include "NRF24L01user.h"
+#include "NRF24L01.h"
+#include "moduleHWInit.h"
+
 #include "debugStuff.h"
 
 extern S_address_oper_data s_address_oper_data;
@@ -252,18 +256,13 @@ static void updateSensorStatus(SENSOR_STATUS newStatus){
     }
 }
 
-void t_processing_sensor(void *pvParameters){
-	S_sensor_user_config *s_sensorUserConfig =(S_sensor_user_config*)pvParameters;
+
+static void processingLocalSensor(void)
+{
 	uint16_t rezMes = 0;
 	float rezMesHumidity;
 	float rezMesTemperature;
 	float rezMesPressure;
-
-    // stop task if it disable on configuration
-	if(s_sensorUserConfig->state == DISABLE)
-	{
-		vTaskDelete(NULL);
-	}
 
 	bmeStatus = initI2C_Sensor();
 
@@ -309,3 +308,90 @@ void t_processing_sensor(void *pvParameters){
 		}
 	}
 }
+
+
+#pragma pack(push, 1)
+typedef struct
+{
+	uint8_t status;
+    int16_t temperature;
+    int16_t humifity;
+    int16_t atmPressure;
+}transactionT;
+#pragma pack(pop)
+
+typedef union
+{
+	uint8_t      *buf;
+	transactionT *data;
+}transactionBuffT;
+STATUS statusRx;
+nrfHeader nrfRx;
+transactionT rxData;
+transactionBuffT rxBuff =
+{
+	.data = &rxData
+};
+
+//static void processingRemoteSensor()
+void processingRemoteSensor(void)
+{
+	static uint8_t defAddress[5] = "METEO";
+	STATUS status_reg;
+	nrfRx = NRF24L01_init(NRF_INTERFACE_N01);
+
+	NRF24L01_power_switch(nrfRx, NRF_SET);
+	NRF24L01_FLUSH_RX(nrfRx);
+	NRF24L01_FLUSH_TX(nrfRx);
+	NRF24L01_set_RX_address(nrfRx, PIPE0, defAddress);
+	NRF24L01_set_crco(nrfRx, CRCO_2_BYTES);
+	// set payload width
+	NRF24L01_set_TX_PayloadSize(nrfRx, PIPE0, sizeof(transactionT));
+	// get status NRF
+	NRF24L01_get_status_tx_rx(nrfRx,&status_reg);
+	NRF24L01_clear_interrupt(nrfRx, STATUS_RX_DR); // Clear status NRF
+	//Set Rx mode
+	NRF24L01_set_rx_mode(nrfRx);
+
+	//------------ wait receive  data-------------------
+    while(1)
+    {
+    	NRF24L01_get_status_tx_rx(nrfRx, &status_reg);
+    	while(status_reg.RX_DR == 0){
+    		NRF24L01_get_status_tx_rx(nrfRx, &status_reg);
+    	}; //wait interrupt
+    	if(*(uint8_t*)(&status_reg) == 0xff)
+    	{
+    		continue;
+    	}
+    	NRF24L01_read_rx_data(nrfRx, sizeof(transactionT), rxBuff.buf);
+    	processing_mem_map_write_s_proces_object_modbus((uint16_t*)&rxData.temperature, 1, s_address_oper_data.s_sensor_address.rezTemperature);
+    	processing_mem_map_write_s_proces_object_modbus((uint16_t*)&rxData.humifity,    1, s_address_oper_data.s_sensor_address.rezHumidity);
+    	processing_mem_map_write_s_proces_object_modbus((uint16_t*)&rxData.atmPressure, 1, s_address_oper_data.s_sensor_address.rezPressure_mmHg);
+    	NRF24L01_clear_interrupt(nrfRx,STATUS_RX_DR);
+    }
+}
+
+
+void t_processing_sensor(void *pvParameters){
+	S_sensor_user_config *s_sensorUserConfig =(S_sensor_user_config*)pvParameters;
+    // stop task if it disable on configuration
+	if(s_sensorUserConfig->state == DISABLE)
+	{
+		vTaskDelete(NULL);
+	}
+
+	if(s_sensorUserConfig->source == 0)
+	{
+		processingLocalSensor();
+	}
+	else
+	{
+		processingRemoteSensor();
+	}
+}
+
+
+
+
+

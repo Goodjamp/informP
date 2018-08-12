@@ -58,6 +58,7 @@ typedef struct{
 uint16_t sensor_calc_address_oper_reg(S_sensor_address *ps_sensor_address, uint16_t adres_start);
 void t_processing_sensor(void *pvParameters);
 
+void processingRemoteSensor();
 
 #endif // PROCESSING_SENSOR_EXTERN_H_
 

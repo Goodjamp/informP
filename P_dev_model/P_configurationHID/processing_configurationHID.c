@@ -102,7 +102,7 @@ typedef struct
 
 void rxDataCB(uint8_t epNumber, uint8_t numRx, uint8_t* rxData)
 {
-	BaseType_t  rezPush = xQueueSendToBackFromISR(inMessageQueue, (void*)rxData, NULL);
+	xQueueSendToBackFromISR(inMessageQueue, (void*)rxData, NULL);
 }
 
 

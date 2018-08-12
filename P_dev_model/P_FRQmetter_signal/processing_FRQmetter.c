@@ -32,8 +32,6 @@ xSemaphoreHandle semaphoreUpdateFRQ;
 //static uint16_t status;
 static S_FRQmetter_user_config *s_FRQConfig;
 
-
-
 struct{
 	uint16_t rezArray[NUMBER_OF_RESULTS];
 	uint32_t summ;

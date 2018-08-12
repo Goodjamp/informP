@@ -252,6 +252,8 @@ void t_processing_TIME(void *p_task_par){
     // stop task if it disable on configuration
 	if(configData->state == DISABLE)
 	{
+		registerValue = TIME_STATUS_OK;
+		processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.status_TIME);
 		vTaskDelete(NULL);
 	}
 	// create event group for processing clock event
