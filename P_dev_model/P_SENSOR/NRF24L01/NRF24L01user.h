@@ -322,6 +322,7 @@ NRF_ERROR NRF24L01_enable_pipe       (nrfHeader inNRF, PIPS_DEF PipeNumber);
 NRF_ERROR NRF24L01_set_num_retr      (nrfHeader inNRF, uint8_t num_retransmit);
 NRF_ERROR NRF24L01_set_delay_retr    (nrfHeader inNRF, RETRANSMIT_DELAY auto_retr_delay);
 NRF_ERROR NRF24L01_set_rf_dr         (nrfHeader inNRF, RF_DR  inDR);
+NRF_ERROR NRF24L01_set_rf_chanel     (nrfHeader inNRF, uint8_t number_rf_chanel);
 NRF_ERROR NRF24L01_set_address_width (nrfHeader inNRF, AW  address_width);
 NRF_ERROR NRF24L01_set_RX_address    (nrfHeader inNRF, PIPS_DEF PipeNumber, uint8_t *pPipeAddress);
 NRF_ERROR NRF24L01_get_RX_address    (nrfHeader inNRF, PIPS_DEF PipeNumber, uint8_t *pPipeAddress);

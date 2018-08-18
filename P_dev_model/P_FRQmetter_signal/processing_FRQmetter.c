@@ -256,7 +256,7 @@ void t_processing_FRQmetter(void *pvParameters){
  		frqRezMes.f_ICinterrupt = 0;
 		totatalCNT = frqRezMes.updateCNT * TIM_MAX_CNT + frqRezMes.inputCaptureCNT;
 		// calculate frq + correction
-		frq = updateMiddleRez( ((float)(frqRezMes.df/(float)totatalCNT)*1000)  + s_FRQConfig->frqCorrection*10 );
+		frq = updateMiddleRez( ((float)(frqRezMes.df/(float)totatalCNT)*1000)  + s_FRQConfig->frqCorrection );
 		if((frq < FRQ_MAX) && (frq > FRQ_MIN)){
 			updateFrqStatus(FRQ_STATUS_OK);
 		}

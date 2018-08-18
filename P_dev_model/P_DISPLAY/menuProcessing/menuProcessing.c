@@ -13,6 +13,7 @@
 #include "LCD.h"
 #include "processing_display_extern.h"
 
+extern void saveMenuConfigData(void);
 extern displayHandlerDef myDisplay;
 
 typedef struct{

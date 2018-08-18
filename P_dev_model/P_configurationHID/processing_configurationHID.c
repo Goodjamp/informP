@@ -153,7 +153,6 @@ void t_processing_configurationHID(void *in_Data) {
 		}
 		case COMUNICATION_SET_REG:
 		{
-			S_global_config *configData = (S_global_config*)((headOfReq_t*) reqBuf)->payload.setRegReq.payload;
 			((headOfRes_t*) respBuf)->reqType = COMUNICATION_GET_REG;
 			((headOfRes_t*) respBuf)->respStatus = (MEM_ERROR == processing_mem_map_write_s_proces_object_modbus(
 									                                           (uint16_t*)((headOfReq_t*) reqBuf)->payload.setRegReq.payload,

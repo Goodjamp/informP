@@ -282,6 +282,63 @@ static inline void updateSensorStatus(uint16_t newStatus){
 }
 
 
+static void gistConfig(gistT *inGist, uint16_t thresholdWindowSize, uint16_t thresholdSucsses, uint16_t thresholdError, bool defState)
+{
+    inGist->thresholdWindowSize  = thresholdWindowSize;
+    inGist->thresholdSucssesSize = thresholdSucsses;
+    inGist->thresholdErrorSize   = thresholdError;
+
+    inGist->thresholdSucssesCnt = (defState) ? (inGist->thresholdWindowSize) : (0);
+    inGist->thresholdErrorCnt   = (defState) ? (0) : (inGist->thresholdWindowSize);
+    inGist->state               = defState;
+}
+
+
+static bool gistAddData(gistT *inGist, bool rez)
+{
+    if(rez)
+    {
+        if(inGist->thresholdSucssesCnt < inGist->thresholdWindowSize)
+        {
+            inGist->thresholdSucssesCnt++;
+        }
+        if(inGist->thresholdErrorCnt != 0)
+        {
+            inGist->thresholdErrorCnt--;
+        }
+    }
+    else
+    {
+        if(inGist->thresholdSucssesCnt != 0)
+        {
+            inGist->thresholdSucssesCnt--;
+        }
+        if(inGist->thresholdErrorCnt < inGist->thresholdWindowSize)
+        {
+            inGist->thresholdErrorCnt++;
+        }
+    }
+
+    if(inGist->state) // current state true
+    {
+        // check for false
+        if( inGist->thresholdErrorCnt >= inGist->thresholdErrorSize)
+        {
+            inGist->state = false;
+        }
+    }
+    else            // current state false
+    {
+        //check for true
+        if( inGist->thresholdSucssesCnt >= inGist->thresholdSucssesSize)
+        {
+        	inGist->state = true;
+        }
+    }
+    return inGist->state;
+}
+
+
 static void processingLocalSensor(void)
 {
 	uint16_t rezMes = 0;
@@ -326,68 +383,6 @@ static void processingLocalSensor(void)
 	}
 }
 
-
-void gistConfig(gistT *inGist, uint16_t thresholdWindowSize, uint16_t thresholdSucsses, uint16_t thresholdError, bool defState)
-{
-    inGist->thresholdWindowSize  = thresholdWindowSize;
-    inGist->thresholdSucssesSize = thresholdSucsses;
-    inGist->thresholdErrorSize   = thresholdError;
-
-    inGist->thresholdSucssesCnt = (defState) ? (inGist->thresholdWindowSize) : (0);
-    inGist->thresholdErrorCnt   = (defState) ? (0) : (inGist->thresholdWindowSize);
-    inGist->state               = defState;
-}
-
-
-bool gistAddData(gistT *inGist, bool rez)
-{
-    if(rez)
-    {
-        if(inGist->thresholdSucssesCnt < inGist->thresholdWindowSize)
-        {
-            inGist->thresholdSucssesCnt++;
-        }
-        if(inGist->thresholdErrorCnt != 0)
-        {
-            inGist->thresholdErrorCnt--;
-        }
-    }
-    else
-    {
-        if(inGist->thresholdSucssesCnt != 0)
-        {
-            inGist->thresholdSucssesCnt--;
-        }
-        if(inGist->thresholdErrorCnt < inGist->thresholdWindowSize)
-        {
-            inGist->thresholdErrorCnt++;
-        }
-    }
-
-    if(inGist->state) // current state true
-    {
-        // check for false
-        if( inGist->thresholdErrorCnt >= inGist->thresholdErrorSize)
-        {
-            inGist->state = false;
-        }
-    }
-    else            // current state false
-    {
-        //check for true
-        if( inGist->thresholdSucssesCnt >= inGist->thresholdSucssesSize)
-        {
-        	inGist->state = true;
-        }
-    }
-    return inGist->state;
-}
-
-/*
- * gisteresis for ERROR_REM_RX_TIMEOUT:
- * set   error - during timeout T receiver should receive LESS than N packet
- * clear error - during timeout T receiver should receive MORE than N packet
- * */
 
 void processingRemoteSensor(void)
 {

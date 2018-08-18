@@ -92,6 +92,9 @@ static inline TX_STATE getNextTxState(void){
 	case TX_COMPLITE:
 		stopTimer();
 		return txTimerState.txState = TX_STATE_COMPLITE;
+	default:
+		stopTimer();
+		return txTimerState.txState = TX_STATE_COMPLITE;
 	}
 }
 

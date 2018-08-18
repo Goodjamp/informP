@@ -52,7 +52,7 @@ void FLASH_OPERATION_read_flash_16b(u16 *p_buff, u32 length, u32 address) {
 //                  length - к-во данных к записи
 //                  num_page - номер страницы памяти, принмсает значения 0-127
 FLASH_Status FLASH_OPERATION_write_flash_page_16b(u16 *data, u32 length, u16 num_page) {
-	FLASH_Status rez_write;
+	FLASH_Status rez_write = FLASH_COMPLETE;
 	u32 address;
 	u32 k1;
 	address = PAGE_ABS_ADDRESS(num_page);
@@ -76,7 +76,7 @@ FLASH_Status FLASH_OPERATION_write_flash_page_16b(u16 *data, u32 length, u16 num
 //                 address - начальный адрес записи, принимает значения START_MEM_ADRESS - STOP_MEM_ADRESS
 u32 k1_count;
 FLASH_Status FLASH_OPERATION_write_flash_16b(u16 *data, u32 length, u32 address) {
-	FLASH_Status rez_write;
+	FLASH_Status rez_write = FLASH_COMPLETE;;
 	FLASH_Unlock();
 	for (k1_count = 0; k1_count < length; k1_count ++) {
 		rez_write = FLASH_ProgramHalfWord(address, (*data));
@@ -96,7 +96,7 @@ void FLASH_OPERATION_erase_page(u16 num_page) {
 	u32 address;
 	address = PAGE_ABS_ADDRESS(num_page);
 	FLASH_Unlock();
-	FLASH_Status rezErace = FLASH_ErasePage(address);
+	FLASH_ErasePage(address);
 	FLASH_Lock();
 }
 
