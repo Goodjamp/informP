@@ -53,7 +53,7 @@
 #define  MOD_3_OFF 20
 
 //макрос для конструирования вызова ф-и установки бита статуса в глобальном статус-регистре
-#define SET_GLOBAL_STATUS(X)   processing_reset_control_set_dev_error(X##_CONTROL_BIT,SET);
+#define SET_GLOBAL_STATUS(X)     processing_reset_control_set_dev_error(X##_CONTROL_BIT,SET);
 //макрос для конструирования вызова ф-и очситки бита статуса в глобальном статус-регистре
 #define RESET_GLOBAL_STATUS(X)   processing_reset_control_set_dev_error(X##_CONTROL_BIT,RESET);
 

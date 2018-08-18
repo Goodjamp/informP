@@ -27,10 +27,10 @@
 	.s_config_moduls.s_connectmodbus_global[0].number_no_answer = 1,                     \
 	.s_config_moduls.s_connectmodbus_global[0].adress_kp = 2,                            \
 	/*==========default FRQ configuration=========*/                                     \
-	.s_config_moduls.s_FRQmetter_user_config.state = ENABLE,                             \
+	.s_config_moduls.s_FRQmetter_user_config.state = DISABLE,                             \
 	.s_config_moduls.s_FRQmetter_user_config.frqCorrection = 230,                        \
 	/*==========default TIME configuration========*/                                     \
-	.s_config_moduls.s_TIME_user_config.state = ENABLE,                                  \
+	.s_config_moduls.s_TIME_user_config.state = DISABLE,                                  \
 	.s_config_moduls.s_TIME_user_config.timeCorection = 120,                             \
 	.s_config_moduls.s_TIME_user_config.isDaylightSaving = 0,                            \
 	.s_config_moduls.s_TIME_user_config.synchronizationSource = 0,                       \
@@ -39,7 +39,7 @@
 	.s_config_moduls.s_sensor_user_config.source = 1,                                    \
 	/*==========default DISPLAY configuration=======*/                                   \
 	.s_config_moduls.s_display_user_config.state = ENABLE,                               \
-	.s_config_moduls.s_display_user_config.numScreen = 4,                                \
+	.s_config_moduls.s_display_user_config.numScreen = 1,                                \
                                                                                          \
 	.s_config_moduls.s_display_user_config.screenConfig[0].numParamiterPerScreen = 3,    \
 	.s_config_moduls.s_display_user_config.screenConfig[0].bitsOfParamiters =0b111,      \

@@ -7,6 +7,7 @@
   * @brief
   */
 #include "stdint.h"
+#include "stdbool.h"
 
 #include "FreeRTOS.h"
 #include "semphr.h"
@@ -36,6 +37,14 @@ extern S_address_oper_data s_address_oper_data;
 DS1621MessStatus mesStatus;
 xSemaphoreHandle semaphoreUpdateFRQ;
 static BME280_STATUS bmeStatus;
+STATUS statusRx;
+nrfHeader nrfRx;
+transactionT rxData;
+transactionBuffT rxBuff =
+{
+	.data = &rxData
+};
+
 
 //---------------------------------I2C user implementation functions-----------------------
 void i2cInitGpio(uint8_t step){
@@ -234,26 +243,42 @@ BME280_STATUS initI2C_Sensor(void){
 }
 
 
-static void updateSensorStatus(SENSOR_STATUS newStatus){
-	static uint16_t currentSensorStatus = SENSOR_STATUS_NOT_SET;
+static void initNRF(void)
+{
+	nrfRx = NRF24L01_init(NRF_INTERFACE_N01);
+
+	NRF24L01_power_switch(nrfRx, NRF_SET);
+	NRF24L01_FLUSH_RX(nrfRx);
+	NRF24L01_FLUSH_TX(nrfRx);
+	NRF24L01_set_RX_address(nrfRx, PIPE0, NRF_ADDRESS);
+	NRF24L01_set_TX_addres(nrfRx, NRF_ADDRESS);
+	NRF24L01_set_crco(nrfRx, CRCO_2_BYTES);
+	NRF24L01_set_TX_PayloadSize(nrfRx, PIPE0, sizeof(transactionT));
+	NRF24L01_set_rf_dr(nrfRx, DATA_SPEED_250K);
+	NRF24L01_set_rf_chanel(nrfRx, NRF_CHANEL);
+	NRF24L01_clear_interrupt(nrfRx, STATUS_RX_DR); // Clear status NRF
+	NRF24L01_set_rx_mode(nrfRx);
+}
+
+
+static inline void updateSensorStatus(uint16_t newStatus){
+	volatile static uint16_t currentSensorStatus = SENSOR_STATUS_NOT_INIT;
 	if(currentSensorStatus == newStatus)
 	{
 		return;
 	}
 	currentSensorStatus = newStatus;
-	uint16_t regValue = (uint16_t)newStatus;
-	processing_mem_map_write_s_proces_object_modbus((uint16_t*)&regValue, 1, s_address_oper_data.s_sensor_address.status_sensor);
-    switch(regValue){
-    case SENSOR_STATUS_OK:
-		// set global error status end error indication
-		RESET_GLOBAL_STATUS(DEV_7);
-		break;
-    case SENSOR_STATUS_ERROR:
+	processing_mem_map_write_s_proces_object_modbus((uint16_t*)&newStatus, 1, s_address_oper_data.s_sensor_address.status_sensor);
+	if(currentSensorStatus != 0)
+	{
 		// set global error status end error indication
 		SET_GLOBAL_STATUS(DEV_7);
-		break;
-    default:break;
-    }
+	}
+	else
+	{
+		// reset global error status end error indication
+		RESET_GLOBAL_STATUS(DEV_7);
+	}
 }
 
 
@@ -265,20 +290,14 @@ static void processingLocalSensor(void)
 	float rezMesPressure;
 
 	bmeStatus = initI2C_Sensor();
-
-	//status = (bmeStatus == BME280_STATUS_OK) ? SENSOR_STATUS_OK : SENSOR_STATUS_ERROR;
-	updateSensorStatus(  (bmeStatus == BME280_STATUS_OK) ? SENSOR_STATUS_OK : SENSOR_STATUS_ERROR  );
-	//processing_mem_map_write_s_proces_object_modbus((uint16_t*)&status, 1, s_address_oper_data.s_sensor_address.status_sensor);
-
+	updateSensorStatus(  (bmeStatus == BME280_STATUS_OK) ? ( SENSOR_STATUS_OK ) : ((uint16_t)(1 << SENSOR_STATUS_ERROR_LOCAL)));
 	while(1){
 
 		if( BME280_STATUS_OK  != bmeStatus )
 		{
 			if( BME280_STATUS_OK  == (bmeStatus = initI2C_Sensor()) )
 			{
-				//status = SENSOR_STATUS_OK;
 				updateSensorStatus(SENSOR_STATUS_OK);
-				//processing_mem_map_write_s_proces_object_modbus((uint16_t*)&status, 1, s_address_oper_data.s_sensor_address.status_sensor);
 			    continue;
 			}
 			vTaskDelay(10);
@@ -289,9 +308,7 @@ static void processingLocalSensor(void)
 					                                                              &rezMesPressure,
 					                                                              &rezMesHumidity) ) )
 			{
-				//status = SENSOR_STATUS_ERROR;
-				updateSensorStatus(SENSOR_STATUS_ERROR);
-				//processing_mem_map_write_s_proces_object_modbus((uint16_t*)&status, 1, s_address_oper_data.s_sensor_address.status_sensor);
+				updateSensorStatus(((uint16_t)(1 << SENSOR_STATUS_ERROR_LOCAL)));
 				vTaskDelay(10);
 				continue;
 			}
@@ -310,78 +327,156 @@ static void processingLocalSensor(void)
 }
 
 
-#pragma pack(push, 1)
-typedef struct
+void gistConfig(gistT *inGist, uint16_t thresholdWindowSize, uint16_t thresholdSucsses, uint16_t thresholdError, bool defState)
 {
-	uint8_t status;
-    int16_t temperature;
-    int16_t humifity;
-    int16_t atmPressure;
-}transactionT;
-#pragma pack(pop)
+    inGist->thresholdWindowSize  = thresholdWindowSize;
+    inGist->thresholdSucssesSize = thresholdSucsses;
+    inGist->thresholdErrorSize   = thresholdError;
 
-typedef union
-{
-	uint8_t      *buf;
-	transactionT *data;
-}transactionBuffT;
-STATUS statusRx;
-nrfHeader nrfRx;
-transactionT rxData;
-transactionBuffT rxBuff =
-{
-	.data = &rxData
-};
+    inGist->thresholdSucssesCnt = (defState) ? (inGist->thresholdWindowSize) : (0);
+    inGist->thresholdErrorCnt   = (defState) ? (0) : (inGist->thresholdWindowSize);
+    inGist->state               = defState;
+}
 
-//static void processingRemoteSensor()
+
+bool gistAddData(gistT *inGist, bool rez)
+{
+    if(rez)
+    {
+        if(inGist->thresholdSucssesCnt < inGist->thresholdWindowSize)
+        {
+            inGist->thresholdSucssesCnt++;
+        }
+        if(inGist->thresholdErrorCnt != 0)
+        {
+            inGist->thresholdErrorCnt--;
+        }
+    }
+    else
+    {
+        if(inGist->thresholdSucssesCnt != 0)
+        {
+            inGist->thresholdSucssesCnt--;
+        }
+        if(inGist->thresholdErrorCnt < inGist->thresholdWindowSize)
+        {
+            inGist->thresholdErrorCnt++;
+        }
+    }
+
+    if(inGist->state) // current state true
+    {
+        // check for false
+        if( inGist->thresholdErrorCnt >= inGist->thresholdErrorSize)
+        {
+            inGist->state = false;
+        }
+    }
+    else            // current state false
+    {
+        //check for true
+        if( inGist->thresholdSucssesCnt >= inGist->thresholdSucssesSize)
+        {
+        	inGist->state = true;
+        }
+    }
+    return inGist->state;
+}
+
+/*
+ * gisteresis for ERROR_REM_RX_TIMEOUT:
+ * set   error - during timeout T receiver should receive LESS than N packet
+ * clear error - during timeout T receiver should receive MORE than N packet
+ * */
+
 void processingRemoteSensor(void)
 {
-	static uint8_t defAddress[5] = "METEO";
 	STATUS status_reg;
-	nrfRx = NRF24L01_init(NRF_INTERFACE_N01);
+	uint16_t moduleStatus = SENSOR_STATUS_OK;
+	gistT inGist;
 
-	NRF24L01_power_switch(nrfRx, NRF_SET);
-	NRF24L01_FLUSH_RX(nrfRx);
-	NRF24L01_FLUSH_TX(nrfRx);
-	NRF24L01_set_RX_address(nrfRx, PIPE0, defAddress);
-	NRF24L01_set_crco(nrfRx, CRCO_2_BYTES);
-	// set payload width
-	NRF24L01_set_TX_PayloadSize(nrfRx, PIPE0, sizeof(transactionT));
-	// get status NRF
-	NRF24L01_get_status_tx_rx(nrfRx,&status_reg);
-	NRF24L01_clear_interrupt(nrfRx, STATUS_RX_DR); // Clear status NRF
-	//Set Rx mode
-	NRF24L01_set_rx_mode(nrfRx);
+    gistConfig(&inGist, TIMEOUT_GIST_WIN_SIZE, TIMEOUT_GIST_SUCSSESS_SIZE, TIMEOUT_GIST_ERROR_SIZE, false);
 
-	//------------ wait receive  data-------------------
-    while(1)
+	initNRF();
+	while(1)
     {
+		vTaskDelay(MESSUREMT_PERIOD);
+        updateSensorStatus(moduleStatus);
     	NRF24L01_get_status_tx_rx(nrfRx, &status_reg);
-    	while(status_reg.RX_DR == 0){
-    		NRF24L01_get_status_tx_rx(nrfRx, &status_reg);
-    	}; //wait interrupt
+    	if(status_reg.RX_DR == 0)//wait interrupt
+    	{
+    		if(!gistAddData(&inGist, false))
+    		{
+    			moduleStatus = SENSOR_STATUS_OK;
+    			moduleStatus |= (uint16_t)(1 << SENSOR_STATUS_ERROR_REM_RX_TIMEOUT);
+    		}
+        	continue;
+    	}
+    	else
+    	{
+    		if(gistAddData(&inGist, true))
+    		{
+    			moduleStatus &= ~(uint16_t)(1 << SENSOR_STATUS_ERROR_REM_RX_TIMEOUT);
+    		}
+    	}
     	if(*(uint8_t*)(&status_reg) == 0xff)
     	{
-    		continue;
+    		moduleStatus  = SENSOR_STATUS_OK;
+    		moduleStatus |= (uint16_t)(1 << SENSOR_STATUS_ERROR_RECEIVER);
+    		continue; // there are no sense processing next steps
     	}
+    	else
+    	{
+    		moduleStatus &= ~(uint16_t)(1 << SENSOR_STATUS_ERROR_RECEIVER);
+    	}
+
+    	// new data was received
     	NRF24L01_read_rx_data(nrfRx, sizeof(transactionT), rxBuff.buf);
-    	processing_mem_map_write_s_proces_object_modbus((uint16_t*)&rxData.temperature, 1, s_address_oper_data.s_sensor_address.rezTemperature);
-    	processing_mem_map_write_s_proces_object_modbus((uint16_t*)&rxData.humifity,    1, s_address_oper_data.s_sensor_address.rezHumidity);
-    	processing_mem_map_write_s_proces_object_modbus((uint16_t*)&rxData.atmPressure, 1, s_address_oper_data.s_sensor_address.rezPressure_mmHg);
+    	NRF24L01_FLUSH_RX(nrfRx);
     	NRF24L01_clear_interrupt(nrfRx,STATUS_RX_DR);
+    	if( rxData.status & (uint8_t)(1 << REM_METEO_STATUS_ERROR_SENSOR) )
+    	{
+    		moduleStatus |= (uint16_t)(1 << SENSOR_STATUS_ERROR_REM_SENSOR);
+            continue;
+    	}
+    	else
+    	{
+    		moduleStatus &= ~(uint16_t)(1 << SENSOR_STATUS_ERROR_REM_SENSOR);
+    	}
+    	if( rxData.status & (uint8_t)(1 << REM_METEO_STATUS_ERROR_MES) )
+    	{
+    		moduleStatus |= (uint16_t)(1 << SENSOR_STATUS_ERROR_REM_MES);
+            continue;
+    	}
+    	else
+    	{
+    		moduleStatus &= ~(uint16_t)(1 << SENSOR_STATUS_ERROR_REM_MES);
+    	}
+    	if( rxData.status & (uint8_t)(1 << REM_METEO_STATUS_ERROR_BATARY) )
+    	{
+    		moduleStatus |= (uint16_t)(1 << SENSOR_STATUS_ERROR_REM_BATARY);
+    	}
+    	else
+    	{
+    		moduleStatus &= ~(uint16_t)(1 << SENSOR_STATUS_ERROR_REM_BATARY);
+    	}
+    	processing_mem_map_write_s_proces_object_modbus((uint16_t*)&rxData.temperature,    1, s_address_oper_data.s_sensor_address.rezTemperature);
+    	processing_mem_map_write_s_proces_object_modbus((uint16_t*)&rxData.humifity,       1, s_address_oper_data.s_sensor_address.rezHumidity);
+    	processing_mem_map_write_s_proces_object_modbus((uint16_t*)&rxData.atmPressure,    1, s_address_oper_data.s_sensor_address.rezPressure_mmHg);
+    	processing_mem_map_write_s_proces_object_modbus((uint16_t*)&rxData.atmPressurehPa, 1, s_address_oper_data.s_sensor_address.rezPressure_GPasc);
     }
 }
 
 
 void t_processing_sensor(void *pvParameters){
 	S_sensor_user_config *s_sensorUserConfig =(S_sensor_user_config*)pvParameters;
+	updateSensorStatus(SENSOR_STATUS_OK);
     // stop task if it disable on configuration
 	if(s_sensorUserConfig->state == DISABLE)
 	{
 		vTaskDelete(NULL);
 	}
-
-	if(s_sensorUserConfig->source == 0)
+	if(s_sensorUserConfig->source == METEO_SOURCE_LOCAL)
 	{
 		processingLocalSensor();
 	}
