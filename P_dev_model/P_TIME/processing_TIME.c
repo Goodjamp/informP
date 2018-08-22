@@ -34,14 +34,25 @@
 extern S_address_oper_data s_address_oper_data;
 extern S_Task_parameters task_parameters[NUMBER_MY_PROCES];
 //event grup
-EventGroupHandle_t clockEventGroup;
+EventGroupHandle_t  clockEventGroup;
 EventBits_t        rezWaiteEvent;
 
-static uint8_t usartReadBuff[USART_READ_BUFF_SIZE];
-static uint8_t numRezRead;
-static GPRMC_Def myGPRMC;
-static uint16_t registerValue;
+
+static uint8_t            usartReadBuff[USART_READ_BUFF_SIZE];
+static uint8_t            numRezRead;
+static GPRMC_Def          myGPRMC;
+static uint16_t           registerValue;
 static S_TIME_user_config *configData;
+static serverSetTime      timeSetStruct;
+
+union
+{
+	uint16_t      *timeBuf;
+	serverSetTime *timeData;
+}timeBuffManager =
+{
+    .timeData = &timeSetStruct
+};
 
 static struct{
 	uint8_t initTIme:1;
@@ -63,17 +74,22 @@ static void initUSARTGPS(void);
 
 
 uint16_t TIME_calc_address_oper_reg(S_TIME_address *ps_TIME_address, uint16_t adres_start){
-	ps_TIME_address->status_TIME = adres_start;
-	ps_TIME_address->date_year   = ps_TIME_address->status_TIME + structFieldRegSize(S_TIME_address,status_TIME);
-	ps_TIME_address->date_month  = ps_TIME_address->date_year + structFieldRegSize(S_TIME_address,date_year);
-	ps_TIME_address->date_day    = ps_TIME_address->date_month + structFieldRegSize(S_TIME_address,date_month);
-	ps_TIME_address->time_honour = ps_TIME_address->date_day + structFieldRegSize(S_TIME_address,date_day);
-	ps_TIME_address->time_minute = ps_TIME_address->time_honour + structFieldRegSize(S_TIME_address,time_honour);
-	ps_TIME_address->time_second = ps_TIME_address->time_minute + structFieldRegSize(S_TIME_address,time_minute);
-	ps_TIME_address->DATE        = ps_TIME_address->time_second + structFieldRegSize(S_TIME_address,time_second);
-	ps_TIME_address->TIME        = ps_TIME_address->DATE + structFieldRegSize(S_TIME_address,DATE);
-	adres_start                  = ps_TIME_address->TIME + structFieldRegSize(S_TIME_address,TIME);
-	return adres_start;
+	ps_TIME_address->status_TIME   = adres_start + offsetof(S_TIME_address, status_TIME) / 2;
+	ps_TIME_address->date_year     = adres_start + offsetof(S_TIME_address, date_year) / 2;
+	ps_TIME_address->date_month    = adres_start + offsetof(S_TIME_address, date_month) / 2;
+	ps_TIME_address->date_day      = adres_start + offsetof(S_TIME_address, date_day) / 2;
+	ps_TIME_address->time_hour     = adres_start + offsetof(S_TIME_address, time_hour) / 2;
+	ps_TIME_address->time_minute   = adres_start + offsetof(S_TIME_address, time_minute) / 2;
+	ps_TIME_address->time_second   = adres_start + offsetof(S_TIME_address, time_second) / 2;
+	ps_TIME_address->DATE          = adres_start + offsetof(S_TIME_address, DATE) / 2;
+	ps_TIME_address->TIME          = adres_start + offsetof(S_TIME_address, TIME) / 2;
+	ps_TIME_address->serverYear    = adres_start + offsetof(S_TIME_address, serverYear) / 2;
+	ps_TIME_address->serverMonth   = adres_start + offsetof(S_TIME_address, serverMonth) / 2;
+	ps_TIME_address->serverDay     = adres_start + offsetof(S_TIME_address, serverDay) / 2;
+	ps_TIME_address->serverHour    = adres_start + offsetof(S_TIME_address, serverHour) / 2;
+	ps_TIME_address->serverMinutes = adres_start + offsetof(S_TIME_address, serverMinutes) / 2;
+	ps_TIME_address->serverSeconds = adres_start + offsetof(S_TIME_address, serverSeconds) / 2;
+	return adres_start + sizeof(S_TIME_address)/2;
 }
 
 // Config USART
@@ -113,6 +129,7 @@ struct{
 	uint16_t cnt;
 }GPSdata;
 
+
 void secondClockCallBack(uint32_t seconCnt){
 
 	BaseType_t pxHigherPriorityTaskWoken;
@@ -133,8 +150,8 @@ void alarmClockCallBack(uint32_t seconCnt){
 			ALARM_EVENT_BITS,
 			&pxHigherPriorityTaskWoken
     );
-
 }
+
 
 /*@brief getLastWeekDate  - return date of last Sunday in month
  *@[in]  date        -  day of month, 1-31
@@ -155,8 +172,8 @@ static inline uint8_t getLastWeekDate(uint8_t date, uint8_t dayOfWeek, uint8_t d
 static inline SEZON_TIME getSezonTime(struct tm *nowTime){
     uint8_t tm_mon  = nowTime->tm_mon + 1;
     uint8_t tm_wday = nowTime->tm_wday + 1;
-	// chec is we in summer time now. If not winter - winter
-	if(! ( (tm_mon >= DAYLIGHT_START_MOUNTH ) && (tm_mon <= DAYLIGHT_STOP_MOUNTH) ) )
+	// chec is we in summer time now. If not winter - summer
+	if( !((tm_mon >= DAYLIGHT_START_MOUNTH ) && (tm_mon <= DAYLIGHT_STOP_MOUNTH)))
 	{
 		return SEZON_TIME_WINTER;
 	}
@@ -191,62 +208,76 @@ static inline SEZON_TIME getSezonTime(struct tm *nowTime){
 		return SEZON_TIME_WINTER;
 
 	}
-
-	return SEZON_TIME_WINTER;
+	return SEZON_TIME_SUMMER;
 }
 
 
-static void initTimeProcessing(void){
+static void initTimeProcessing(bool isServer){
 	clockInit();
 	clockSetCallback(secondClockCallBack, alarmClockCallBack);
+	if(isServer)
+	{
+		return;
+	}
 	initUSARTGPS();
     addGPSPars(GPRMC, &myGPRMC);
 }
 
 
-static bool updateRTC(uint8_t *gpsData, uint8_t numberOfData ) {
+void setRCTTime(const serverSetTime *newTime, bool setAllarm)
+{
 	struct tm timeUpdate;
 	time_t timeSetUTC, alarmSetUTC;
 	struct tm *timeGet;
-	parsGPS(&myGPRMC, usartReadBuff, numRezRead);
-	if (rxGPSStatus((void*) &myGPRMC) == GPS_STATUS_COMPLETE) {
-		//set time
-		timeUpdate.tm_year = myGPRMC.year + 100;
-		timeUpdate.tm_mon  = myGPRMC.mounth - 1; // -1 according time.h
-		timeUpdate.tm_mday = myGPRMC.date;
-		timeUpdate.tm_hour = myGPRMC.honour;
-		timeUpdate.tm_min  = myGPRMC.minutes;
-		timeUpdate.tm_sec  = myGPRMC.seconds;
-		timeUpdate.tm_isdst = -1;
-		// get UTC time for RTC
-		timeSetUTC = mktime(&timeUpdate);
-		// I need day of the week for detect current period of dayLight
+	uint16_t correction  = configData->timeCorection;
+	//set time
+	timeUpdate.tm_year = newTime->Year + 100;
+	timeUpdate.tm_mon  = newTime->Month - 1; // -1 according time.h
+	timeUpdate.tm_mday = newTime->Day;
+	timeUpdate.tm_hour = newTime->Hour;
+	timeUpdate.tm_min  = newTime->Minutes;
+	timeUpdate.tm_sec  = newTime->Seconds;
+	timeUpdate.tm_isdst = -1;
+	// get UTC time for RTC
+	timeSetUTC = mktime(&timeUpdate);
+	// I need day of the week for detect current period of dayLight
+	if(configData->isDaylightSaving)
+	{
 		timeGet = gmtime(&timeSetUTC);
-		uint8_t correction = ( SEZON_TIME_SUMMER == (timeCorrection.sezonTime = getSezonTime(timeGet)) ) ?
-						(configData->timeCorection + 1) :
-						(configData->timeCorection);
-        // add correction in seconds for current time
-		timeSetUTC += correction * SECONDS_PER_HOUR;
-		 // ALARM USE FOR UPDATE DAYLYGHT!!!!!!!!!!!!!   VERY IMPORTANT     !!!!!!!!!!!!!
-		//timeUpdate.tm_min  = 0;
-		//timeUpdate.tm_sec  = 0;
-		// calculate time for update: current time UTC  + one hour in seconds  + correction in seconds
-		alarmSetUTC =  mktime(&timeUpdate);
-		alarmSetUTC =  alarmSetUTC + 3 + correction * SECONDS_PER_HOUR;
-		// set alarm
-		clockSetAlarmTime( alarmSetUTC );
-		// set RTC
-		clockSetTime(timeSetUTC);
-		return true;
+		correction += ( SEZON_TIME_SUMMER == (timeCorrection.sezonTime = getSezonTime(timeGet)) ) ? (60) : (0);
 	}
-	return false;
+	// add correction in seconds for current time
+	timeSetUTC += correction * SECONDS_PER_MINUTES;
+	// calculate time for update: current time UTC  + one hour in seconds  + correction in seconds
+	if(setAllarm)
+	{
+		// TODO add normal allarm period !!!!!!!! (in current code this value hardcode + to 3)
+		alarmSetUTC  =  mktime(&timeUpdate);
+		alarmSetUTC +=  10 + correction * SECONDS_PER_MINUTES;
+		clockSetAlarmTime( alarmSetUTC );
+	}
+	clockSetTime(timeSetUTC);
 }
 
+
+uint8_t serverUpdatteTime(void)
+{
+	if(configData->synchronizationSource == SYNCRONISATION_SOURCE_GPS)
+	{
+		return 0;
+	}
+	xEventGroupSetBits(
+			clockEventGroup,
+			SERVER_UPDATE_TIME
+    );
+	return 1;
+}
+
+
 void t_processing_TIME(void *p_task_par){
-	uint8_t temp = 0;
 	time_t timeGetUTC;
 	struct tm *timeGet;
-	TickType_t errorIndTimeThresHold_ms;
+	TickType_t allarmErrorIndTime_ms;
 
 	configData = (S_TIME_user_config*)p_task_par;
     // stop task if it disable on configuration
@@ -256,84 +287,94 @@ void t_processing_TIME(void *p_task_par){
 		processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.status_TIME);
 		vTaskDelete(NULL);
 	}
-	// create event group for processing clock event
+
 	clockEventGroup= xEventGroupCreate();
-	// initialization module
-	initTimeProcessing();
-	//------------set clock first time-------------------
-	registerValue = TIME_STATUS_ERROR;
-	processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.status_TIME);
 
-	Clrinbuf_without_time(&task_parameters[gpsUSARTNum]);
-	// calculate error indication time threshold
-	errorIndTimeThresHold_ms = xTaskGetTickCount() + ERROR_IND_TIME_THRESHOLD;
-	while(1)
+	if(configData->synchronizationSource == SYNCRONISATION_SOURCE_GPS)
 	{
-		numRezRead = ReadUSART(task_parameters[gpsUSARTNum].RdUSART, (uint8_t*)usartReadBuff, USART_READ_BUFF_SIZE, USART_READ_BUFF_TIME_MS);
-		if( 0 != numRezRead)
+		/************************************CONFIGURATION TIME PROCESSING FOR WORK WITH GPS*******************/
+		initTimeProcessing(false);
+		registerValue = TIME_STATUS_ERROR;
+		processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.status_TIME);
+		Clrinbuf_without_time(&task_parameters[gpsUSARTNum]);
+		// calculate error status time threshold
+		allarmErrorIndTime_ms = xTaskGetTickCount() + ERROR_IND_TIME_THRESHOLD;
+		while(1)
 		{
-		    if (updateRTC(usartReadBuff, numRezRead))
-		    {
-		    	RESET_GLOBAL_STATUS(DEV_6);
-			    break;
-		    }
+			if( allarmErrorIndTime_ms <= xTaskGetTickCount() ) // set global error status end error indication
+			{
+				SET_GLOBAL_STATUS(DEV_6);
+			}
+			numRezRead = ReadUSART(task_parameters[gpsUSARTNum].RdUSART, (uint8_t*)usartReadBuff, USART_READ_BUFF_SIZE, USART_READ_BUFF_TIME_MS);
+			if( 0 == numRezRead)
+			{
+				continue;
+			}
+			parsGPS(&myGPRMC, usartReadBuff, numRezRead);
+			if (rxGPSStatus((void*) &myGPRMC) != GPS_STATUS_COMPLETE)
+			{
+				continue;
+			}
+			timeBuffManager.timeData->Year    = myGPRMC.year ;
+			timeBuffManager.timeData->Month   = myGPRMC.mounth;
+			timeBuffManager.timeData->Day     = myGPRMC.date;
+			timeBuffManager.timeData->Hour    = myGPRMC.honour;
+			timeBuffManager.timeData->Minutes = myGPRMC.minutes;
+			timeBuffManager.timeData->Seconds = myGPRMC.seconds;
+			setRCTTime(timeBuffManager.timeData, true);
+			RESET_GLOBAL_STATUS(DEV_6);
+			break;
 		}
-		if( errorIndTimeThresHold_ms <= xTaskGetTickCount() )
-		{
-			// set global error status end error indication
-			SET_GLOBAL_STATUS(DEV_6);
-		}
+		registerValue = TIME_STATUS_OK;
+		processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.status_TIME);
 	}
-
-	registerValue = TIME_STATUS_OK;
-	processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.status_TIME);
+	else
+	{
+		/************************************CONFIGURATION TIME PROCESSING FOR WORK WITH SERVER*******************/
+		initTimeProcessing(true);
+	}
 
 	while(1){
 
-		if( timeProcessingState.fineTuneClock )
+		if( timeProcessingState.fineTuneClock == 1 )
 		{
-			// update RTC
 			numRezRead = ReadUSART(task_parameters[gpsUSARTNum].RdUSART, (uint8_t*)usartReadBuff, USART_READ_BUFF_SIZE, USART_READ_BUFF_TIME_MS);
 			if( 0 != numRezRead)
 			{
-				if ( updateRTC(usartReadBuff, numRezRead) )
+				parsGPS(&myGPRMC, usartReadBuff, numRezRead);
+				if (rxGPSStatus((void*) &myGPRMC) == GPS_STATUS_COMPLETE)
 				{
-					 timeProcessingState.fineTuneClock = 0;
-					 registerValue = TIME_STATUS_OK;
-					 processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.status_TIME);
+					timeProcessingState.fineTuneClock = 0;
+					registerValue = TIME_STATUS_OK;
+					processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.status_TIME);
+					timeBuffManager.timeData->Year    = myGPRMC.year ;
+					timeBuffManager.timeData->Month   = myGPRMC.mounth;
+					timeBuffManager.timeData->Day     = myGPRMC.date;
+					timeBuffManager.timeData->Hour    = myGPRMC.honour;
+					timeBuffManager.timeData->Minutes = myGPRMC.minutes;
+					timeBuffManager.timeData->Seconds = myGPRMC.seconds;
+					setRCTTime(timeBuffManager.timeData, true);
 				}
-			}
-			// UPDATE TIME TIMOUT!!!!  Alarm indication
-			if( errorIndTimeThresHold_ms <= xTaskGetTickCount() )
+		    }
+			// UPDATE TIME TIMEOUT!!!!  Alarm indication
+			if( allarmErrorIndTime_ms <= xTaskGetTickCount() )
 			{
 				// set alarm status and indication
 				registerValue = TIME_STATUS_ALLARM;
 				processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.status_TIME);
 			}
-			// Take a last events without timeout
-		    rezWaiteEvent = xEventGroupWaitBits(
-			    	clockEventGroup,
-				    ( SECOND_EVENT_BIT | ALARM_EVENT_BITS  ),
-				    pdTRUE,
-				    pdFALSE,
-				    0
-				    );
 		}
-		else
-		{
-			// infinity wait for any time processing event
-		    rezWaiteEvent = xEventGroupWaitBits(
-			    	clockEventGroup,
-				    ( SECOND_EVENT_BIT | ALARM_EVENT_BITS ),
-				    pdTRUE,
-				    pdFALSE,
-				    portMAX_DELAY
-				    );
-		}
+        // Wait for any event
+	    rezWaiteEvent = xEventGroupWaitBits(
+		    	clockEventGroup,
+			    ( SECOND_EVENT_BIT | ALARM_EVENT_BITS | SERVER_UPDATE_TIME  ),
+			    pdTRUE,
+			    pdFALSE,
+			    (timeProcessingState.fineTuneClock == 1) ? (0) : (portMAX_DELAY)
+			    );
         // processing event
 		if( rezWaiteEvent & SECOND_EVENT_BIT ) // processing second event
 		{
-
 			// get current date/time value
 			timeGetUTC = clockGetTime();
 			timeGet = gmtime(&timeGetUTC);
@@ -349,21 +390,25 @@ void t_processing_TIME(void *p_task_par){
 			processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.date_day);
 			// update HOUR
 			registerValue = (uint16_t)( timeGet->tm_hour);
-			processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.time_honour);
+			processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.time_hour);
 			// update MINUTE
 			registerValue = (uint16_t)( timeGet->tm_min);
 			processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.time_minute);
 			// update SECOND
 			registerValue = (uint16_t)( timeGet->tm_sec);
 			processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.time_second);
-
 			// update DATE
 			registerValue = (uint16_t)( ((timeGet->tm_mon + 1) << 8) | (uint8_t)(timeGet->tm_mday) );
 			processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.DATE);
 			// update TIME
 			registerValue = (uint16_t)( ((timeGet->tm_hour) << 8) | (uint8_t)(timeGet->tm_min));
 			processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.TIME);
-
+		}
+		else if( rezWaiteEvent & SERVER_UPDATE_TIME ) // new time was received from server
+		{
+            // serverSetTime
+			processing_mem_map_read_s_proces_object_modbus(timeBuffManager.timeBuf, sizeof(serverSetTime) / 2, s_address_oper_data.s_TIME_address.serverYear);
+			setRCTTime(timeBuffManager.timeData, false);
 		}
 		else if( rezWaiteEvent & ALARM_EVENT_BITS ) // processing alarm event, dayLight update
 		{
@@ -371,16 +416,7 @@ void t_processing_TIME(void *p_task_par){
 			// clear USART in buff
 			Clrinbuf_without_time(&task_parameters[gpsUSARTNum]);
 			// calculate error indication time threshold
-			errorIndTimeThresHold_ms = xTaskGetTickCount() + ERROR_IND_TIME_THRESHOLD;
-			if( (temp++) & 0x1)
-			{
-				debugPin_2_Clear;
-			}
-			else
-			{
-				debugPin_2_Set;
-			}
-
+			allarmErrorIndTime_ms = xTaskGetTickCount() + ERROR_IND_TIME_THRESHOLD;
 		}
 	}
 }

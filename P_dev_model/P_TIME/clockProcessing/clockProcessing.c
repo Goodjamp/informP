@@ -39,14 +39,12 @@ void clockInit(void){
 	// Set RTC prescaler
 	RTC_SetPrescaler(0x7FFF); // 1 seconds period
 	RTC_WaitForLastTask();
-
 	RTC_ITConfig(RTC_IT_SEC, ENABLE);
 	RTC_ITConfig(RTC_IT_ALR, ENABLE);
 	RTC_WaitForLastTask();
 	//Enter fron config RTC mode
 	RTC_ExitConfigMode();
 	RTC_WaitForLastTask();
-
 	NVIC_EnableIRQ(RTC_IRQn);
 }
 
@@ -84,15 +82,12 @@ void clockSetTime(uint32_t UTCtime){
 
 	  RTC_EnterConfigMode();
 	  RTC_WaitForLastTask();
-
 	  /* Set RTC COUNTER MSB word */
 	  RTC->CNTH = UTCtime >> 16;
 	  RTC_WaitForLastTask();
-
 	  /* Set RTC COUNTER LSB word */
 	  RTC->CNTL = (UTCtime & RTC_LSB_MASK);
 	  RTC_WaitForLastTask();
-
 	  RTC_ExitConfigMode();
 	  RTC_WaitForLastTask();
 
@@ -103,15 +98,12 @@ void clockSetAlarmTime(uint32_t UTCtime){
 
 	  RTC_EnterConfigMode();
 	  RTC_WaitForLastTask();
-
 	  /* Set the ALARM MSB word */
 	  RTC->ALRH = UTCtime >> 16;
 	  RTC_WaitForLastTask();
-
 	  /* Set the ALARM LSB word */
 	  RTC->ALRL = (UTCtime & RTC_LSB_MASK);
 	  RTC_WaitForLastTask();
-
 	  RTC_ExitConfigMode();
 	  RTC_WaitForLastTask();
 }

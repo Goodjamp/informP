@@ -22,9 +22,23 @@ S_connectmodbus *ps_connectmodbus_global; //[NUM_PORT_MODBUS];
 // структура настроек запросов modbas_master  для каждого из портов (порядочный номер порта - (индекс масива+1 ))
 S_list_madbus_req s_list_madbus_req[NUM_PORT_MODBUS];
 // масив указателей на функции проверки адресации запросов
-PF_procesing_req_slave p_procesing_slave[17] = { &func_0102, &func_0102,
-		&func_0304, &func_0304, &func_05, &func_06, 0, 0, 0, 0, 0, 0, 0, 0, &func_16,
-		&func_16 };
+PF_procesing_req_slave p_procesing_slave[17] = { &func_0102,
+		                                         &func_0102,
+		                                         &func_0304,
+		                                         &func_0304,
+		                                         &func_05,
+		                                         &func_06,
+		                                         0,
+		                                         0,
+		                                         0,
+		                                         0,
+		                                         0,
+		                                         0,
+		                                         0,
+		                                         0,
+		                                         &func_16,
+		                                         &func_16
+};
 //-------------------------
 
 // Масив структур для функций проверки адресов в запросе (типа callback, задает пользователь)
@@ -455,10 +469,9 @@ u16 func_16(void *p_req, S_modbus_make_res *p_buf_respons) {
 	if (s_modbus_add_procesing_req[ps_req->function - 1].flag_req_procesing)
 	{
 		// выполняю доп. обработку
-		s_modbus_add_procesing_req[ps_req->function - 1].f_add_req_procesing((void*) &(ps_req->req_field_var.s_req_f16.payload),\
-				CharTooshort(ps_req->number_reg_H,ps_req->number_reg_L),\
-				/*ps_req->req_field_var.s_req_f16.byte_count,\*/
-				CharTooshort(ps_req->address_mem_H,ps_req->address_mem_L));
+		s_modbus_add_procesing_req[ps_req->function - 1].f_add_req_procesing( (void*) &(ps_req->req_field_var.s_req_f16.payload),
+				CharTooshort(ps_req->number_reg_H, ps_req->number_reg_L),
+				CharTooshort(ps_req->address_mem_H, ps_req->address_mem_L));
 	}
 
 	// формирую отвeт
@@ -467,6 +480,9 @@ u16 func_16(void *p_req, S_modbus_make_res *p_buf_respons) {
 	modus_add_CRC((u8*) p_buf_respons, sizeof(S_modbus_req_write));
 	return sizeof(S_modbus_req_write);
 }
+
+
+
 
 void t_Modbus_SLAVE(void *p_task_par) {
 	S_modbus_req_input *ps_modbus_req_input; // указатель на начало буфера приема
@@ -479,15 +495,15 @@ void t_Modbus_SLAVE(void *p_task_par) {
     u8 address_KP = P_SHIFT(ps_connectmodbus_global,((S_modbus_tsk_par*)p_task_par)->num_modbus)->adress_kp;
 	S_Task_parameters *ptaskparameters= ((S_modbus_tsk_par*)p_task_par)->ps_task_parameters;;
 
-	ps_modbus_req_input = (S_modbus_req_input*) &buf_in_slave[0];
+	ps_modbus_req_input = (S_modbus_req_input*)buf_in_slave;
 
 
-	while (ReadUSART(ptaskparameters->RdUSART, (u8*) ps_modbus_req_input, 1, 1)) {	} // очищаю буффер приема
+	while (ReadUSART(ptaskparameters->RdUSART, (u8*) ps_modbus_req_input, 1, 1)) {} // очищаю буффер приема
 	vTaskDelay(500); //таймаут переда стартом всех задач, для валидации данных в картепамяти
 	while (1) {
 
-		if (ReadUSART(ptaskparameters->RdUSART, (u8*) ps_modbus_req_input, 8,20) != 8) { //считываю из стека USART. Если размер прочитаной посылки не 8 байт, повторяю чтение
-			vTaskDelay(50);
+		if (ReadUSART(ptaskparameters->RdUSART, (u8*)ps_modbus_req_input, 8,20) != 8) { //считываю из стека USART. Если размер прочитаной посылки не 8 байт, повторяю чтение
+			//vTaskDelay(50);
 			continue;
 		}
 
@@ -527,9 +543,9 @@ void t_Modbus_SLAVE(void *p_task_par) {
 REZ_REQ_CHEACK_SLAVE cheack_req_modbus(S_Task_parameters *p_iparameters,
 		S_modbus_req_input *ps_modbus_req_cheack, u8 address_kp) {
 	u8 rez_addition_chek;
-	u16 rez_CRC16, *p_req_CRC16;
-	u16 payload_modbus_req[2]; //адрес начала запрашиваимых регистров - payload_modbus_req[0],
-	                           //количество запрашиваимых регистров   - payload_modbus_req[1],
+	u16 rez_CRC16;
+	u16 addressReg;
+	u16 numberOfReg;
 	u16 byte_count; // к-во сбайт полезнеой нагрузки
 
 	//   ----ТИПОВАЯ ЧАСТЬ ПРОВЕРКИ (ДЛЯ ВСЕХ ТИПОВ ЗАПРОСОВ)-------------
@@ -549,8 +565,8 @@ REZ_REQ_CHEACK_SLAVE cheack_req_modbus(S_Task_parameters *p_iparameters,
 		return REQ_SLAVE_ERROR;
 	}
 	//Два варианта: или было принято начало посылки №15-16 или другие типы
-	if ((ps_modbus_req_cheack->function == FORSE_MULTIPLE_COILS) // если принято начало посылки 15 или 16
-			|| (ps_modbus_req_cheack->function == PRESET_MULTIPLE_REGISTERS)) {
+	if ((ps_modbus_req_cheack->function == FORSE_MULTIPLE_COILS) || (ps_modbus_req_cheack->function == PRESET_MULTIPLE_REGISTERS))
+	{
 		// к-во байт к риему
 		byte_count = CharTooshort(ps_modbus_req_cheack->number_reg_H,ps_modbus_req_cheack->number_reg_L) * 2;
 		// Парсим принятую посылку
@@ -562,17 +578,16 @@ REZ_REQ_CHEACK_SLAVE cheack_req_modbus(S_Task_parameters *p_iparameters,
 			return REQ_SLAVE_ERROR;
 		};
 		byte_count = byte_count + 7; // длина запроса без контрольной суммы
-	} else {
+	}
+	else
+	{
 		byte_count = 8 - 2; // длина запроса без контрольной суммы
 	}
 
-	// рассчитываю контрольную сумму приннятого запроса
 	rez_CRC16 = CRC16((u8*) ps_modbus_req_cheack, byte_count); // +7 это заголовок команды запроса №16
 	Convert_ShortTooCharHiLo(rez_CRC16, (u8*)&rez_CRC16);
-	// меняю местами байты в CRC чтобы были как в запросе
-	p_req_CRC16 = (u16*) ((u8*) ps_modbus_req_cheack + byte_count); // беру указатель на приннятую контрольную сумму
-	// проверка контрольной суммы посылки
-	if ((*p_req_CRC16) != rez_CRC16) {
+    uint16_t *p_req_CRC16 = (u16*) ((u8*) ps_modbus_req_cheack + byte_count); // беру указатель на приннятую контрольную сумму
+	if (*p_req_CRC16 != rez_CRC16) {
 		return REQ_SLAVE_ERROR;
 	}
     // ---------ЗАКЛЮЧЕНИЕ: посылка адресована даному устройству, формат посылки выдержан и без ошибок, проверка полезной нагрузки
@@ -582,18 +597,20 @@ REZ_REQ_CHEACK_SLAVE cheack_req_modbus(S_Task_parameters *p_iparameters,
 	//*********************************************************************************************************
 
 	// выбираю из запроса адрес и к-во запрашиваимых регистров
-	payload_modbus_req[0] = CharTooshort(ps_modbus_req_cheack->address_mem_H,
+	addressReg = CharTooshort(ps_modbus_req_cheack->address_mem_H,
 			ps_modbus_req_cheack->address_mem_L);
-	payload_modbus_req[1] = CharTooshort(ps_modbus_req_cheack->number_reg_H,
+	numberOfReg = CharTooshort(ps_modbus_req_cheack->number_reg_H,
 			ps_modbus_req_cheack->number_reg_L);
 
-	// проверка принадлежности адреса запрашиваимых регистров команды области допустимых адресов согласно номеру команды
-	// через функцию callback пользователя
-	if (!s_modbus_check_address_req[ps_modbus_req_cheack->function - 1].flag_callback_check) { // если для запрашиваимой команды функция не задана
-		return ILLEGAL_DATA_ADRESS;                                                              // значит запрос по данной команде не допустим
+	// is user function for check input address
+	if(!s_modbus_check_address_req[ps_modbus_req_cheack->function - 1].flag_callback_check)
+	{
+		return ILLEGAL_DATA_ADRESS;     // if no checking function for current command - that mean that current command UNRESOLVED !!
 	}
-	else{
-		if( s_modbus_check_address_req[ps_modbus_req_cheack->function - 1].pf_callback_check(&payload_modbus_req[0])){
+	else
+	{
+		if( s_modbus_check_address_req[ps_modbus_req_cheack->function - 1].pf_callback_check(addressReg, numberOfReg))
+		{
 			return ILLEGAL_DATA_ADRESS;
 		};
 	}
@@ -607,7 +624,7 @@ REZ_REQ_CHEACK_SLAVE cheack_req_modbus(S_Task_parameters *p_iparameters,
 		return REQ_SLAVE_OK;
 	}
 	// если НУЖНО выполнить ДОПОЛНИТЕЛЬНУЮ проверкудля выдачи ответа по заданой ф-и (для разных запросов аргументы имеют разный смысл)
-	rez_addition_chek = s_modbus_check_add_check[ps_modbus_req_cheack->function - 1].pf_callback_check(&payload_modbus_req[0]);
+	rez_addition_chek = s_modbus_check_add_check[ps_modbus_req_cheack->function - 1].pf_callback_check(addressReg, numberOfReg);
 
 	// если функция дополнительной проверки возвратила недопустимый аргумент
 	if ((rez_addition_chek != REQ_SLAVE_OK)
@@ -622,8 +639,6 @@ REZ_REQ_CHEACK_SLAVE cheack_req_modbus(S_Task_parameters *p_iparameters,
 			&& (rez_addition_chek != MEMORY_PARITY_ERROR)) {
 		return REQ_SLAVE_ERROR;
 	}
-	//----------------------------------------------------------------------------------------------------------------------
-
 
 	// возвращаю код исключения
 	if (rez_addition_chek) {
@@ -662,8 +677,7 @@ void modbus_callback_add_check(PF_modbus_callback_check p_modbus_callback_add_ch
 // pf_modbus_callback_address_check - указательна на функцию дополнительной обработки
 // number_req - типа запроса (номер)
 void modbus_callback_address_check(PF_modbus_callback_check pf_modbus_callback_address_check, u8 number_req) {
-	s_modbus_check_address_req[number_req - 1].pf_callback_check =
-			pf_modbus_callback_address_check;
+	s_modbus_check_address_req[number_req - 1].pf_callback_check   = pf_modbus_callback_address_check;
 	s_modbus_check_address_req[number_req - 1].flag_callback_check = 1;
 }
 
@@ -674,8 +688,7 @@ void modbus_callback_address_check(PF_modbus_callback_check pf_modbus_callback_a
 // p_modbus_callback_req - указательна на функцию дополнительной обработки
 // number_req - типа запроса (номер)
 void  modbus_callback_add_processing(PF_add_processing_req_slave p_modbus_callback_req, u8 number_req) {
-	s_modbus_add_procesing_req[number_req - 1].f_add_req_procesing =
-			p_modbus_callback_req;
+	s_modbus_add_procesing_req[number_req - 1].f_add_req_procesing = p_modbus_callback_req;
 	s_modbus_add_procesing_req[number_req - 1].flag_req_procesing = 1;
 }
 

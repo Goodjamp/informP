@@ -91,21 +91,16 @@ void init_timer(){
 }
 
 //------------------------------------MY HANDLER INTERRAPTS---------------------------------------------
-
 void USART1_IRQHandler(void)
 {
     uint16_t	usingle;
     unsigned char singlchar;
-
 	//--Proveryaem TXE
 
 	if(USART_GetFlagStatus(USART1,USART_FLAG_TXE) == SET)
 	{
 		if((read_fastdirstruct_usart(WrUSART,&singlchar))!=0)
 		{
-			if((singlchar<0x30)||(singlchar>0x39))
-			{
-			}
 			usingle=((uint16_t)singlchar)&0x00ff;
 			USART_SendData(USART1,usingle);
 		}
@@ -117,10 +112,9 @@ void USART1_IRQHandler(void)
 
 	if(USART_GetFlagStatus(USART1,USART_FLAG_RXNE) == SET)
 	{
-
 		usingle=USART_ReceiveData(USART1);
 		singlchar=(uint8_t)(usingle&0xff);
-		write_fastdirstruct_usart(RdUSART,singlchar);
+	    write_fastdirstruct_usart(RdUSART,singlchar);
 	}
 
 }

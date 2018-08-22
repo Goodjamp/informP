@@ -36,26 +36,44 @@ typedef struct{
 	uint16_t  date_year;    // date: year
 	uint16_t  date_month;   // date: month
 	uint16_t  date_day;     // date: day
-	uint16_t  time_honour;  // time: honour
+	uint16_t  time_hour;  // time: honour
 	uint16_t  time_minute;  // time: minute
 	uint16_t  time_second;  // time: second
 	uint16_t  DATE;
 	uint16_t  TIME;
+	uint16_t  serverYear;
+	uint16_t  serverMonth;
+	uint16_t  serverDay;
+	uint16_t  serverHour;
+	uint16_t  serverMinutes;
+	uint16_t  serverSeconds;
 } S_TIME_address;
 //--------------------------------------------------------------------------------------------------------------------------------------
 
 
 //----------------------------- Оперативные регистры процесса FRQmetter------------------------------------------------------------------------
+
+typedef struct
+{
+	uint16_t Year;
+	uint16_t Month;
+	uint16_t Day;
+	uint16_t Hour;
+	uint16_t Minutes;
+	uint16_t Seconds;
+}serverSetTime;
+
 typedef struct{
-	S_proces_object_modbus  status_TIME; // status register TIME module
-	S_proces_object_modbus  date_year;    // date: year
-	S_proces_object_modbus  date_month;   // date: month
-	S_proces_object_modbus  date_day;     // date: day
-	S_proces_object_modbus  time_honour;  // time: honour
-	S_proces_object_modbus  time_minute;  // time: minute
-	S_proces_object_modbus  time_second;  // time: second
-	S_proces_object_modbus  DATE;
-	S_proces_object_modbus  TIME;
+	uint16_t      status_TIME; // status register TIME module
+	uint16_t      date_year;    // date: year
+	uint16_t      date_month;   // date: month
+	uint16_t      date_day;     // date: day
+	uint16_t      time_hour;  // time: honour
+	uint16_t      time_minute;  // time: minute
+	uint16_t      time_second;  // time: second
+	uint16_t      DATE;
+	uint16_t      TIME;
+	serverSetTime serverTime;
 } S_TIME_oper_data;
 //--------------------------------------------------------------------------------------------------------------------------------------
 
@@ -72,6 +90,7 @@ typedef struct{
 
 uint16_t TIME_calc_address_oper_reg(S_TIME_address *ps_TIME_address, uint16_t adres_start);
 void t_processing_TIME(void *pvParameters);
+uint8_t serverUpdatteTime(void);
 
 
 #endif // PROCESSING_TC_SINAL

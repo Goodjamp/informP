@@ -12,6 +12,7 @@
 
 #include "processing_config_dev.h"
 #include "default_configuration_description.h"
+#include "processing_TIME_extern.h"
 
 static uint8_t          userConfiguration[]  __attribute__((section("userConfigurationSection")))    = FIRST_POWER_ON_ATTRIBUTE;
 static S_global_config  defaultConfiguration __attribute__((section("defaultConfigurationSection"))) = {
@@ -137,22 +138,6 @@ bool processing_config_init(bool isUserConfig)
 }
 
 
-//-------------processing_config_dev_init------------------
-//функция processing_config_dev_init - выполняет заполнение битового поля состава устройства согласно настройкам пользователя
-//                                     копирует данные конфигурации в рабочую структуру для доступа програмных модулей,
-//                                     задает callback приема функции 16 modbus
-void processing_config_add_modbus_callback(void){
-	// задаю ф-ю callback которая вызываться процессом modbus_slave для проверки запрашиваимого адресса запросом №3
-	modbus_callback_address_check(&processing_config_check_is_holding_reg,READ_HOLDING_STATUS);
-	// задаю ф-ю callback которая вызываться процессом modbus_slave для проверки запрашиваимого адресса запросом №4
-	modbus_callback_address_check(&processing_config_check_is_input_reg,READ_INPUT_REGISTERS);
-	// задаю ф-ю callback которая вызываться процессом modbus_slave для проверки запрашиваимого адресса запросом №16
-	modbus_callback_address_check(&processing_config_check_is_preset_multiple_reg,PRESET_MULTIPLE_REGISTERS);
-	// задаю ф-ю callback которая вызываться процессом modbus_slave после приема сообщения  №16
-	modbus_callback_add_processing(&update_config_data,PRESET_MULTIPLE_REGISTERS);
-}
-
-
 //------------функция processing_config_is_holding_reg-----------------------------------
 // функция processing_config_is_holding_reg - выполняет проверку адресса карты памяти на принадлежность регистрам конфигурации устройства
 // даная функция соответствует проверке команде №3 modbus
@@ -161,44 +146,19 @@ void processing_config_add_modbus_callback(void){
 // выходные аргументы:
 // REQ_SLAVE_OK - проверка выполнена успешно
 // ILLEGAL_DATA_ADRESS - недопустимый адрес
-REZ_REQ_CHEACK_SLAVE processing_config_check_is_holding_reg(void* p_check_address){
-	u16 address= *(u16*)p_check_address;
-	u16 num_reg= *(u16*)((u16*)p_check_address+1);
+REZ_REQ_CHEACK_SLAVE processing_config_check_is_holding_reg(uint16_t addressReg, uint16_t numberOfReg)
+{
 	// адрес принадлежит области оперативных регистров
-	if((address>=USER_ADDRESS_OPER_DATA)&&((address+num_reg-1)<(USER_ADDRESS_OPER_DATA+NUM_REG_OPER_DATA)))
+	if((addressReg >= USER_ADDRESS_OPER_DATA) && ((addressReg + numberOfReg - 1) < (USER_ADDRESS_OPER_DATA + NUM_REG_OPER_DATA)))
 	{
 		return REQ_SLAVE_OK;
 	}
 	// адрес принадлежит области настроек
-	if((address>=USER_ADDRESS_CONFIG_DATA)&&((address+num_reg-1)<(USER_ADDRESS_CONFIG_DATA+NUM_REG_CONFIG)))
+	if((addressReg >= USER_ADDRESS_CONFIG_DATA) && ((addressReg + numberOfReg - 1) < (USER_ADDRESS_CONFIG_DATA + NUM_REG_CONFIG)))
 	{
 		return REQ_SLAVE_OK;
 	}
 	// адрес находиться за границами региcтров настройки
-	return ILLEGAL_DATA_ADRESS;
-}
-
-
-
-
-//------------функция processing_config_is_input_reg-----------------------------------
-// функция processing_config_is_input_reg - выполняет проверку адресса карты памяти на принадлежность любому регистру устройства, за исключением рег. конфигурации
-// даная функция соответствует проверке команде №4 modbus
-// входные аргументы:
-// *p_check_address - указатель на начало последовательности (u16)address, (u16)num_reg
-// выходные аргументы:
-// REQ_SLAVE_OK - проверкаа выполнена успешно
-// ILLEGAL_DATA_ADRESS - недопустимый адрес
-REZ_REQ_CHEACK_SLAVE processing_config_check_is_input_reg(void* p_check_address){
-	u16 address= *(u16*)p_check_address;
-	u16 num_reg= *(u16*)((u16*)p_check_address+1);
-	// адрес принадлежит области регистров пользователя
-	if((address>=USER_ADDRESS_DATA)&&
-			((address+num_reg-1)<(USER_ADDRESS_DATA+NUM_REG_DATA)))
-	{
-		return REQ_SLAVE_OK;
-	}
-	// адрес находиться за границами допустимых адресов
 	return ILLEGAL_DATA_ADRESS;
 }
 
@@ -212,8 +172,17 @@ REZ_REQ_CHEACK_SLAVE processing_config_check_is_input_reg(void* p_check_address)
 // REQ_SLAVE_OK - проверкаа выполнена успешно
 // ILLEGAL_DATA_ADRESS - недопустимый адрес
 
-REZ_REQ_CHEACK_SLAVE processing_config_check_is_preset_multiple_reg(void* p_check_address){
-	return REQ_SLAVE_OK;
+REZ_REQ_CHEACK_SLAVE processing_config_check_is_preset_multiple_reg(uint16_t addressReg, uint16_t numberOfReg)
+{
+    if( (addressReg == s_address_oper_data.s_TIME_address.serverYear) && ((addressReg + numberOfReg - 1) == s_address_oper_data.s_TIME_address.serverSeconds ) )
+    {
+    	return REQ_SLAVE_OK;
+    }
+    else if((addressReg >= USER_ADDRESS_CONFIG_DATA) && ((addressReg + numberOfReg - 1) <= (sizeof(s_address_oper_data) + 1) / 2) )
+    {
+    	return REQ_SLAVE_OK;
+    }
+	return REQ_SLAVE_ERROR;
 }
 
 
@@ -229,7 +198,8 @@ REZ_REQ_CHEACK_SLAVE processing_config_check_is_preset_multiple_reg(void* p_chec
 // 2 - после каждого приннятого пакета увеличиваю следующий адреса записи
 // 3 - если адрес в следующем пакете не совпадает со счетчиком адресов (п.2) перехожу к п.1
 // 4 - после приема всей конфигурационной информации, выполняю проверку и записываю к-цию во флеш
-u8 update_config_data(void* req,u8 num_peyload_data, u16 addres_data){
+uint8_t saveConfiguration(void* req, u8 num_peyload_data, u16 addres_data)
+{
 	static u16 count_config_data=0;
 	static u8 f_rx_config_data=0; // флаг начаоа приема к-ции
 	// если принята случайная посылка
@@ -274,6 +244,20 @@ u8 update_config_data(void* req,u8 num_peyload_data, u16 addres_data){
 }
 
 
+static uint8_t processingresetMultipleRegisters(void* req, u8 numberOfReg, u16 addressReg)
+{
+    if( (addressReg == s_address_oper_data.s_TIME_address.serverYear) && ((addressReg + numberOfReg - 1) == s_address_oper_data.s_TIME_address.serverSeconds ) )
+    {
+    	return serverUpdatteTime();
+    }
+    else if((addressReg >= USER_ADDRESS_CONFIG_DATA) && ((addressReg + numberOfReg - 1) <= (sizeof(s_address_oper_data) + 1) / 2) )
+    {
+    	return saveConfiguration(req, numberOfReg, addressReg);
+    }
+    return 0;
+}
+
+
 void processing_config_write_configuration(void)
 {
 	union
@@ -292,3 +276,17 @@ void processing_config_write_configuration(void)
 			                        PAGE_ABS_ADDRESS(PAGE_USER_CONFIG ));
 }
 
+
+
+//-------------processing_config_dev_init------------------
+//функция processing_config_dev_init - выполняет заполнение битового поля состава устройства согласно настройкам пользователя
+//                                     копирует данные конфигурации в рабочую структуру для доступа програмных модулей,
+//                                     задает callback приема функции 16 modbus
+void processing_config_add_modbus_callback(void){
+	// задаю ф-ю callback которая вызываться процессом modbus_slave для проверки запрашиваимого адресса запросом №3
+	modbus_callback_address_check(&processing_config_check_is_holding_reg, READ_HOLDING_STATUS);
+	// задаю ф-ю callback которая вызываться процессом modbus_slave для проверки запрашиваимого адресса запросом №16
+	modbus_callback_address_check(&processing_config_check_is_preset_multiple_reg,PRESET_MULTIPLE_REGISTERS);
+	// задаю ф-ю callback которая вызываться процессом modbus_slave после приема сообщения  №16
+	modbus_callback_add_processing(&processingresetMultipleRegisters,PRESET_MULTIPLE_REGISTERS);
+}

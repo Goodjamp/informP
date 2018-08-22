@@ -77,8 +77,9 @@ void p_watchdog_set_flag(void){
 // выходные аргументы:
 // REQ_SLAVE_OK - проверка выполнена успешно
 // ILLEGAL_DATA_ADRESS - недопустимый адрес
-static REZ_REQ_CHEACK_SLAVE processing_reset_control_single_registr(void* p_check_address){
-	if(s_address_oper_data.s_address_devise_reset_status.address_device_rcr!=*((u16*)p_check_address)){
+static REZ_REQ_CHEACK_SLAVE processing_reset_control_single_registr(uint16_t addressReg, uint16_t numberOfReg){
+	if(s_address_oper_data.s_address_devise_reset_status.address_device_rcr != addressReg)
+	{
 		return ILLEGAL_DATA_ADRESS;
 	}
 	return REQ_SLAVE_OK;
@@ -91,7 +92,7 @@ static REZ_REQ_CHEACK_SLAVE processing_reset_control_single_registr(void* p_chec
 void processing_reset_control_set_dev_error(u8 num_bit, FlagStatus state){
 	u16 state_status_reg, counter;
 	// нахожу порядочный номер бита модуля, который вызвал данную функцию
-	for(counter=0;counter<MAX_NUM_MODULS;counter++){
+	for(counter=0;counter < MAX_NUM_MODULS;counter++){
 		if(a_bit_status[counter]==num_bit){break;}
 	}
 	// считываю поточный статус устройства

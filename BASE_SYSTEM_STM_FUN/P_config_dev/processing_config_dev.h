@@ -169,9 +169,6 @@ void processing_config_first_on(void);
 bool processing_config_init(bool isUserConfig);
 u8 update_config_data(void* req,u8 num_peyload_data, u16 addres_data);
 void processing_config_add_modbus_callback(void);
-REZ_REQ_CHEACK_SLAVE processing_config_check_is_holding_reg(void* p_check_address);
-REZ_REQ_CHEACK_SLAVE processing_config_check_is_input_reg(void* p_check_address);
-REZ_REQ_CHEACK_SLAVE processing_config_check_is_preset_multiple_reg(void* p_check_address);
 void processing_config_write_configuration(void);
 
 #endif

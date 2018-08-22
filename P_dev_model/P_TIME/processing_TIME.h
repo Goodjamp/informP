@@ -12,6 +12,7 @@
 
 #define SECOND_EVENT_BIT      (uint8_t)(1<<0)
 #define ALARM_EVENT_BITS      (uint8_t)(1<<1)
+#define SERVER_UPDATE_TIME    (uint8_t)(1<<2)
 
 #define gpsUSARTSpeed      9600
 #define gpsUSARTStopBits   1
@@ -24,7 +25,8 @@
 #define gpsUSARTDef  USART3
 #define gpsUSARTNum       2
 
-#define SECONDS_PER_HOUR  3600
+#define SECONDS_PER_HOUR    3600
+#define SECONDS_PER_MINUTES 60
 
 //-----------------DAYLIGHT SWITCH PARAMITERS-------------------
 #define DAYLIGHT_SWITCH_HOUR_UTC    3
@@ -43,6 +45,11 @@ typedef enum{
 	SEZON_TIME_WINTER,
 	SEZON_TIME_SUMMER
 }SEZON_TIME;
+
+typedef enum{
+	SYNCRONISATION_SOURCE_GPS    = 0,
+	SYNCRONISATION_SOURCE_SERVER = 1,
+}SYNCRONISATION_SOURCE;
 
 
 void initTIME(void);

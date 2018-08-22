@@ -137,7 +137,7 @@ typedef u16 (*PF_procesing_req_slave)(void *, S_modbus_make_res *);
 
 
 // указатель на функцию-обработчик дополнительных проверок и дополнительных внешних обработок
-typedef REZ_REQ_CHEACK_SLAVE (*PF_modbus_callback_check)(void*);
+typedef REZ_REQ_CHEACK_SLAVE (*PF_modbus_callback_check)(uint16_t addressReg, uint16_t numberOfReg);
 
 // —труктура установок дополнительной проверки параметров запроса
 typedef struct{

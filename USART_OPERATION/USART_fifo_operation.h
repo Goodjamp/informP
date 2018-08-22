@@ -32,8 +32,6 @@ struct point_wrdirobject
 };
 
 
-
-
  //----------------------MYFUNCTION---------------------------------------------------
  int 	write_fastdirstruct_usart(struct point_wrdirobject *pwrdirobject,unsigned char singlchar);
  int	read_fastdirstruct_usart(struct point_wrdirobject *pwrdirobject,uint8_t *singlchar);
