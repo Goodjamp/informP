@@ -42,7 +42,10 @@ QueueHandle_t menuQueue;
 uint8_t lcdPeriodType;
 uint8_t *blinkStateP;
 uint8_t lcdStr[7];
-const static uint8_t brightnes[] = {DISPLAY_BRIGHTNES_7, DISPLAY_BRIGHTNES_11, DISPLAY_BRIGHTNES_19, DISPLAY_BRIGHTNES_31};
+const static uint8_t brightnes[] = {DISPLAY_BRIGHTNES_7,
+		                            DISPLAY_BRIGHTNES_11,
+		                            DISPLAY_BRIGHTNES_19,
+		                            DISPLAY_BRIGHTNES_31};
 /*====================================BUTTON ================================================*/
 //-Button processing timer variables
 TimerHandle_t     keyTimerHandler;
@@ -193,7 +196,6 @@ void setBreightnes(menuActionListDef menuAction){
 	};
     // push button action to queue
     xQueueSendToBack(menuQueue, (void*)&actionMember, 0);
-
 }
 
 /**
@@ -214,31 +216,31 @@ static void initUserMenu(S_display_user_config *configData){
 	menuSetLisBoxNumItem(2, configData->screenConfig[2].numParamiterPerScreen);
 	menuSetLisBoxNumItem(3, configData->screenConfig[3].numParamiterPerScreen);
 
-		displayInit( &myDisplay, brightnes );
-		keyboardInit();
-		initValueAddress();
+	displayInit( &myDisplay, brightnes, configData->numScreen);
+	keyboardInit();
+	initValueAddress();
 
-		//-------------------Init key processing timer and queue-------------------------------
-		keyTimerHandler =  xTimerCreate((const char*)"BUTTON TIMER",
-				                         BUTTON_PROCESSING_MS,
-				                         pdTRUE,
-		                                 (void *)0,
-		                                 butttonTimerFunctionCB);
-		lcdTimerHandler =  xTimerCreate((const char*)"LCD TIMER",
-				                         LCD_UPDATE_HIGHT_MS,
-	                                     pdTRUE,
-	                                     (void *)&lcdPeriodType,
-	                                     lcdTimerFunctionCB);
-		escTimerHandler = xTimerCreate((const char*)"LCD TIMER",
-				                         BUTTON_ESC_PERIOD_MS,
-	                                     pdFALSE,
-	                                     (void *)0,
-	                                     escTimerFunctionCB);
-		menuQueue = xQueueCreate( ACTION_QUEUE_QANTITY, sizeof(actionQueueMember) );
-	   // Start key processing timer
-		xTimerStart( keyTimerHandler, 0 );
-		// Start lcd processing timer
-		xTimerStart( lcdTimerHandler, 0 );
+	//-------------------Init key processing timer and queue-------------------------------
+	keyTimerHandler =  xTimerCreate((const char*)"BUTTON TIMER",
+			BUTTON_PROCESSING_MS,
+			pdTRUE,
+			(void *)0,
+			butttonTimerFunctionCB);
+	lcdTimerHandler =  xTimerCreate((const char*)"LCD TIMER",
+			LCD_UPDATE_HIGHT_MS,
+			pdTRUE,
+			(void *)&lcdPeriodType,
+			lcdTimerFunctionCB);
+	escTimerHandler = xTimerCreate((const char*)"LCD TIMER",
+			BUTTON_ESC_PERIOD_MS,
+			pdFALSE,
+			(void *)0,
+			escTimerFunctionCB);
+	menuQueue = xQueueCreate( ACTION_QUEUE_QANTITY, sizeof(actionQueueMember) );
+	// Start key processing timer
+	xTimerStart( keyTimerHandler, 0 );
+	// Start lcd processing timer
+	xTimerStart( lcdTimerHandler, 0 );
 
 }
 
@@ -277,7 +279,7 @@ void t_processing_display(void *pvParameters){
 	actionQueueMember actionMember;
 	displayUserConfig = (S_display_user_config*)pvParameters;
 
-	initUserMenu( (S_display_user_config*)pvParameters );
+	initUserMenu((S_display_user_config*)pvParameters );
 	// set value indication according last adjustments
 	getLastMenuData();
 

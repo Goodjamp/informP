@@ -81,11 +81,12 @@ static void displaySetScanLim(displayHandlerDef *displayHandlerIn, uint8_t numSt
   * @param
   * @retval None
   */
-DISPLAY_STATUS displayInit( displayHandlerDef *displayHandlerIn, const uint8_t* brightnesPar)
+DISPLAY_STATUS displayInit( displayHandlerDef *displayHandlerIn, const uint8_t* brightnesPar, uint8_t numberOfActiveDisplay)
 {
 	uint8_t cnt;
 	displayHandlerIn->brightnesList = brightnesPar;
 	displayHandlerIn->currentSettings.brightnes = 2;
+	displayHandlerIn->currentSettings.numberOfActivDisplay = numberOfActiveDisplay;
 	// default color of ALL strings
 	for(cnt = 0; cnt < NUMBER_OF_LCD_STRING; cnt++){
 		displayHandlerIn->currentSettings.color[cnt] = COLOR_RED;
@@ -221,18 +222,31 @@ void displaySetDefConfig(displayHandlerDef *displayHandlerIn)
 	while(displayIntarfaceGetStatus(displayHandlerIn) == DISPLAY_BUSY){}
 
 	//Set scan limit according color
-	for(cnt = 0; cnt < NUMBER_OF_LCD_STRING; cnt++)
+	for(cnt = 0; cnt < displayHandlerIn->currentSettings.numberOfActivDisplay; cnt++)
 	{
 		displaySetScanLim(displayHandlerIn, cnt);
 	}
 
-	// Set work mode
+	// Set work mode for current user configured displays
 	for(cnt = 0; cnt < MAX_PER_SCREEN; cnt++)
 	{
 		displayConfigWorkMode(displayHandlerIn->txData, cnt, SHUT_DOWN_NORMAL_OPERATION);
 	}
-	displayTxCommand(displayHandlerIn, 0, TX_ADDRESS_ALL);
-	while(displayIntarfaceGetStatus(displayHandlerIn) == DISPLAY_BUSY){}
+	for(cnt = 0; cnt < displayHandlerIn->currentSettings.numberOfActivDisplay; cnt++)
+	{
+	    displayTxCommand(displayHandlerIn, cnt, TX_ADDRESS_ONE);
+	    while(displayIntarfaceGetStatus(displayHandlerIn) == DISPLAY_BUSY){}
+	}
+	// Set shut down mode for unused displays
+	for(cnt = 0; cnt < MAX_PER_SCREEN; cnt++)
+	{
+		displayConfigWorkMode(displayHandlerIn->txData, cnt, SHUT_DOWN_SHUTDOWN_MODE);
+	}
+	for(cnt = displayHandlerIn->currentSettings.numberOfActivDisplay; cnt < NUMBER_OF_LCD_STRING; cnt++)
+	{
+	    displayTxCommand(displayHandlerIn, cnt, TX_ADDRESS_ONE);
+	    while(displayIntarfaceGetStatus(displayHandlerIn) == DISPLAY_BUSY){}
+	}
 
 	displaySetBrightnes(displayHandlerIn, displayHandlerIn->brightnesList[displayHandlerIn->currentSettings.brightnes], 0, TX_ADDRESS_ALL);
 	while(displayIntarfaceGetStatus(displayHandlerIn) == DISPLAY_BUSY){}

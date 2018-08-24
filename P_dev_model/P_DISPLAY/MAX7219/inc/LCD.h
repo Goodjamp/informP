@@ -81,9 +81,9 @@ typedef enum{
 }txState;
 
 typedef struct{
+	uint8_t numberOfActivDisplay;
 	uint8_t brightnes;
 	COLOR   color[NUMBER_OF_LCD_STRING];
-
 }displayCurrentSetings;
 
 /* @brief
@@ -102,7 +102,7 @@ typedef struct{
 //--------------------------------------------------------------------------
 //---------DISPLAY HAL PROCESSING FUNCTION PROTOTYPE------------------------
 //--------------------------------------------------------------------------
-DISPLAY_STATUS displayInit( displayHandlerDef *displayHandlerIn, const uint8_t* brightnesPar);
+DISPLAY_STATUS displayInit( displayHandlerDef *displayHandlerIn, const uint8_t* brightnesPar, uint8_t numberOfActiveDisplay);
 void displayWrite(displayHandlerDef *displayHandlerIn, uint16_t numScreen, uint8_t *str, uint16_t strSize, COLOR color, TX_ADDRESS txAddress);
 void displaySetDefConfig(displayHandlerDef *displayHandler);
 void displayClear(displayHandlerDef *displayHandlerIn, uint16_t numScreen, TX_ADDRESS txAddress);
