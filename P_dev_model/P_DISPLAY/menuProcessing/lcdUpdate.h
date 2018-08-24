@@ -24,9 +24,10 @@
 #define TEST_STR             "@8888"
 
 typedef enum{
-	VALUE_STATUS_OK     = 0b0,
-	VALUE_STATUS_ALLARM = 0b1,
-	VALUE_STATUS_ERROR  = 0b10
+	VALUE_STATUS_OK       = 0,
+	VALUE_STATUS_ALLARM   = 1,
+	VALUE_STATUS_ERROR    = 2,
+	VALUE_STATUS_MAX_VAL  = 3
 }VALUE_STATUS;
 
 /**************************************************************************/

@@ -243,6 +243,10 @@ bool updateLCD(uint8_t *str, BLINK_STATE blinkState, DISPLAY_MENU displayMenu, b
     processing_mem_map_read_s_proces_object_modbus(&value, 1,
     				paramIndication[numberValue].addressValue);
 
+    if(status >= VALUE_STATUS_MAX_VAL)
+    {
+    	status = VALUE_STATUS_ERROR;
+    }
 	switch (displayMenu) {
 	case DISPLAY_MENU_WORK:
 		switch(blinkState){

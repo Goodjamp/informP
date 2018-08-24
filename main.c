@@ -243,11 +243,10 @@ int main(void)
 	}
 #endif
 
-    // reset, watch dog and status indication processing
 	xTaskCreate(  t_processing_configurationHID, ( const char * ) "configuration", 70,	NULL, 4, NULL );
 
     // reset, watch dog and status indication processing
-	xTaskCreate(  t_processing_reset_control, ( const char * ) "WatcDogTask", 70,	NULL, 4, NULL );
+	xTaskCreate(  t_processing_reset_control, ( const char * ) "WatchDogTask", 70,	NULL, 4, NULL );
 
 	NVIC_SetPriorityGrouping(NVIC_PriorityGroup_4);
 

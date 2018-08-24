@@ -55,18 +55,9 @@ union
 };
 
 static struct{
-	uint8_t initTIme:1;
-	uint8_t fineTuneClock:1;
-	uint8_t reserved:6;
-}timeProcessingState = {
-		.initTIme = 1,
-		.fineTuneClock = 0
-};
-
-static struct{
 	SEZON_TIME sezonTime; // = SEZON_TIME_NOT_SET;
 }timeCorrection = {
-		.sezonTime  = SEZON_TIME_WINTER
+		.sezonTime  = SEZON_TIME_NOT_SET
 };
 
 //---------Sattic function definition---------
@@ -228,7 +219,7 @@ void setRCTTime(const serverSetTime *newTime, bool setAllarm)
 {
 	struct tm timeUpdate;
 	time_t timeSetUTC, alarmSetUTC;
-	struct tm *timeGet;
+	//struct tm *timeGet;
 	uint16_t correction  = configData->timeCorection;
 	//set time
 	timeUpdate.tm_year = newTime->Year + 100;
@@ -241,11 +232,13 @@ void setRCTTime(const serverSetTime *newTime, bool setAllarm)
 	// get UTC time for RTC
 	timeSetUTC = mktime(&timeUpdate);
 	// I need day of the week for detect current period of dayLight
+	/*
 	if(configData->isDaylightSaving)
 	{
 		timeGet = gmtime(&timeSetUTC);
 		correction += ( SEZON_TIME_SUMMER == (timeCorrection.sezonTime = getSezonTime(timeGet)) ) ? (60) : (0);
 	}
+	*/
 	// add correction in seconds for current time
 	timeSetUTC += correction * SECONDS_PER_MINUTES;
 	// calculate time for update: current time UTC  + one hour in seconds  + correction in seconds
@@ -253,7 +246,7 @@ void setRCTTime(const serverSetTime *newTime, bool setAllarm)
 	{
 		// TODO add normal allarm period !!!!!!!! (in current code this value hardcode + to 3)
 		alarmSetUTC  =  mktime(&timeUpdate);
-		alarmSetUTC +=  10 + correction * SECONDS_PER_MINUTES;
+		alarmSetUTC +=  TIME_UPDATE_PERIOD_MINUTES + correction * SECONDS_PER_MINUTES;
 		clockSetAlarmTime( alarmSetUTC );
 	}
 	clockSetTime(timeSetUTC);
@@ -277,6 +270,7 @@ uint8_t serverUpdatteTime(void)
 void t_processing_TIME(void *p_task_par){
 	time_t timeGetUTC;
 	struct tm *timeGet;
+	bool fineTuneClock = false;
 	TickType_t allarmErrorIndTime_ms;
 
 	configData = (S_TIME_user_config*)p_task_par;
@@ -301,7 +295,7 @@ void t_processing_TIME(void *p_task_par){
 		allarmErrorIndTime_ms = xTaskGetTickCount() + ERROR_IND_TIME_THRESHOLD;
 		while(1)
 		{
-			if( allarmErrorIndTime_ms <= xTaskGetTickCount() ) // set global error status end error indication
+			if( allarmErrorIndTime_ms <= xTaskGetTickCount() ) //set global error status end error indication
 			{
 				SET_GLOBAL_STATUS(DEV_6);
 			}
@@ -336,7 +330,7 @@ void t_processing_TIME(void *p_task_par){
 
 	while(1){
 
-		if( timeProcessingState.fineTuneClock == 1 )
+		if( fineTuneClock )
 		{
 			numRezRead = ReadUSART(task_parameters[gpsUSARTNum].RdUSART, (uint8_t*)usartReadBuff, USART_READ_BUFF_SIZE, USART_READ_BUFF_TIME_MS);
 			if( 0 != numRezRead)
@@ -344,7 +338,7 @@ void t_processing_TIME(void *p_task_par){
 				parsGPS(&myGPRMC, usartReadBuff, numRezRead);
 				if (rxGPSStatus((void*) &myGPRMC) == GPS_STATUS_COMPLETE)
 				{
-					timeProcessingState.fineTuneClock = 0;
+					fineTuneClock = false;
 					registerValue = TIME_STATUS_OK;
 					processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.status_TIME);
 					timeBuffManager.timeData->Year    = myGPRMC.year ;
@@ -370,13 +364,18 @@ void t_processing_TIME(void *p_task_par){
 			    ( SECOND_EVENT_BIT | ALARM_EVENT_BITS | SERVER_UPDATE_TIME  ),
 			    pdTRUE,
 			    pdFALSE,
-			    (timeProcessingState.fineTuneClock == 1) ? (0) : (portMAX_DELAY)
+			    (fineTuneClock) ? (0) : (portMAX_DELAY)
 			    );
         // processing event
 		if( rezWaiteEvent & SECOND_EVENT_BIT ) // processing second event
 		{
 			// get current date/time value
 			timeGetUTC = clockGetTime();
+			if(configData->isDaylightSaving)
+			{
+				timeGet = gmtime(&timeGetUTC);
+				timeGetUTC  += ( SEZON_TIME_SUMMER == (timeCorrection.sezonTime = getSezonTime(timeGet)) ) ? (60 * SECONDS_PER_MINUTES) : (0);
+			}
 			timeGet = gmtime(&timeGetUTC);
 
 			// update YEAR
@@ -412,7 +411,7 @@ void t_processing_TIME(void *p_task_par){
 		}
 		else if( rezWaiteEvent & ALARM_EVENT_BITS ) // processing alarm event, dayLight update
 		{
-			timeProcessingState.fineTuneClock = 1;
+			fineTuneClock = true;
 			// clear USART in buff
 			Clrinbuf_without_time(&task_parameters[gpsUSARTNum]);
 			// calculate error indication time threshold

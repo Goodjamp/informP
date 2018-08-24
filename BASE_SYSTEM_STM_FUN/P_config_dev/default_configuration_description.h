@@ -26,31 +26,39 @@
 	.s_config_moduls.s_connectmodbus_global[0].number_of_pribor           = 0,                     \
 	.s_config_moduls.s_connectmodbus_global[0].number_no_answer           = 1,                     \
 	.s_config_moduls.s_connectmodbus_global[0].adress_kp                  = 1,                     \
-	/*==========default FRQ configuration=========*/                                     \
-	.s_config_moduls.s_FRQmetter_user_config.state = DISABLE,                             \
-	.s_config_moduls.s_FRQmetter_user_config.frqCorrection = 230,                        \
-	/*==========default TIME configuration========*/                                     \
-	.s_config_moduls.s_TIME_user_config.state = ENABLE,                                  \
-	.s_config_moduls.s_TIME_user_config.timeCorection = 120,                             \
-	.s_config_moduls.s_TIME_user_config.isDaylightSaving = 1,                            \
-	.s_config_moduls.s_TIME_user_config.synchronizationSource = 1,                       \
-	/*==========default SENSOR configuration========*/                                   \
-	.s_config_moduls.s_sensor_user_config.state = ENABLE,                                \
-	.s_config_moduls.s_sensor_user_config.source = 1,                                    \
-	/*==========default DISPLAY configuration=======*/                                   \
-	.s_config_moduls.s_display_user_config.state = ENABLE,                               \
-	.s_config_moduls.s_display_user_config.numScreen = 2,                                \
-                                                                                         \
-	.s_config_moduls.s_display_user_config.screenConfig[0].numParamiterPerScreen = 2,    \
-	.s_config_moduls.s_display_user_config.screenConfig[0].bitsOfParamiters =0b110000,      \
-                                                                                         \
-	.s_config_moduls.s_display_user_config.screenConfig[1].numParamiterPerScreen = 2,    \
-	.s_config_moduls.s_display_user_config.screenConfig[1].bitsOfParamiters =0b110000,      \
-                                                                                         \
-	.s_config_moduls.s_display_user_config.screenConfig[2].numParamiterPerScreen = 1,    \
-	.s_config_moduls.s_display_user_config.screenConfig[2].bitsOfParamiters =0b1000,     \
-                                                                                         \
-	.s_config_moduls.s_display_user_config.screenConfig[3].numParamiterPerScreen = 3,    \
-	.s_config_moduls.s_display_user_config.screenConfig[3].bitsOfParamiters =0b1110000,  \
+	/*==========default FRQ configuration=========*/                                               \
+	.s_config_moduls.s_FRQmetter_user_config.state                        = DISABLE,               \
+	.s_config_moduls.s_FRQmetter_user_config.frqCorrection                = 230,                   \
+	/*==========default TIME configuration========*/                                               \
+	.s_config_moduls.s_TIME_user_config.state                             = ENABLE,                \
+	.s_config_moduls.s_TIME_user_config.timeCorection                     = 120,                   \
+	.s_config_moduls.s_TIME_user_config.isDaylightSaving                  = 1,                     \
+	.s_config_moduls.s_TIME_user_config.synchronizationSource             = 1,                     \
+	/*==========default SENSOR configuration========*/                                             \
+	.s_config_moduls.s_sensor_user_config.state                           = ENABLE,                \
+	.s_config_moduls.s_sensor_user_config.source                          = 1,                     \
+	/*==========default DISPLAY configuration=======*/                                             \
+/*  Bit #     Paramiter             */\
+    /* 0 - temperature              */\
+	/* 1 - atmosferyc pressure hPa  */\
+	/* 2 - atmosferyc pressure      */\
+	/* 3 - humidity                 */\
+	/* 4 - date                     */\
+    /* 5 - time                     */\
+    /* 6 - frequency                */\
+	.s_config_moduls.s_display_user_config.state                          = ENABLE,                \
+	.s_config_moduls.s_display_user_config.numScreen                      = 2,                     \
+                                                                                                   \
+	.s_config_moduls.s_display_user_config.screenConfig[0].numParamiterPerScreen = 6,              \
+	.s_config_moduls.s_display_user_config.screenConfig[0].bitsOfParamiters       =0b111101,       \
+                                                                                                   \
+	.s_config_moduls.s_display_user_config.screenConfig[1].numParamiterPerScreen = 2,              \
+	.s_config_moduls.s_display_user_config.screenConfig[1].bitsOfParamiters      =0b110000,        \
+                                                                                                   \
+	.s_config_moduls.s_display_user_config.screenConfig[2].numParamiterPerScreen = 1,              \
+	.s_config_moduls.s_display_user_config.screenConfig[2].bitsOfParamiters      =0b1000,          \
+                                                                                                   \
+	.s_config_moduls.s_display_user_config.screenConfig[3].numParamiterPerScreen = 3,              \
+	.s_config_moduls.s_display_user_config.screenConfig[3].bitsOfParamiters      =0b1110000,       \
 
 #endif
