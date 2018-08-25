@@ -76,8 +76,72 @@ static inline void clearDataPin(void);
 static inline void sendLD(void);
 static inline void setLDPin(void);
 static inline void clearLDPin(void);
-
 static inline void sendComplite(void){};
+
+
+/********This pins use for indication LCD transitions******/
+#define PORT_INDICATION_1   GPIOA
+#define PORT_INDICATION_2   GPIOA
+#define PORT_INDICATION_3   GPIOA
+#define PORT_INDICATION_4   GPIOB
+#define PIN_INDICATION_1    GPIO_Pin_0
+#define PIN_INDICATION_2    GPIO_Pin_2
+#define PIN_INDICATION_3    GPIO_Pin_3
+#define PIN_INDICATION_4    GPIO_Pin_3
+
+
+static volatile LDDescr indicationLCDList[NUMBER_OF_LCD_STRING] = {
+		[SCREEN_1] = {
+				.port = PORT_INDICATION_1,
+				.pin =  PIN_INDICATION_1
+				},
+		[SCREEN_2] = {
+				.port = PORT_INDICATION_2,
+				.pin =  PIN_INDICATION_2
+				},
+		[SCREEN_3] = {
+				.port = PORT_INDICATION_3,
+				.pin =  PIN_INDICATION_3
+				},
+		[SCREEN_4] = {
+				.port = PORT_INDICATION_4,
+				.pin =  PIN_INDICATION_4
+				},
+};
+
+static inline void indicationPinSetAll(void)
+{
+    for(uint8_t cnt = 0; cnt < sizeof(indicationLCDList) / sizeof(indicationLCDList[0]); cnt++)
+    {
+    	GPIO_SetBits(indicationLCDList[cnt].port, indicationLCDList[cnt].pin);
+    }
+}
+
+
+static inline void indicationPinResetAll(void)
+{
+    for(uint8_t cnt = 0; cnt < sizeof(indicationLCDList) / sizeof(indicationLCDList[0]); cnt++)
+    {
+    	GPIO_ResetBits(indicationLCDList[cnt].port, indicationLCDList[cnt].pin);
+    }
+}
+
+
+static void configIndicationPin()
+{
+	GPIO_InitTypeDef gpioConfig;
+    for(uint8_t cnt = 0; cnt < sizeof(indicationLCDList) / sizeof(indicationLCDList[0]); cnt++)
+    {
+    	enableGPIO(indicationLCDList[cnt].port);
+    	gpioConfig.GPIO_Mode  = GPIO_Mode_Out_PP;
+    	gpioConfig.GPIO_Speed = GPIO_Speed_2MHz;
+    	gpioConfig.GPIO_Pin   = indicationLCDList[cnt].pin;
+    	GPIO_Init(indicationLCDList[cnt].port, &gpioConfig);
+    	GPIO_ResetBits(indicationLCDList[cnt].port, indicationLCDList[cnt].pin);
+    }
+}
+
+/**********************************************************/
 
 
 static inline TX_STATE getNextTxState(void){
@@ -145,7 +209,6 @@ static inline void sendLD(void){
     	return;
     case LD_STATE_CLEAR:
     	clearLDPin();
-
     	if( TX_STATE_COMPLITE == getNextTxState() )
     	{
     		return;
@@ -154,7 +217,6 @@ static inline void sendLD(void){
     	return;
     };
 }
-
 
 
 static inline void transmitCallback(void){
@@ -234,6 +296,8 @@ static inline void setLDPin(void){
 	if(ldTxDef.address == TX_ADDRESS_ONE)
 	{
 		GPIO_SetBits(LDList[ldTxDef.numLD].port, LDList[ldTxDef.numLD].pin);
+		// control indication pin activity
+		GPIO_ResetBits(indicationLCDList[ldTxDef.numLD].port, LDList[ldTxDef.numLD].pin);
 	}
 	else
 	{
@@ -242,6 +306,8 @@ static inline void setLDPin(void){
 		{
 			GPIO_SetBits(LDList[cnt].port, LDList[cnt].pin);
 		}
+		// control indication pin activity
+		indicationPinResetAll();
 	}
 }
 
@@ -336,6 +402,8 @@ void hwInterfaceInit(void){
 	{
 		configGPIOLd(LDList[cnt].port, LDList[cnt].pin);
 	}
+	// Config indication pin
+	configIndicationPin();
 	//Config timer
 	configTImer();
 }
@@ -352,6 +420,17 @@ void hwInterfaceTx(uint16_t orderNumberDispl, TX_ADDRESS txAddress){
 
 	txTimerState.txState =  TX_STATE_BIT;
 	txTimerState.clockState = CLOCK_STATE_HIGHT;
+
+	if(txAddress == TX_ADDRESS_ONE)
+	{
+		// control indication pin activity
+		GPIO_SetBits(indicationLCDList[ldTxDef.numLD].port, LDList[ldTxDef.numLD].pin);
+	}
+	else
+	{
+		// control indication pin activity
+		indicationPinSetAll();
+	}
     transmitCallback();
     startTimer();
 }

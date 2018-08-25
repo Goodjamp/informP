@@ -244,7 +244,6 @@ void setRCTTime(const serverSetTime *newTime, bool setAllarm)
 	// calculate time for update: current time UTC  + one hour in seconds  + correction in seconds
 	if(setAllarm)
 	{
-		// TODO add normal allarm period !!!!!!!! (in current code this value hardcode + to 3)
 		alarmSetUTC  =  mktime(&timeUpdate);
 		alarmSetUTC +=  TIME_UPDATE_PERIOD_MINUTES + correction * SECONDS_PER_MINUTES;
 		clockSetAlarmTime( alarmSetUTC );

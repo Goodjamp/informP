@@ -90,7 +90,7 @@ actionDetect keyUpdate(volatile uint8_t *actionNum, volatile uint8_t *timePeriod
     		*timePeriodNumber = actionDescr[actionProces.index].numPeriod - 1;
     		//clear processing
             actionProces.cnt = 0;
-            rezButProcessing = 	ACTION_DETECT;
+            rezButProcessing = ACTION_DETECT;
     	}
     }
     else if( !actionProces.detect && ( actionProces.cnt > 0) )
@@ -106,19 +106,10 @@ actionDetect keyUpdate(volatile uint8_t *actionNum, volatile uint8_t *timePeriod
     	    // return detected action and period
     	    *actionNum        = actionProces.index;
     	    *timePeriodNumber = cnt-1;
-    	    rezButProcessing = 	ACTION_DETECT;
+    	    rezButProcessing  = ACTION_DETECT;
         }
     	//clear processing
     	actionProces.cnt = 0;
     }
     return 	rezButProcessing;
 }
-
-
-
-
-
-
-
-
-

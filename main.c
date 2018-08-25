@@ -57,13 +57,18 @@ void delay_loop(){
 int main(void)
 {
 	u8 k1;
-	debugPinConfig();
+	//debugPinConfig();
 	delay_loop();
 	processing_simple_gpio();
 	processing_mem_map_init();
     processing_config_first_on();
     // TODO if return false - error indication!!!!!
-    processing_config_init((STATE_JAMPER1) ? (true): (false));
+    if(!processing_config_init((IS_USER_CONFIG) ? (true): (false)))
+    {
+    	IND_ERROR_SET;
+    	while(1)
+    	{}
+    }
 
     /*********************CONFIG AND RUN MODBUS TASKS***************************/
     processing_config_add_modbus_callback();

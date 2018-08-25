@@ -41,7 +41,7 @@
 
 
 // ---------- люйпняш времхъ дфюлоепнб --------------------------------------
-#define STATE_JAMPER1          GPIO_ReadInputDataBit(PORT_JAMP1,PIN_JAMP1)
+#define IS_USER_CONFIG          GPIO_ReadInputDataBit(PORT_JAMP1,PIN_JAMP1)
 
 // ---------- люйпняш сопюбкемхъ хмдхйюжхеи --------------------------------------
 #define IND_OUT_INVERSE

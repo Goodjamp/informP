@@ -115,7 +115,6 @@ void processing_config_first_on(void){
 
 
 bool processing_config_init(bool isUserConfig)
-
 {
 	union
 	{
@@ -132,7 +131,7 @@ bool processing_config_init(bool isUserConfig)
 			(isUserConfig) ? &(((S_global_config*)PAGE_ABS_ADDRESS(PAGE_USER_CONFIG ))->s_config_moduls) :
 					         &(((S_global_config*)PAGE_ABS_ADDRESS(PAGE_DEFAULT_CONFIG ))->s_config_moduls),
 		    (sizeof(S_global_config)-2));
-	// calculaton CRC for detect
+	// calculation CRC for detect configuration error
 	uint16_t calcCRC = CRC16((uint8_t*)PAGE_ABS_ADDRESS(PAGE_USER_CONFIG ), (sizeof(S_global_config)-2));
     return (calcCRC == ((S_global_config*)s_mem_map.p_start_config_data)->configurationCRC16) ? (true) : (false);
 }

@@ -38,7 +38,7 @@
 
 #define CLOCK_TIMER       TIM2
 
-#define CLOCK_FRQ         3000000
+#define CLOCK_FRQ         3000
 
 // ----------SPI1 pin/port definition---------
 #define GPIO_CLOCK_PORT    GPIOB
