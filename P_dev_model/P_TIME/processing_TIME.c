@@ -231,21 +231,13 @@ void setRCTTime(const serverSetTime *newTime, bool setAllarm)
 	timeUpdate.tm_isdst = -1;
 	// get UTC time for RTC
 	timeSetUTC = mktime(&timeUpdate);
-	// I need day of the week for detect current period of dayLight
-	/*
-	if(configData->isDaylightSaving)
-	{
-		timeGet = gmtime(&timeSetUTC);
-		correction += ( SEZON_TIME_SUMMER == (timeCorrection.sezonTime = getSezonTime(timeGet)) ) ? (60) : (0);
-	}
-	*/
 	// add correction in seconds for current time
 	timeSetUTC += correction * SECONDS_PER_MINUTES;
 	// calculate time for update: current time UTC  + one hour in seconds  + correction in seconds
 	if(setAllarm)
 	{
 		alarmSetUTC  =  mktime(&timeUpdate);
-		alarmSetUTC +=  TIME_UPDATE_PERIOD_MINUTES + correction * SECONDS_PER_MINUTES;
+		alarmSetUTC +=  TIME_UPDATE_PERIOD_MINUTES * SECONDS_PER_MINUTES + correction * SECONDS_PER_MINUTES;
 		clockSetAlarmTime( alarmSetUTC );
 	}
 	clockSetTime(timeSetUTC);
@@ -347,6 +339,7 @@ void t_processing_TIME(void *p_task_par){
 					timeBuffManager.timeData->Minutes = myGPRMC.minutes;
 					timeBuffManager.timeData->Seconds = myGPRMC.seconds;
 					setRCTTime(timeBuffManager.timeData, true);
+					continue;
 				}
 		    }
 			// UPDATE TIME TIMEOUT!!!!  Alarm indication
