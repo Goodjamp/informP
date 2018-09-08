@@ -64,9 +64,9 @@ static void displaySetScanLim(displayHandlerDef *displayHandlerIn, uint8_t numSt
 	displayConfigScanLimit(displayHandlerIn->txData, 0, SCAN_LIM_7);
 	switch( displayHandlerIn->currentSettings.color[numString]){
 	case COLOR_GREEN:
-	case COLOR_ORANGE:
 	    displayConfigScanLimit(displayHandlerIn->txData, 1, SCAN_LIM_3);
 		break;
+	case COLOR_ORANGE:
 	case COLOR_RED:
 		displayConfigScanLimit(displayHandlerIn->txData, 1, SCAN_LIM_7);
 		break;

@@ -297,7 +297,7 @@ static inline void setLDPin(void){
 	{
 		GPIO_SetBits(LDList[ldTxDef.numLD].port, LDList[ldTxDef.numLD].pin);
 		// control indication pin activity
-		GPIO_ResetBits(indicationLCDList[ldTxDef.numLD].port, LDList[ldTxDef.numLD].pin);
+		GPIO_ResetBits(indicationLCDList[ldTxDef.numLD].port, indicationLCDList[ldTxDef.numLD].pin);
 	}
 	else
 	{
@@ -424,7 +424,7 @@ void hwInterfaceTx(uint16_t orderNumberDispl, TX_ADDRESS txAddress){
 	if(txAddress == TX_ADDRESS_ONE)
 	{
 		// control indication pin activity
-		GPIO_SetBits(indicationLCDList[ldTxDef.numLD].port, LDList[ldTxDef.numLD].pin);
+		GPIO_SetBits(indicationLCDList[ldTxDef.numLD].port, indicationLCDList[ldTxDef.numLD].pin);
 	}
 	else
 	{
