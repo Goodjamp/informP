@@ -27,8 +27,8 @@
 	.s_config_moduls.s_connectmodbus_global[0].number_no_answer           = 1,                     \
 	.s_config_moduls.s_connectmodbus_global[0].adress_kp                  = 1,                     \
 	/*==========default FRQ configuration=========*/                                               \
-	.s_config_moduls.s_FRQmetter_user_config.state                        = DISABLE,               \
-	.s_config_moduls.s_FRQmetter_user_config.frqCorrection                = 230,                   \
+	.s_config_moduls.s_FRQmetter_user_config.state                        = ENABLE,               \
+	.s_config_moduls.s_FRQmetter_user_config.frqCorrection                = 000,                   \
 	/*==========default TIME configuration========*/                                               \
 	.s_config_moduls.s_TIME_user_config.state                             = ENABLE,                \
 	.s_config_moduls.s_TIME_user_config.timeCorection                     = 120,                   \
@@ -47,18 +47,18 @@
     /* 5 - time                     */\
     /* 6 - frequency                */\
 	.s_config_moduls.s_display_user_config.state                          = ENABLE,                \
-	.s_config_moduls.s_display_user_config.numScreen                      = 2,                     \
+	.s_config_moduls.s_display_user_config.numScreen                      = 4,                     \
                                                                                                    \
-	.s_config_moduls.s_display_user_config.screenConfig[0].numParamiterPerScreen = 6,              \
-	.s_config_moduls.s_display_user_config.screenConfig[0].bitsOfParamiters       =0b111101,       \
+	.s_config_moduls.s_display_user_config.screenConfig[0].numParamiterPerScreen = 3,              \
+	.s_config_moduls.s_display_user_config.screenConfig[0].bitsOfParamiters       =0b001110,       \
                                                                                                    \
-	.s_config_moduls.s_display_user_config.screenConfig[1].numParamiterPerScreen = 2,              \
-	.s_config_moduls.s_display_user_config.screenConfig[1].bitsOfParamiters      =0b110000,        \
+	.s_config_moduls.s_display_user_config.screenConfig[1].numParamiterPerScreen = 3,              \
+	.s_config_moduls.s_display_user_config.screenConfig[1].bitsOfParamiters      =0b001110,        \
                                                                                                    \
-	.s_config_moduls.s_display_user_config.screenConfig[2].numParamiterPerScreen = 1,              \
-	.s_config_moduls.s_display_user_config.screenConfig[2].bitsOfParamiters      =0b1000,          \
+	.s_config_moduls.s_display_user_config.screenConfig[2].numParamiterPerScreen = 3,              \
+	.s_config_moduls.s_display_user_config.screenConfig[2].bitsOfParamiters      =0b001110,          \
                                                                                                    \
 	.s_config_moduls.s_display_user_config.screenConfig[3].numParamiterPerScreen = 3,              \
-	.s_config_moduls.s_display_user_config.screenConfig[3].bitsOfParamiters      =0b1110000,       \
+	.s_config_moduls.s_display_user_config.screenConfig[3].bitsOfParamiters      =0b001110,       \
 
 #endif

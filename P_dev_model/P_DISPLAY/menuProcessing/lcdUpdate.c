@@ -26,7 +26,7 @@ const static uint8_t testStr[]  = TEST_STR;
 
 
 struct {
-	uint8_t sumbol[2];
+	uint8_t sumbol[3];
 	uint16_t addressStatus;
 	uint16_t addressValue;
 }paramIndication[NUMBER_OF_VALUE] = {

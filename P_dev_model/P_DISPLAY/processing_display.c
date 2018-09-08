@@ -121,7 +121,7 @@ void updateLcdVal(BLINK_STATE blinkState) {
 		for(k = 0; k < sizeof(lcdStr); k++)
 		{
 			// list of second layer symbols
-			if( ('.' == lcdStr[k]) || ('~' == lcdStr[k]))
+			if( ('.' == lcdStr[k]) || ('~' == lcdStr[k])|| ('h' == lcdStr[k]))
 			{
 				lcdStr[k] |= 0b10000000;
 			}

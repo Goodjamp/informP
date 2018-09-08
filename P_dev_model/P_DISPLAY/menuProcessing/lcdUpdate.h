@@ -14,6 +14,7 @@
 
 #define SYMBOL_TEMPERATURE   'C'
 #define SYMBOL_PRESSURE_PA   'P'
+#define SYMBOL_PRESSURE_PAh  'h'
 #define SYMBOL_PRESSURE_MM   'P'
 #define SYMBOL_HUMIDITY      'H'
 #define SYMBOL_DATE          'D'
@@ -65,7 +66,7 @@ typedef enum{
 #define TEMPERATURE_ADJUSTMENT_INFOCUS_NOERROR_LOW sprintf((char*)str, " %5.1f",                                         (float)((int16_t)value)/10 );
 
 /****PRESSURE PA**********/
-#define PRESSURE_PA_NORMAL_NOERROR_HIGH               sprintf((char*)str, "%1c%4d", (char)paramIndication[cnt].sumbol[0], value);
+#define PRESSURE_PA_NORMAL_NOERROR_HIGH               sprintf((char*)str, "%1c%1c%4d", (char)paramIndication[cnt].sumbol[0], SYMBOL_PRESSURE_PAh, value);
 #define PRESSURE_PA_ADJUSTMENT_INFOCUS_NOERROR_LOW    sprintf((char*)str, " %4d",                                         value);
 
 /****PRESSURE MM**********/

@@ -343,8 +343,8 @@ NRF_ERROR NRF24L01_set_rf_dr(nrfHeader inNRF, RF_DR  inDR)
 	{
 		return NRF_ERROR_ARG;
 	}
-	inNRF->global_reg_map.rf_setup.RF_DR_LOW   = (uint8_t)0b01 & inDR;
-	inNRF->global_reg_map.rf_setup.RF_DR_HIGHT = (uint8_t)0b10 & inDR;
+	inNRF->global_reg_map.rf_setup.RF_DR_LOW   = ((uint8_t)0b10 & inDR) ? (1) : (0);
+	inNRF->global_reg_map.rf_setup.RF_DR_HIGHT = ((uint8_t)0b01 & inDR) ? (1) : (0);
 	restricAvoidType(RF_SETUP, readReg, &inNRF->global_reg_map.rf_setup);
 	return NRF24L01_write_reg(inNRF, RF_SETUP_ADDRESS, 1, readReg.simplType);
 }
