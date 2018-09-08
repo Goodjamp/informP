@@ -108,7 +108,7 @@ void updateLcdVal(BLINK_STATE blinkState) {
 	{
 	    displaySetDefConfig(&myDisplay);
 	}
-	for (cnt = 0; cnt < NUMBER_OF_LCD_STRING; cnt++) {
+	for (cnt = 0; cnt < displayUserConfig->numScreen; cnt++) {
 
 		if (!updateLCD( lcdStr,
 				        blinkState,
@@ -139,7 +139,15 @@ static void butttonTimerFunctionCB( TimerHandle_t xTimer ){
 			.queueType.KeyAction.action = keyNumAction,
 			.queueType.KeyAction.periodIndex = keyNumPeriod,
 		};
-		keyPause(50);
+		if((keyNumAction == ACTION_MODE) && (keyNumPeriod == 1))
+		{
+			keyPause(300);
+		}
+		else
+		{
+			keyPause(50);
+		}
+
 		// push button action to queue
 		xQueueSendToBack(menuQueue, (void*)&actionMember, 0);
 	}

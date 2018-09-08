@@ -153,6 +153,8 @@
 		<pathentry include="D:/Private/Programing/MCU/STM32/CooCox/INFORM_P/informP/stm_lib" kind="inc" path="" system="true"/>
 		<pathentry include="D:/Private/Programing/MCU/STM32/CooCox/INFORM_P/informP/stm_lib/inc" kind="inc" path="" system="true"/>
 		<pathentry include="D:/Private/Programing/MCU/STM32/CooCox/INFORM_P/informP/USART_OPERATION" kind="inc" path="" system="true"/>
+		<pathentry include="D:/Private/Programing/MCU/STM32/CooCox/INFORM_P/informP/MAX7219/inc" kind="inc" path="" system="true"/>
+		<pathentry include="D:/Private/Programing/MCU/STM32/CooCox/INFORM_P/informP/MAX7219/src" kind="inc" path="" system="true"/>
 		<pathentry include="D:/Private/Programing/MCU/STM32/CooCox/INFORM_P/informP/BME280_HAL" kind="inc" path="" system="true"/>
 		<pathentry include="D:/Private/Programing/MCU/STM32/CooCox/INFORM_P/informP/I2C_HAL" kind="inc" path="" system="true"/>
 		<pathentry kind="mac" name="__GNUC__" path="" value=""/>
