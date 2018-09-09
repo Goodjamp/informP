@@ -229,7 +229,7 @@ void t_processing_reset_control(void* in_Data){
 	//Создаю семафор доступа к флагоам состояния процесов
 	vSemaphoreCreateBinary(SemaphoreHandle_watchdog);
 	// инициилизирую СТОРОЖЕВОЙ ТАЙМЕР (watchdog)
-	p_watchdog_init(WDG_PRESCALER_32,4000);
+	p_watchdog_init(WDG_PRESCALER_64,4000);
 	p_watchdog_enable();
 	while(1){
 		//xSemaphoreTake(SemaphoreHandle_watchdog, portMAX_DELAY);

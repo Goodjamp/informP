@@ -36,7 +36,7 @@
 	.s_config_moduls.s_TIME_user_config.synchronizationSource             = 1,                     \
 	/*==========default SENSOR configuration========*/                                             \
 	.s_config_moduls.s_sensor_user_config.state                           = ENABLE,                \
-	.s_config_moduls.s_sensor_user_config.source                          = 1,                     \
+	.s_config_moduls.s_sensor_user_config.source                          = 0,                     \
 	/*==========default DISPLAY configuration=======*/                                             \
 /*  Bit #     Paramiter             */\
     /* 0 - temperature              */\
@@ -49,16 +49,16 @@
 	.s_config_moduls.s_display_user_config.state                          = ENABLE,                \
 	.s_config_moduls.s_display_user_config.numScreen                      = 4,                     \
                                                                                                    \
-	.s_config_moduls.s_display_user_config.screenConfig[0].numParamiterPerScreen = 3,              \
-	.s_config_moduls.s_display_user_config.screenConfig[0].bitsOfParamiters       =0b001110,       \
+	.s_config_moduls.s_display_user_config.screenConfig[0].numParamiterPerScreen = 7,              \
+	.s_config_moduls.s_display_user_config.screenConfig[0].bitsOfParamiters       =0b1111111,       \
                                                                                                    \
-	.s_config_moduls.s_display_user_config.screenConfig[1].numParamiterPerScreen = 3,              \
-	.s_config_moduls.s_display_user_config.screenConfig[1].bitsOfParamiters      =0b001110,        \
+	.s_config_moduls.s_display_user_config.screenConfig[1].numParamiterPerScreen = 7,              \
+	.s_config_moduls.s_display_user_config.screenConfig[1].bitsOfParamiters      =0b1111111,        \
                                                                                                    \
-	.s_config_moduls.s_display_user_config.screenConfig[2].numParamiterPerScreen = 3,              \
-	.s_config_moduls.s_display_user_config.screenConfig[2].bitsOfParamiters      =0b001110,          \
+	.s_config_moduls.s_display_user_config.screenConfig[2].numParamiterPerScreen = 7,              \
+	.s_config_moduls.s_display_user_config.screenConfig[2].bitsOfParamiters      =0b1111111,          \
                                                                                                    \
-	.s_config_moduls.s_display_user_config.screenConfig[3].numParamiterPerScreen = 3,              \
-	.s_config_moduls.s_display_user_config.screenConfig[3].bitsOfParamiters      =0b001110,       \
+	.s_config_moduls.s_display_user_config.screenConfig[3].numParamiterPerScreen = 7,              \
+	.s_config_moduls.s_display_user_config.screenConfig[3].bitsOfParamiters      =0b1111111,       \
 
 #endif

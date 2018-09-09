@@ -61,7 +61,7 @@ void initValueAddress(void){
 
 bool menuWorkHight(uint8_t *str, uint16_t status, uint16_t value, uint8_t cnt){
 	if( VALUE_STATUS_ERROR <= status){
-		sprintf((char*)str, "%1c%s", (char)paramIndication[cnt].sumbol[0], (char*)errorInf);
+		sprintf((char*)str, "%s%s", paramIndication[cnt].sumbol, (char*)errorInf);
 		return true;
 	}
 
