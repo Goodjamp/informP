@@ -147,16 +147,27 @@ void USART3_IRQHandler(void)
 	unsigned char singlchar;
 	uint16_t	usingle;
 	//--Proveryaem TXE
-
 	if(USART_GetFlagStatus(USART3,USART_FLAG_TXE) == SET)
 	{
 		if((read_fastdirstruct_usart(WrUSART+2,&singlchar))!=0)
 		{
 			usingle=((uint16_t)singlchar)&0x00ff;
 			USART_SendData(USART3,usingle);
+
 		}
 		else
-			UsartClearStatusCR1(USART3,IT_TXEIE_USART);			//Nado zakrit port
+		{
+			if(USART3->CR1 & IT_TXEIE_USART)
+			{
+			    UsartClearStatusCR1(USART3,IT_TXEIE_USART);			//Nado zakrit port
+			}
+		}
+	}
+
+	if(USART_GetFlagStatus(USART3,USART_FLAG_ORE) == SET)
+	{
+		(void)USART3->SR;
+		(void)USART3->DR;
 	}
 
 	if(USART_GetFlagStatus(USART3,USART_FLAG_RXNE) == SET)
@@ -164,7 +175,6 @@ void USART3_IRQHandler(void)
 		usingle=USART_ReceiveData(USART3);
 		singlchar=(uint8_t)(usingle&0xff);
 		write_fastdirstruct_usart(RdUSART+2,singlchar);
-
 	}
 }
 void TIM4_IRQHandler(void)
@@ -174,8 +184,6 @@ void TIM4_IRQHandler(void)
 	TIM_ClearITPendingBit(TIM4,TIM_IT_Update);
 	counter_ms++;  //счетчик миллисекунд через таймер TIM7
 }
-
-
 
 
 //

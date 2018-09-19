@@ -14,11 +14,11 @@ char UsartGetStatusCR1(USART_TypeDef *USARTx, uint16_t USART_IT) {
 }
 
 void UsartSetStatusCR1(USART_TypeDef *USARTx, uint16_t USART_IT) {
-	USARTx->CR1 = USARTx->CR1 | USART_IT;
+	USARTx->CR1 |= USART_IT;
 }
 
 void UsartClearStatusCR1(USART_TypeDef *USARTx, uint16_t USART_IT) {
-	USARTx->CR1 = (USARTx->CR1 | USART_IT) ^ USART_IT;
+	USARTx->CR1 &=  ~USART_IT;
 }
 
 uint16_t write_Usart_Buf(USART_TypeDef* USARTx, uint8_t *bufuchar, uint16_t lenmassive, struct point_wrdirobject *pwrdirobject)
@@ -101,7 +101,9 @@ int read_fastdirstruct_usart(struct point_wrdirobject *pwrdirobject, uint8_t *si
 
 		return 1;
 	} else
+	{
 		return 0;
+	}
 }
 
 int Read_From(struct point_wrdirobject *pwrdirobject, uint8_t *buffer, int numbyte) {

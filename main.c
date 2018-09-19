@@ -158,7 +158,7 @@ int main(void)
 	}
 #endif
 
-#ifdef DEV_6 // FRQ processing
+#ifdef DEV_6
 #if (TASK_PRIORITY(DEV_1)<MIN_T_PRIORITY)||(TASK_PRIORITY(DEV_1)>MAX_T_PRIORITY)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
@@ -167,7 +167,7 @@ int main(void)
 	}
 #endif
 
-#ifdef DEV_7 // GPS processing
+#ifdef DEV_7
 #if (TASK_PRIORITY(DEV_1)<MIN_T_PRIORITY)||(TASK_PRIORITY(DEV_1)>MAX_T_PRIORITY)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
@@ -176,7 +176,7 @@ int main(void)
 	}
 #endif
 
-#ifdef DEV_8 // sensor processing
+#ifdef DEV_8
 #if (TASK_PRIORITY(DEV_1)<MIN_T_PRIORITY)||(TASK_PRIORITY(DEV_1)>MAX_T_PRIORITY)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif

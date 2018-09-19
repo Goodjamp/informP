@@ -15,8 +15,6 @@
 
 
 #define IT_TXEIE_USART						0x80
-#define NUMBER_TXEIE_USART					7
-#define TRANSMITION_IS_NOT_COMPLETE			-1
 
 //--------------------------------MYSTRUCT-----------------------------------------------
 struct point_wrdirobject
