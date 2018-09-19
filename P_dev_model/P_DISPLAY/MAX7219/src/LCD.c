@@ -89,7 +89,7 @@ DISPLAY_STATUS displayInit( displayHandlerDef *displayHandlerIn, const uint8_t* 
 	displayHandlerIn->currentSettings.numberOfActivDisplay = numberOfActiveDisplay;
 	// default color of ALL strings
 	for(cnt = 0; cnt < NUMBER_OF_LCD_STRING; cnt++){
-		displayHandlerIn->currentSettings.color[cnt] = COLOR_RED;
+		displayHandlerIn->currentSettings.color[cnt] = COLOR_GREEN;
 	}
 
 	displayHandlerIn->status = DISPLAY_OK;
@@ -151,8 +151,8 @@ void displayWrite(displayHandlerDef *displayHandlerIn, uint16_t numString, uint8
 	uint16_t digCnt = 0;
 	LAYER_ORDER layer;
 	// For current screen configuration:
-	// first max7219  - 8x8 matrix indicator
-	// Second max7219 - 7-segment indicator
+	// first  max7219  - 8x8 matrix indicator
+	// second max7219 - 7-segment indicator
 	displayClearBuff(displayHandlerIn->txData,MAX_PER_SCREEN);
 	// set max#1 symbol - 8x8 matrix(maximum 2 layer suport)
 	displaySet8x8Matrix(displayHandlerIn->txData, ORDER_NUM_MATRIX,  str[ORDER_NUM_MATRIX], LAYER_ORDER_FIRST );

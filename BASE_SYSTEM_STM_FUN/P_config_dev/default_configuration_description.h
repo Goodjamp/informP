@@ -50,7 +50,7 @@
 	.s_config_moduls.s_display_user_config.numScreen                      = 4,                     \
                                                                                                    \
 	.s_config_moduls.s_display_user_config.screenConfig[0].numParamiterPerScreen = 7,              \
-	.s_config_moduls.s_display_user_config.screenConfig[0].bitsOfParamiters       =0b1111111,       \
+	.s_config_moduls.s_display_user_config.screenConfig[0].bitsOfParamiters      =0b1111111,       \
                                                                                                    \
 	.s_config_moduls.s_display_user_config.screenConfig[1].numParamiterPerScreen = 7,              \
 	.s_config_moduls.s_display_user_config.screenConfig[1].bitsOfParamiters      =0b1111111,        \
