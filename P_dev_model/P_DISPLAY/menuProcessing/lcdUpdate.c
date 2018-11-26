@@ -29,13 +29,19 @@ struct {
 	uint8_t sumbol[3];
 	uint16_t addressStatus;
 	uint16_t addressValue;
-}paramIndication[NUMBER_OF_VALUE] = {
+}paramIndication[QUANTITY_OF_VALUE] = {
 		[PAR_TEMPERATURE] = { .sumbol = { SYMBOL_TEMPERATURE }, },
 		[PAR_PRESSURE_PA] = { .sumbol = { SYMBOL_PRESSURE_PA}, },
 		[PAR_PRESSURE_MM] = { .sumbol = { SYMBOL_PRESSURE_MM}, },
 		[PAR_HUMIDITY]    = { .sumbol = { SYMBOL_HUMIDITY }, },
-		[PAR_DATE]        = { .sumbol = { SYMBOL_DATE }, },
-		[PAR_TIME]        = { .sumbol = { SYMBOL_TIME }, },
+		[PAR_DATE_0]        = { .sumbol = { SYMBOL_DATE }, },
+		[PAR_TIME_0]        = { .sumbol = { SYMBOL_TIME }, },
+		[PAR_DATE_1]        = { .sumbol = { SYMBOL_DATE }, },
+		[PAR_TIME_1]        = { .sumbol = { SYMBOL_TIME }, },
+		[PAR_DATE_2]        = { .sumbol = { SYMBOL_DATE }, },
+		[PAR_TIME_2]        = { .sumbol = { SYMBOL_TIME }, },
+		[PAR_DATE_3]        = { .sumbol = { SYMBOL_DATE }, },
+		[PAR_TIME_3]        = { .sumbol = { SYMBOL_TIME }, },
 		[PAR_FRQ]         = { .sumbol = { SYMBOL_FRQ }, }
 };
 
@@ -44,16 +50,28 @@ void initValueAddress(void){
 	// copy address of all values that can indication
 	paramIndication[PAR_TEMPERATURE].addressValue  = s_address_oper_data.s_sensor_address.rezTemperature;
 	paramIndication[PAR_TEMPERATURE].addressStatus = s_address_oper_data.s_sensor_address.status_sensor;
-	paramIndication[PAR_PRESSURE_PA].addressValue     = s_address_oper_data.s_sensor_address.rezPressure_GPasc;
-	paramIndication[PAR_PRESSURE_PA].addressStatus    = s_address_oper_data.s_sensor_address.status_sensor;
-	paramIndication[PAR_PRESSURE_MM].addressValue     = s_address_oper_data.s_sensor_address.rezPressure_mmHg;
-	paramIndication[PAR_PRESSURE_MM].addressStatus    = s_address_oper_data.s_sensor_address.status_sensor;
+	paramIndication[PAR_PRESSURE_PA].addressValue  = s_address_oper_data.s_sensor_address.rezPressure_GPasc;
+	paramIndication[PAR_PRESSURE_PA].addressStatus = s_address_oper_data.s_sensor_address.status_sensor;
+	paramIndication[PAR_PRESSURE_MM].addressValue  = s_address_oper_data.s_sensor_address.rezPressure_mmHg;
+	paramIndication[PAR_PRESSURE_MM].addressStatus = s_address_oper_data.s_sensor_address.status_sensor;
 	paramIndication[PAR_HUMIDITY].addressValue     = s_address_oper_data.s_sensor_address.rezHumidity;
 	paramIndication[PAR_HUMIDITY].addressStatus    = s_address_oper_data.s_sensor_address.status_sensor;
-	paramIndication[PAR_DATE].addressValue         = s_address_oper_data.s_TIME_address.DATE;
-	paramIndication[PAR_DATE].addressStatus        = s_address_oper_data.s_TIME_address.status_TIME;
-	paramIndication[PAR_TIME].addressValue         = s_address_oper_data.s_TIME_address.TIME;
-	paramIndication[PAR_TIME].addressStatus        = s_address_oper_data.s_TIME_address.status_TIME;
+	paramIndication[PAR_DATE_0].addressValue       = s_address_oper_data.s_TIME_address.clock[0].DATE;
+	paramIndication[PAR_DATE_0].addressStatus      = s_address_oper_data.s_TIME_address.status_TIME;
+	paramIndication[PAR_TIME_0].addressValue       = s_address_oper_data.s_TIME_address.clock[0].TIME;
+	paramIndication[PAR_TIME_0].addressStatus      = s_address_oper_data.s_TIME_address.status_TIME;
+	paramIndication[PAR_DATE_1].addressValue       = s_address_oper_data.s_TIME_address.clock[1].DATE;
+	paramIndication[PAR_DATE_1].addressStatus      = s_address_oper_data.s_TIME_address.status_TIME;
+	paramIndication[PAR_TIME_1].addressValue       = s_address_oper_data.s_TIME_address.clock[1].TIME;
+	paramIndication[PAR_TIME_1].addressStatus      = s_address_oper_data.s_TIME_address.status_TIME;
+	paramIndication[PAR_DATE_2].addressValue       = s_address_oper_data.s_TIME_address.clock[2].DATE;
+	paramIndication[PAR_DATE_2].addressStatus      = s_address_oper_data.s_TIME_address.status_TIME;
+	paramIndication[PAR_TIME_2].addressValue       = s_address_oper_data.s_TIME_address.clock[2].TIME;
+	paramIndication[PAR_TIME_2].addressStatus      = s_address_oper_data.s_TIME_address.status_TIME;
+	paramIndication[PAR_DATE_3].addressValue       = s_address_oper_data.s_TIME_address.clock[3].DATE;
+	paramIndication[PAR_DATE_3].addressStatus      = s_address_oper_data.s_TIME_address.status_TIME;
+	paramIndication[PAR_TIME_3].addressValue       = s_address_oper_data.s_TIME_address.clock[3].TIME;
+	paramIndication[PAR_TIME_3].addressStatus      = s_address_oper_data.s_TIME_address.status_TIME;
 	paramIndication[PAR_FRQ].addressValue          = s_address_oper_data.s_FRQmetter_address.rez_FRQmetter;
 	paramIndication[PAR_FRQ].addressStatus         = s_address_oper_data.s_FRQmetter_address.status_FRQmetter;
 }
@@ -94,7 +112,10 @@ bool menuWorkHight(uint8_t *str, uint16_t status, uint16_t value, uint8_t cnt){
 			return true;
 		}
 		break;
-	case PAR_DATE:
+	case PAR_DATE_0:
+	case PAR_DATE_1:
+	case PAR_DATE_2:
+	case PAR_DATE_3:
 		switch(status){
 		case VALUE_STATUS_OK:
 			DATE_NORMAL_NOERROR_HIGH;
@@ -104,7 +125,10 @@ bool menuWorkHight(uint8_t *str, uint16_t status, uint16_t value, uint8_t cnt){
 			return true;
 		}
 		break;
-	case PAR_TIME:
+	case PAR_TIME_0:
+	case PAR_TIME_1:
+	case PAR_TIME_2:
+	case PAR_TIME_3:
 		switch(status){
 		case VALUE_STATUS_OK:
 			TIME_NORMAL_NOERROR_HIGH;
@@ -134,7 +158,10 @@ bool menuWorkLow(uint8_t *str, uint16_t status, uint16_t value, uint8_t cnt) {
 
 	switch (cnt) {
 
-	case PAR_DATE:
+	case PAR_DATE_0:
+	case PAR_DATE_1:
+	case PAR_DATE_2:
+	case PAR_DATE_3:
 		switch (status) {
 		case VALUE_STATUS_OK:
 			DATE_NORMAL_NOERROR_LOW;
@@ -145,7 +172,10 @@ bool menuWorkLow(uint8_t *str, uint16_t status, uint16_t value, uint8_t cnt) {
 		}
 		break;
 
-	case PAR_TIME:
+	case PAR_TIME_0:
+	case PAR_TIME_1:
+	case PAR_TIME_2:
+	case PAR_TIME_3:
 		switch (status) {
 		case VALUE_STATUS_OK:
 			TIME_NORMAL_NOERROR_LOW;
@@ -195,7 +225,10 @@ bool menuAdjLowFocus(uint8_t *str, uint16_t status, uint16_t value, uint8_t cnt)
 			return true;
 		}
 		break;
-	case PAR_DATE:
+	case PAR_DATE_0:
+	case PAR_DATE_1:
+	case PAR_DATE_2:
+	case PAR_DATE_3:
 		switch(status){
 		case VALUE_STATUS_OK:
 			DATE_ADJUSTMENT_INFOCUS_NOERROR_LOW;
@@ -205,7 +238,10 @@ bool menuAdjLowFocus(uint8_t *str, uint16_t status, uint16_t value, uint8_t cnt)
 			return true;
 		}
 		break;
-	case PAR_TIME:
+	case PAR_TIME_0:
+	case PAR_TIME_1:
+	case PAR_TIME_2:
+	case PAR_TIME_3:
 		switch(status){
 		case VALUE_STATUS_OK:
 			TIME_ADJUSTMENT_INFOCUS_NOERROR_LOW;

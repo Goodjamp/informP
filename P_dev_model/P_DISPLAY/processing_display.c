@@ -85,7 +85,7 @@ static uint8_t getNumberOfParamiter(uint16_t configBitField, uint8_t selectPos)
 	uint8_t  cntBit = 0;
 	uint8_t  cntPar = 0;
 	selectPos++;
-	for(;cntPar < NUMBER_OF_VALUE; cntPar++)
+	for(;cntPar < QUANTITY_OF_VALUE; cntPar++)
 	{
 		if(configBitField & mask)
 		{
@@ -197,9 +197,9 @@ static menuActionListDef decodeKeyAction(uint8_t action, int8_t intervalIn){
 }
 
 
-void setBreightnes(menuActionListDef menuAction){
+void setBrightness(menuActionListDef menuAction){
 	actionQueueMember actionMember = {
-		.type = event_Brightnes,
+		.type = event_UPDATE_BRIGHTNESS,
 		.queueType.payload[0] = (uint8_t)menuAction
 	};
     // push button action to queue
@@ -234,12 +234,12 @@ static void initUserMenu(S_display_user_config *configData){
 			pdTRUE,
 			(void *)0,
 			butttonTimerFunctionCB);
-	lcdTimerHandler =  xTimerCreate((const char*)"LCD TIMER",
+	lcdTimerHandler =  xTimerCreate((const char*)"LCD UPDATE TIMER",
 			LCD_UPDATE_HIGHT_MS,
 			pdTRUE,
 			(void *)&lcdPeriodType,
 			lcdTimerFunctionCB);
-	escTimerHandler = xTimerCreate((const char*)"LCD TIMER",
+	escTimerHandler = xTimerCreate((const char*)"LCD ESC TIMER",
 			BUTTON_ESC_PERIOD_MS,
 			pdFALSE,
 			(void *)0,
@@ -314,8 +314,7 @@ void t_processing_display(void *pvParameters){
 			break;
 		// Key update
 		case event_KEY:
-			menuUpdate(
-					decodeKeyAction(  actionMember.queueType.KeyAction.action,
+			menuUpdate( decodeKeyAction(  actionMember.queueType.KeyAction.action,
 							          actionMember.queueType.KeyAction.periodIndex
 					               )
 					  );
@@ -325,25 +324,33 @@ void t_processing_display(void *pvParameters){
 			    xTimerStart(escTimerHandler,10);
 			}
 			break;
-		case event_Brightnes:
-			switch( actionMember.queueType.Brightnes.action ){
+		case event_UPDATE_BRIGHTNESS:
+			/* update brightness according menu that we wont to switch:
+			  - switch to TEST_BRIGHTNES_INDEX if we swaith to test mode
+			  - switch to to normal brightness level in other case
+			*/
+			switch( actionMember.queueType.Brightnes.action )
+			{
 			case MENU_ACTION_SWITCH_TO_TEST:
-				tempSaveBrightnes = myDisplay.currentSettings.brightnes;
-				myDisplay.currentSettings.brightnes = TEST_BRIGHTNES_UNDEX;
+				//tempSaveBrightnes = myDisplay.currentSettings.brightnes;
+				//myDisplay.currentSettings.brightnes = TEST_BRIGHTNES_INDEX;
+				displaySetBrightness(&myDisplay, myDisplay.brightnesList[TEST_BRIGHTNES_INDEX], 0, TX_ADDRESS_ALL);
 				break;
 			case MENU_ACTION_SWITCH_TO_WORK:
 			case MENU_ACTION_SWITCH_TO_ADJ:
-				myDisplay.currentSettings.brightnes = tempSaveBrightnes;
+				//myDisplay.currentSettings.brightnes = tempSaveBrightnes;
+				displaySetBrightness(&myDisplay, myDisplay.brightnesList[myDisplay.currentSettings.brightnes], 0, TX_ADDRESS_ALL);
 				break;
-			default:
+			case MENU_ACTION_SELL:
 				if( ++myDisplay.currentSettings.brightnes > (sizeof(brightnes)/sizeof(brightnes[0])-1 ) )
 				{
 					myDisplay.currentSettings.brightnes = 0;
 				}
-				displaySetBrightnes(&myDisplay, myDisplay.brightnesList[myDisplay.currentSettings.brightnes], 0, TX_ADDRESS_ALL);
+				displaySetBrightness(&myDisplay, myDisplay.brightnesList[myDisplay.currentSettings.brightnes], 0, TX_ADDRESS_ALL);
+				break;
+			default:
 				break;
 			};
-			break;
 		}
 
 

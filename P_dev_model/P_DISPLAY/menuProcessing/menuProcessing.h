@@ -57,7 +57,7 @@ uint8_t menuSetListboxItemIndex(uint8_t orderNumberLisbox, uint8_t newItemIndex)
 DISPLAY_MENU menuGetCurrentMenu (void);
 uint8_t menuGetListbox(void);
 // User implementation function
-void setBreightnes(menuActionListDef menuAction);
+void setBrightness(menuActionListDef menuAction);
 
 
 

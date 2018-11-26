@@ -34,13 +34,13 @@ struct{
 
 static void increaseWidjetP(void);
 static void increaseListBoxItem(void);
-static void mainMenuUpdate(menuActionListDef inAction);
+static void workMenuUpdate(menuActionListDef inAction);
 static void adjustmentMenuUpdate(menuActionListDef inAction);
 static void testMenuUpdate(menuActionListDef inAction);
 static void updateBrightnes(void);
 
 
-void mainMenuUpdate(menuActionListDef inAction){
+void workMenuUpdate(menuActionListDef inAction){
 	switch(inAction){
 	    case MENU_ACTION_ENTER:
 	    	menuDescription.displayState = DISPLAY_MENU_UDJUSTMENT;
@@ -50,7 +50,7 @@ void mainMenuUpdate(menuActionListDef inAction){
 	    	break;
 	    case MENU_ACTION_TEST:
 	    	menuDescription.displayState = DISPLAY_MENU_TEST;
-	    	setBreightnes( (uint8_t)MENU_ACTION_SWITCH_TO_TEST );
+	    	setBrightness( (uint8_t)MENU_ACTION_SWITCH_TO_TEST );
 	    	break;
 	    default: break;
 	};
@@ -71,7 +71,7 @@ void adjustmentMenuUpdate(menuActionListDef inAction){
 	    	break;
 	    case MENU_ACTION_TEST:
 	    	menuDescription.displayState = DISPLAY_MENU_TEST;
-	    	setBreightnes( (uint8_t)MENU_ACTION_SWITCH_TO_TEST );
+	    	setBrightness( (uint8_t)MENU_ACTION_SWITCH_TO_TEST );
 	    	break;
 	    default: break;
 	};
@@ -83,7 +83,7 @@ void testMenuUpdate(menuActionListDef inAction){
 	switch(inAction){
 	    case MENU_ACTION_ESC:
         menuDescription.displayState = DISPLAY_MENU_WORK;
-        setBreightnes( (uint8_t)MENU_ACTION_SWITCH_TO_WORK );
+        setBrightness( (uint8_t)MENU_ACTION_SWITCH_TO_WORK );
         break;
 	    default:
 	    break;
@@ -94,7 +94,7 @@ void testMenuUpdate(menuActionListDef inAction){
 
 void updateBrightnes(void){
 	// Call user implementation function
-	setBreightnes( (uint8_t)MENU_ACTION_SELL );
+	setBrightness( (uint8_t)MENU_ACTION_SELL );
 }
 
 
@@ -125,7 +125,7 @@ void increaseListBoxItem(void){
 void menuUpdate(menuActionListDef inAction){
 	switch(menuDescription.displayState){
 	case DISPLAY_MENU_WORK:
-		mainMenuUpdate(inAction);
+		workMenuUpdate(inAction);
 		break;
 	case DISPLAY_MENU_UDJUSTMENT:
 		adjustmentMenuUpdate(inAction);

@@ -14,12 +14,7 @@
 #include "processing_mem_map.h"
 
 #define DEV_6                TIME
-//#define DEV_1_BIT_STATUS_REG 1
-
-// Number of status registers TIME
-#define NUM_REG_STATUS_TIME  1
-// Total number of registers (without status registers)
-#define NUM_REG_TIME         8
+#define CLOCK_QUANTITY   4
 
 typedef enum {
 	TIME_STATUS_OK,
@@ -30,9 +25,7 @@ typedef enum {
 
 #pragma pack(push,1)
 
-//-----------------------------Адреса оперативных регистров процесса FRQmetter---------------------------------------------------------------
 typedef struct{
-	uint16_t  status_TIME;  // status register TIME module addtres
 	uint16_t  date_year;    // date: year
 	uint16_t  date_month;   // date: month
 	uint16_t  date_day;     // date: day
@@ -41,6 +34,13 @@ typedef struct{
 	uint16_t  time_second;  // time: second
 	uint16_t  DATE;
 	uint16_t  TIME;
+}S_Clock;
+
+
+
+typedef struct{
+	uint16_t  status_TIME;  // status register TIME module addtres
+	S_Clock   clock[CLOCK_QUANTITY];
 	uint16_t  serverYear;
 	uint16_t  serverMonth;
 	uint16_t  serverDay;
@@ -63,27 +63,38 @@ typedef struct
 	uint16_t Seconds;
 }serverSetTime;
 
-typedef struct{
-	uint16_t      status_TIME; // status register TIME module
+typedef struct
+{
+	uint16_t  timeCorection:15;  // time correction in minutes
+    uint16_t  isDaylightSaving:1;
+}clockIndConfigT;
+
+typedef struct
+{
 	uint16_t      date_year;    // date: year
 	uint16_t      date_month;   // date: month
 	uint16_t      date_day;     // date: day
-	uint16_t      time_hour;  // time: honour
+	uint16_t      time_hour;    // time: honour
 	uint16_t      time_minute;  // time: minute
 	uint16_t      time_second;  // time: second
 	uint16_t      DATE;
 	uint16_t      TIME;
-	serverSetTime serverTime;
+}clockIndStateT;
+
+
+typedef struct{
+	uint16_t       status_TIME; // status register TIME module
+	clockIndStateT clockState[CLOCK_QUANTITY];
+	serverSetTime  serverTime;
 } S_TIME_oper_data;
 //--------------------------------------------------------------------------------------------------------------------------------------
 
 
 //----------------------------- Конфигурация процесса FRQmetter--------------------------------------------------------------------------------
 typedef struct{
-	uint16_t  state;          // state of module ENABLE/DISABLE
-	uint16_t  timeCorection;  // time correction in hours
-    uint16_t  isDaylightSaving:1;
-    uint16_t  synchronizationSource:15;  // time correction in hours
+	uint16_t  state;                               // state of module ENABLE/DISABLE
+	uint16_t  synchronizationSource;
+	clockIndConfigT clockConfig[CLOCK_QUANTITY];
 }S_TIME_user_config;
 //--------------------------------------------------------------------------------------------------------------------------------------
 #pragma pack(pop)

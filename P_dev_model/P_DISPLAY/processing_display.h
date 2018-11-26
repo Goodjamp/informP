@@ -28,7 +28,7 @@
 
 #define FLASH_PAGE_MENU_DATA   125
 
-#define TEST_BRIGHTNES_UNDEX   0
+#define TEST_BRIGHTNES_INDEX   0
 
 
 typedef struct{
@@ -38,7 +38,7 @@ typedef struct{
 typedef enum{
 	event_KEY,
 	event_DISPLAY,
-	event_Brightnes
+	event_UPDATE_BRIGHTNESS
 }actionTypeDef;
 
 typedef enum{
@@ -46,9 +46,16 @@ typedef enum{
 	PAR_PRESSURE_PA,
 	PAR_PRESSURE_MM,
 	PAR_HUMIDITY,
-	PAR_DATE ,
-	PAR_TIME,
-	PAR_FRQ
+	PAR_DATE_0,
+	PAR_TIME_0,
+	PAR_DATE_1,
+	PAR_TIME_1,
+	PAR_DATE_2,
+	PAR_TIME_2,
+	PAR_DATE_3,
+	PAR_TIME_3,
+	PAR_FRQ,
+	QUANTITY_OF_VALUE
 }paramOrderDef;
 
 typedef enum{

@@ -248,7 +248,7 @@ void displaySetDefConfig(displayHandlerDef *displayHandlerIn)
 	    while(displayIntarfaceGetStatus(displayHandlerIn) == DISPLAY_BUSY){}
 	}
 
-	displaySetBrightnes(displayHandlerIn, displayHandlerIn->brightnesList[displayHandlerIn->currentSettings.brightnes], 0, TX_ADDRESS_ALL);
+	displaySetBrightness(displayHandlerIn, displayHandlerIn->brightnesList[displayHandlerIn->currentSettings.brightnes], 0, TX_ADDRESS_ALL);
 	while(displayIntarfaceGetStatus(displayHandlerIn) == DISPLAY_BUSY){}
 
 	displayConfigDecodeMode(displayHandlerIn->txData, 0, 0b0);
@@ -280,7 +280,7 @@ void displayClear(displayHandlerDef *displayHandlerIn, uint16_t numScreen, TX_AD
   * [txAddress]       address of str: for all screen inside displayHandler, or only one - numScreen
   * @retval
   */
-void displaySetBrightnes(displayHandlerDef *displayHandlerIn, DISPLAY_BRIGHTNES brightnes, uint16_t numScreen, TX_ADDRESS txAddress){
+void displaySetBrightness(displayHandlerDef *displayHandlerIn, DISPLAY_BRIGHTNES brightnes, uint16_t numScreen, TX_ADDRESS txAddress){
     uint8_t cnt;
 	for(cnt = 0; cnt < MAX_PER_SCREEN; cnt++)
 	{
