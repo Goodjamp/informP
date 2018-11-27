@@ -331,10 +331,11 @@ void t_processing_TIME(void *p_task_par){
         // processing event
 		if( rezWaiteEvent & SECOND_EVENT_BIT ) // processing second event
 		{
-			// get current date/time value
-			timeGetUTC = clockGetTime();
+
 			for(uint8_t k = 0; k < CLOCK_QUANTITY; k++)
 			{
+			    // get current date/time value
+			    timeGetUTC = clockGetTime() + configData->clockConfig[k].timeCorection * 60;
 				if(configData->clockConfig[k].isDaylightSaving)
 				{
 					timeGet = gmtime(&timeGetUTC);
