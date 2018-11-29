@@ -225,7 +225,7 @@ TYPE_REG_MEM_MAP processing_mem_map_detect(u16 data_user_addres, u8** p_addres_m
 			&& (data_user_addres < (USER_ADDRESS_DATA + NUM_REG_DATA)))
 	{
 		*p_addres_mem_map=(u8*)(s_mem_map.p_start_DATA+data_user_addres*SIZE_PROCES_OBJECT);
-		return(PMZ_DATA);
+		return PMZ_DATA;
 	}
 	// Ó·Î‡Ò¸ Œœ≈–¿“»¬Õ€’ –≈√»—“–Œ¬
 	else if	((data_user_addres >= USER_ADDRESS_OPER_DATA)
@@ -233,7 +233,7 @@ TYPE_REG_MEM_MAP processing_mem_map_detect(u16 data_user_addres, u8** p_addres_m
 	{
 
 		*p_addres_mem_map=(u8*)(s_mem_map.p_start_oper_data+(data_user_addres-USER_ADDRESS_OPER_DATA)*SIZE_PROCES_OBJECT);
-		return(OPER_DATA);
+		return OPER_DATA;
 	}
 
 	// Ó·Î‡ÒÚ¸ –≈√»—“–Œ¬ ‘À≈ÿ
@@ -241,9 +241,9 @@ TYPE_REG_MEM_MAP processing_mem_map_detect(u16 data_user_addres, u8** p_addres_m
 			&& (data_user_addres < (USER_ADDRESS_CONFIG_DATA+NUM_REG_CONFIG)))
 	{
 		*p_addres_mem_map=(u8*)(s_mem_map.p_start_config_data+(data_user_addres-USER_ADDRESS_CONFIG_DATA)*SIZE_REG_CONFIG);
-		return(CONFIG_DATA);
+		return CONFIG_DATA;
 	}
 
-	return(ERROR_DATA);
+	return ERROR_DATA;
 }
 

@@ -167,7 +167,7 @@ static inline uint8_t getLastWeekDate(uint8_t date, uint8_t dayOfWeek, uint8_t d
 
 static inline SEZON_TIME getSezonTime(struct tm *nowTime){
     uint8_t tm_mon  = nowTime->tm_mon + 1;
-    uint8_t tm_wday = nowTime->tm_wday + 1;
+    uint8_t tm_wday = nowTime->tm_wday;
 	// chec is we in summer time now. If not winter - summer
 	if( !((tm_mon >= DAYLIGHT_START_MOUNTH ) && (tm_mon <= DAYLIGHT_STOP_MOUNTH)))
 	{
@@ -331,7 +331,6 @@ void t_processing_TIME(void *p_task_par){
         // processing event
 		if( rezWaiteEvent & SECOND_EVENT_BIT ) // processing second event
 		{
-
 			for(uint8_t k = 0; k < CLOCK_QUANTITY; k++)
 			{
 			    // get current date/time value

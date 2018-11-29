@@ -243,7 +243,7 @@ uint8_t saveConfiguration(void* req, u8 num_peyload_data, u16 addres_data)
 }
 
 
-static uint8_t processingresetMultipleRegisters(void* req, u8 numberOfReg, u16 addressReg)
+static uint8_t processingPresetMultipleRegisters(void* req, u8 numberOfReg, u16 addressReg)
 {
     if( (addressReg == s_address_oper_data.s_TIME_address.serverYear) && ((addressReg + numberOfReg - 1) == s_address_oper_data.s_TIME_address.serverSeconds ) )
     {
@@ -287,5 +287,5 @@ void processing_config_add_modbus_callback(void){
 	// задаю ф-ю callback которая вызываться процессом modbus_slave для проверки запрашиваимого адресса запросом №16
 	modbus_callback_address_check(&processing_config_check_is_preset_multiple_reg,PRESET_MULTIPLE_REGISTERS);
 	// задаю ф-ю callback которая вызываться процессом modbus_slave после приема сообщения  №16
-	modbus_callback_add_processing(&processingresetMultipleRegisters,PRESET_MULTIPLE_REGISTERS);
+	modbus_callback_add_processing(&processingPresetMultipleRegisters,PRESET_MULTIPLE_REGISTERS);
 }

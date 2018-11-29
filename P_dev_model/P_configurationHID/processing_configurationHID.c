@@ -23,12 +23,12 @@
 
 #include "processing_mem_map.h"
 #include "processing_config_dev.h"
-
-
+#include "processing_TIME_extern.h"
 
 #define NUM_QUEUE_MESSAGE   3
 #define QUEUE_MESSAGE_SIZE  64
 
+extern S_address_oper_data s_address_oper_data;
 QueueHandle_t inMessageQueue;
 QueueHandle_t outMessageQueue;
 uint8_t reqBuf[QUEUE_MESSAGE_SIZE];
@@ -118,6 +118,8 @@ void txDataComplete(void)
 
 void t_processing_configurationHID(void *in_Data) {
 	/*init USB HID */
+	uint16_t regAddress;
+	uint16_t regQuantity;
 	usbHIDInit();
 	usbHIDAddRxCB(rxDataCB);
 	usbHIDAddTxCompleteCB(txDataComplete);
@@ -132,13 +134,15 @@ void t_processing_configurationHID(void *in_Data) {
 		{
 		case COMUNICATION_GET_REG:
 		{
+			regQuantity = ((headOfReq_t*) reqBuf)->payload.getRegReq.numberOfReg;
+			regAddress  = ((headOfReq_t*) reqBuf)->payload.getRegReq.reAddress;
 			((headOfRes_t*) respBuf)->reqType = COMUNICATION_GET_REG;
-			((headOfRes_t*) respBuf)->payload.getRegResp.numberOfReg = ((headOfReq_t*) reqBuf)->payload.getRegReq.numberOfReg;
-			((headOfRes_t*) respBuf)->payload.getRegResp.reAddress   = ((headOfReq_t*) reqBuf)->payload.getRegReq.reAddress;
+			((headOfRes_t*) respBuf)->payload.getRegResp.numberOfReg = regQuantity;
+			((headOfRes_t*) respBuf)->payload.getRegResp.reAddress   = regAddress;
 			((headOfRes_t*) respBuf)->respStatus = (MEM_ERROR == processing_mem_map_read_s_proces_object_modbus(
 									                                           (uint16_t*)((headOfRes_t*) respBuf)->payload.getRegResp.payload,
-									                                           (uint16_t) ((headOfReq_t*) reqBuf)->payload.getRegReq.numberOfReg,
-									                                           (uint16_t) ((headOfReq_t*) reqBuf)->payload.getRegReq.reAddress) )
+									                                           regQuantity,
+									                                           regAddress))
 									                                           ? (STATUS_RESP_ERROR)
 									                                           : (STATUS_RESP_OK);
 			if( usbHIDEPIsReadyToTx(EP_01) )
@@ -153,18 +157,30 @@ void t_processing_configurationHID(void *in_Data) {
 		}
 		case COMUNICATION_SET_REG:
 		{
+			regQuantity = ((headOfReq_t*) reqBuf)->payload.getRegReq.numberOfReg;
+			regAddress  = ((headOfReq_t*) reqBuf)->payload.getRegReq.reAddress;
 			((headOfRes_t*) respBuf)->reqType = COMUNICATION_GET_REG;
 			((headOfRes_t*) respBuf)->respStatus = (MEM_ERROR == processing_mem_map_write_s_proces_object_modbus(
 									                                           (uint16_t*)((headOfReq_t*) reqBuf)->payload.setRegReq.payload,
-									                                           (uint16_t) ((headOfReq_t*) reqBuf)->payload.getRegReq.numberOfReg,
-									                                           (uint16_t) ((headOfReq_t*) reqBuf)->payload.getRegReq.reAddress ) )
+									                                           regQuantity,
+									                                           regAddress))
 									                                           ? (STATUS_RESP_ERROR)
 									                                           : (STATUS_RESP_OK);
-			//write new configuration data
-			vTaskSuspendAll();
-			FLASH_OPERATION_erase_page(PAGE_USER_CONFIG);
-			processing_config_write_configuration();
-			xTaskResumeAll();
+			if((regAddress == s_address_oper_data.s_TIME_address.serverYear)
+				&& ((regAddress + regQuantity - 1)  >= s_address_oper_data.s_TIME_address.serverSeconds))
+			{
+				//update date and time
+				serverUpdatteTime();
+			}
+			else if((regAddress >= USER_ADDRESS_CONFIG_DATA)
+					&& ((regAddress + regQuantity - 1)  < (USER_ADDRESS_CONFIG_DATA + NUM_REG_CONFIG)))
+			{
+			    //write new configuration data
+			    vTaskSuspendAll();
+			    FLASH_OPERATION_erase_page(PAGE_USER_CONFIG);
+			    processing_config_write_configuration();
+			    xTaskResumeAll();
+			}
 			if( usbHIDEPIsReadyToTx(EP_01) )
 			{
 				usbHIDTx( EP_01, respBuf, sizeof(respBuf));
