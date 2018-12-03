@@ -27,7 +27,7 @@ void displayClearBuff(displayBuffDef *displayBuffer, uint8_t numMax){
 	{
 		for(cntMax = 0; cntMax < numMax; cntMax++)
 		{
-			displayBuffer[cntMax][cntDig] = maxSetConfig_( (cntDig+1), 0);
+			displayBuffer[cntMax][cntDig] = maxSetConfig_((cntDig+1), 0);
 		}
 	}
 }

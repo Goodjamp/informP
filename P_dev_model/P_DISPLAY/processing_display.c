@@ -41,7 +41,7 @@ uint8_t tempSaveBrightnes = 0;
 QueueHandle_t menuQueue;
 uint8_t lcdPeriodType;
 uint8_t *blinkStateP;
-uint8_t lcdStr[7];
+uint8_t lcdStr[12];
 const static uint8_t brightnes[] = {DISPLAY_BRIGHTNES_7,
 		                            DISPLAY_BRIGHTNES_11,
 		                            DISPLAY_BRIGHTNES_19,
@@ -102,7 +102,6 @@ static uint8_t getNumberOfParamiter(uint16_t configBitField, uint8_t selectPos)
 
 void updateLcdVal(BLINK_STATE blinkState) {
 	uint8_t cnt;
-	uint8_t k;
 
 	if( BLINK_STATE_HIGHT == blinkState )
 	{
@@ -118,14 +117,6 @@ void updateLcdVal(BLINK_STATE blinkState) {
 		    )
 			continue;
 
-		for(k = 0; k < sizeof(lcdStr); k++)
-		{
-			// list of second layer symbols
-			if( ('.' == lcdStr[k]) || ('~' == lcdStr[k])|| ('h' == lcdStr[k]))
-			{
-				lcdStr[k] |= 0b10000000;
-			}
-		}
 		displayWrite(&myDisplay, cnt, lcdStr, strlen((const char*)lcdStr), COLOR_GREEN, TX_ADDRESS_ONE);
 	}
 }

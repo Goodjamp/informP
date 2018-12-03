@@ -146,54 +146,44 @@ DISPLAY_STATUS displayIntarfaceGetStatus(displayHandlerDef const *displayHandler
   */
 void displayWrite(displayHandlerDef *displayHandlerIn, uint16_t numString, uint8_t *str, uint16_t strSize, COLOR color, TX_ADDRESS txAddress)
 {
-	uint8_t seg7Shift = 1;
 	uint16_t cnt = 0;
-	uint16_t digCnt = 0;
-	LAYER_ORDER layer;
+	uint16_t digCnt;
+
+	// update scan limit parameters for update color
+	if( displayHandlerIn->currentSettings.color[numString] !=  color )
+	{
+		displayHandlerIn->currentSettings.color[numString] =  color;
+		displaySetScanLim(displayHandlerIn,numString);
+	}
+
 	// For current screen configuration:
 	// first  max7219  - 8x8 matrix indicator
 	// second max7219 - 7-segment indicator
 	displayClearBuff(displayHandlerIn->txData,MAX_PER_SCREEN);
-	// set max#1 symbol - 8x8 matrix(maximum 2 layer suport)
-	displaySet8x8Matrix(displayHandlerIn->txData, ORDER_NUM_MATRIX,  str[ORDER_NUM_MATRIX], LAYER_ORDER_FIRST );
-	// second matrix layer
-    if(str[ORDER_NUM_MATRIX+1] >  0x80)
-    {
-    	str[ORDER_NUM_MATRIX + 1] &= 0b1111111;
-    	displaySet8x8Matrix(displayHandlerIn->txData, ORDER_NUM_MATRIX,  str[ORDER_NUM_MATRIX + 1], LAYER_ORDER_SECOND );
-    	seg7Shift++;
-    }
-	// set max#2 - 7 segment 4 ripple colors digits
-	for(cnt = 0 ; cnt < (strSize-1); cnt++)
+	// set max#1 symbol - 8x8 matrix(maximum 3 layer support)
+	for(uint8_t k = 0; k < 3; k++)
 	{
-		if(str[cnt + seg7Shift] >= 0x80 ){ // current symbol in first layer
-			digCnt--;
-			str[cnt + seg7Shift] &= 0b1111111;
-			layer = LAYER_ORDER_SECOND;
-		}
-		else
-		{
-			layer = LAYER_ORDER_FIRST;
-		}
+		displaySet8x8Matrix(displayHandlerIn->txData, ORDER_NUM_MATRIX,  str[ORDER_NUM_MATRIX + k], LAYER_ORDER_SECOND );
+	}
 
-		// update scan limit parameters
-		if( displayHandlerIn->currentSettings.color[numString] !=  color )
-		{
-			displayHandlerIn->currentSettings.color[numString] =  color;
-			displaySetScanLim(displayHandlerIn,numString);
-		}
-
+	// set max#2 - 7 segment 4 ripple colors digits
+	for(cnt = 3, digCnt = 0; cnt < (strSize); cnt++)
+	{
 		// set new value for selected screen
+		if(str[cnt] == '.')
+		{
+			digCnt--;
+		}
 		switch (color){
 		case COLOR_GREEN:
-			displaySet7Segment(  displayHandlerIn->txData, ORDER_NUM_7SEG, str[cnt + seg7Shift],  digCnt,     layer);
+			displaySet7Segment(displayHandlerIn->txData, ORDER_NUM_7SEG, str[cnt], digCnt,     LAYER_ORDER_SECOND);
 			break;
 		case COLOR_RED:
-			displaySet7Segment(  displayHandlerIn->txData, ORDER_NUM_7SEG, str[cnt + seg7Shift],  digCnt + 4, layer);
+			displaySet7Segment(displayHandlerIn->txData, ORDER_NUM_7SEG, str[cnt], digCnt + 4, LAYER_ORDER_SECOND);
 			break;
 		case COLOR_ORANGE:
-			displaySet7Segment(  displayHandlerIn->txData, ORDER_NUM_7SEG, str[cnt + seg7Shift],  digCnt,     layer);
-			displaySet7Segment(  displayHandlerIn->txData, ORDER_NUM_7SEG, str[cnt + seg7Shift],  digCnt + 4, layer);
+			displaySet7Segment(displayHandlerIn->txData, ORDER_NUM_7SEG, str[cnt], digCnt,     LAYER_ORDER_SECOND);
+			displaySet7Segment(displayHandlerIn->txData, ORDER_NUM_7SEG, str[cnt], digCnt + 4, LAYER_ORDER_SECOND);
 			break;
 		}
 
