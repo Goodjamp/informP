@@ -1,4 +1,4 @@
-/********************************************************************************
+  /********************************************************************************
   * @file    processing_display.c
   * @author  Gerasimchuk A.
   * @version V1.0.0
@@ -64,20 +64,12 @@ typedef struct{
 	uint8_t brightnes;
 }menuWork;
 
-typedef struct{
-    uint8_t cursorPos;
-    uint8_t QW;
-}menuConfig;
-
-
 struct{
 	uint8_t numPar;
 	uint8_t listPar;
 }screenAdjustment[NUMBER_OF_LCD_STRING];
 
-
 /*============================================================================================*/
-
 
 static uint8_t getNumberOfParamiter(uint16_t configBitField, uint8_t selectPos)
 {
@@ -85,7 +77,7 @@ static uint8_t getNumberOfParamiter(uint16_t configBitField, uint8_t selectPos)
 	uint8_t  cntBit = 0;
 	uint8_t  cntPar = 0;
 	selectPos++;
-	for(;cntPar < QUANTITY_OF_VALUE; cntPar++)
+	for(;cntPar < PAR_QUANTITY; cntPar++)
 	{
 		if(configBitField & mask)
 		{
@@ -100,6 +92,7 @@ static uint8_t getNumberOfParamiter(uint16_t configBitField, uint8_t selectPos)
 	return 0;
 }
 
+
 void updateLcdVal(BLINK_STATE blinkState) {
 	uint8_t cnt;
 
@@ -109,14 +102,11 @@ void updateLcdVal(BLINK_STATE blinkState) {
 	}
 	for (cnt = 0; cnt < displayUserConfig->numScreen; cnt++) {
 
-		if (!updateLCD( lcdStr,
-				        blinkState,
-				        menuGetCurrentMenu(),
-				        (cnt == menuGetListbox() ) ? (true):(false),
-				        getNumberOfParamiter(displayUserConfig->screenConfig[cnt].bitsOfParamiters, menuGetListboxItemIndex(cnt)))
-		    )
-			continue;
-
+		updateLCD( lcdStr,
+				   blinkState,
+				   menuGetCurrentMenu(),
+				   (cnt == menuGetListbox() ) ? (true):(false),
+				   getNumberOfParamiter(displayUserConfig->screenConfig[cnt].bitsOfParamiters, menuGetListboxItemIndex(cnt)));
 		displayWrite(&myDisplay, cnt, lcdStr, strlen((const char*)lcdStr), COLOR_GREEN, TX_ADDRESS_ONE);
 	}
 }
@@ -217,7 +207,6 @@ static void initUserMenu(S_display_user_config *configData){
 
 	displayInit( &myDisplay, brightnes, configData->numScreen);
 	keyboardInit();
-	initValueAddress();
 
 	//-------------------Init key processing timer and queue-------------------------------
 	keyTimerHandler =  xTimerCreate((const char*)"BUTTON TIMER",

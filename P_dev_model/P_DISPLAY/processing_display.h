@@ -55,7 +55,7 @@ typedef enum{
 	PAR_DATE_3,
 	PAR_TIME_3,
 	PAR_FRQ,
-	QUANTITY_OF_VALUE
+	PAR_QUANTITY
 }paramOrderDef;
 
 typedef enum{

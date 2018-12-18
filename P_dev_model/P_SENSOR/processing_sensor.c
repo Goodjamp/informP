@@ -173,7 +173,8 @@ u16 sensor_calc_address_oper_reg(S_sensor_address *ps_sensor_address, u16 adres_
 	ps_sensor_address->rezHumidity       = ps_sensor_address->rezTemperature + structFieldRegSize(S_sensor_oper_data,rezTemperature);
 	ps_sensor_address->rezPressure_mmHg  = ps_sensor_address->rezHumidity + structFieldRegSize(S_sensor_oper_data,rezHumidity);
 	ps_sensor_address->rezPressure_GPasc = ps_sensor_address->rezPressure_mmHg + structFieldRegSize(S_sensor_oper_data,rezPressure_mmHg);
-	adres_start = ps_sensor_address->rezPressure_GPasc + structFieldRegSize(S_sensor_oper_data,rezPressure_GPasc);
+	ps_sensor_address->rezRain           = ps_sensor_address->rezPressure_GPasc + structFieldRegSize(S_sensor_oper_data,rezPressure_GPasc);
+	adres_start                          = ps_sensor_address->rezRain + structFieldRegSize(S_sensor_oper_data,rezRain);
 	return adres_start;
 }
 
@@ -429,6 +430,7 @@ void processingRemoteSensor(void)
     	NRF24L01_read_rx_data(nrfRx, sizeof(transactionT), rxBuff.buf);
     	NRF24L01_FLUSH_RX(nrfRx);
     	NRF24L01_clear_interrupt(nrfRx,STATUS_RX_DR);
+    	// update status register
     	if( rxData.status & (uint8_t)(1 << REM_METEO_STATUS_ERROR_SENSOR) )
     	{
     		moduleStatus |= (uint16_t)(1 << SENSOR_STATUS_ERROR_REM_SENSOR);
@@ -438,15 +440,7 @@ void processingRemoteSensor(void)
     	{
     		moduleStatus &= ~(uint16_t)(1 << SENSOR_STATUS_ERROR_REM_SENSOR);
     	}
-    	if( rxData.status & (uint8_t)(1 << REM_METEO_STATUS_ERROR_MES) )
-    	{
-    		moduleStatus |= (uint16_t)(1 << SENSOR_STATUS_ERROR_REM_MES);
-            continue;
-    	}
-    	else
-    	{
-    		moduleStatus &= ~(uint16_t)(1 << SENSOR_STATUS_ERROR_REM_MES);
-    	}
+
     	if( rxData.status & (uint8_t)(1 << REM_METEO_STATUS_ERROR_BATARY) )
     	{
     		moduleStatus |= (uint16_t)(1 << SENSOR_STATUS_ERROR_REM_BATARY);
@@ -455,10 +449,25 @@ void processingRemoteSensor(void)
     	{
     		moduleStatus &= ~(uint16_t)(1 << SENSOR_STATUS_ERROR_REM_BATARY);
     	}
+
+
+    	if( rxData.status & (uint8_t)(1 << REM_METEO_STATUS_ERROR_RAINE_SENSOR) )
+    	{
+    		moduleStatus |= (uint16_t)(1 << SENSOR_STATUS_ERROR_REM_RAINE_SENSOR);
+    	}
+    	else
+    	{
+    		moduleStatus &= ~(uint16_t)(1 << SENSOR_STATUS_ERROR_REM_RAINE_SENSOR);
+        	processing_mem_map_write_s_proces_object_modbus((rxData.status & (uint8_t)(1 << REM_METEO_STATUS_RAINE)) ? ((const uint16_t*)1) : ((const uint16_t*)0),
+        			                                        1,
+        			                                        s_address_oper_data.s_sensor_address.rezRain);
+    	}
+
     	processing_mem_map_write_s_proces_object_modbus((uint16_t*)&rxData.temperature,    1, s_address_oper_data.s_sensor_address.rezTemperature);
     	processing_mem_map_write_s_proces_object_modbus((uint16_t*)&rxData.humifity,       1, s_address_oper_data.s_sensor_address.rezHumidity);
     	processing_mem_map_write_s_proces_object_modbus((uint16_t*)&rxData.atmPressure,    1, s_address_oper_data.s_sensor_address.rezPressure_mmHg);
     	processing_mem_map_write_s_proces_object_modbus((uint16_t*)&rxData.atmPressurehPa, 1, s_address_oper_data.s_sensor_address.rezPressure_GPasc);
+
     }
 }
 
@@ -480,8 +489,3 @@ void t_processing_sensor(void *pvParameters){
 		processingRemoteSensor();
 	}
 }
-
-
-
-
-

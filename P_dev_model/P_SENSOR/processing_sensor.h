@@ -37,22 +37,13 @@
 /***************************************************************/
 #define SENSOR_STATUS_OK       (uint16_t)0x0
 #define SENSOR_STATUS_NOT_INIT (uint16_t)0xFFFF
-// bit position of status local/receiver
-typedef enum{
-	SENSOR_STATUS_ALLARM_LOCAL         = 0,
-	SENSOR_STATUS_ERROR_LOCAL          = 1,
-	SENSOR_STATUS_ERROR_RECEIVER       = 2,
-	SENSOR_STATUS_ERROR_REM_RX_TIMEOUT = 3,
-	SENSOR_STATUS_ERROR_REM_SENSOR     = 4,
-	SENSOR_STATUS_ERROR_REM_MES        = 5,
-	SENSOR_STATUS_ERROR_REM_BATARY     = 6,
-}SENSOR_STATUS;
 
 // bit position of remote meteo post status remote
 typedef enum{
-	REM_METEO_STATUS_ERROR_SENSOR = 0,
-	REM_METEO_STATUS_ERROR_MES    = 1,
-	REM_METEO_STATUS_ERROR_BATARY = 2
+	REM_METEO_STATUS_ERROR_SENSOR       = 0,
+    REM_METEO_STATUS_RAINE              = 1,
+    REM_METEO_STATUS_ERROR_RAINE_SENSOR = 2,
+	REM_METEO_STATUS_ERROR_BATARY       = 3
 }REM_METEO_STATUS;
 
 //source of meteo data
