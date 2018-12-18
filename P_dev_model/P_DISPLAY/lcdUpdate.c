@@ -349,16 +349,18 @@ static void getDateStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkS
 	processing_mem_map_read_s_proces_object_modbus(&value,  1, s_address_oper_data.s_TIME_address.clock[clockPos].DATE);
 	// set symbol. We should show alarm status also
 	addSymbols(strSymbol, 4, (const uint8_t*)SYMBOL_DATE, (sizeof(SYMBOL_DATE) - 1));
+	if(status == FRQ_STATUS_ALLARM)
+	{
+		addSymbols(strSymbol, 4, (const uint8_t*)SYMBOL_ALLARM, (sizeof(SYMBOL_ALLARM) - 1));
+	}
 	switch (displayMenu) {
 	case DISPLAY_MENU_WORK:
+
+
 		if((blinkState == BLINK_STATE_HIGHT))
 		{
 			//set value
 			getDateTimeStr(value, strValue, true);
-			if(status == FRQ_STATUS_ALLARM)
-			{
-				addSymbols(strSymbol, 4, (const uint8_t*)SYMBOL_ALLARM, (sizeof(SYMBOL_ALLARM) - 1));
-			}
 		}
 		else // blink state low
 		{
@@ -371,10 +373,6 @@ static void getDateStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkS
 		{
 			//set value
 			getDateTimeStr(value, strValue, true);
-			if(status == FRQ_STATUS_ALLARM)
-			{
-				addSymbols(strSymbol, 4, (const uint8_t*)SYMBOL_ALLARM, (sizeof(SYMBOL_ALLARM) - 1));
-			}
 		}
 		else // blink state low
 		{
