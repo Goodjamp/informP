@@ -32,7 +32,7 @@
 #define SYMBOL_BATARY        "%"
 
 #define ERROR_INF            "ErrO"
-#define TEST_STR             "@8888"
+#define TEST_STR             "@   8888"
 
 
 extern S_address_oper_data s_address_oper_data;

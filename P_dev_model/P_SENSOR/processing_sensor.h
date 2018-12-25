@@ -11,6 +11,7 @@
 #define PROCESSING_FEQMETTER_H_
 
 #include "i2c_user_interface.h"
+#include "stdbool.h"
 
 #define I2C_SENSOR        I2C_1
 #define I2C_SENSOR_FRQ_HZ 20000
@@ -25,15 +26,15 @@
 // Transform atmospheric pressure from Pascal to mmHg
 #define PASCAL_TO_MMHG_COEF 0.00750062
 
-#define MESSUREMT_PERIOD    600
+
 /**********NRF24L01 default paramiters****************/
 #define NRF_ADDRESS             (uint8_t*)"METEO"
-#define REMOTE_DATA_TIMEOUT_MS  (uint32_t)3000
 #define NRF_CHANEL              10
+
+#define MESSUREMT_PERIOD_MS         1000
 /**Hysteresis settings for receive result from remote meteo post****/
-#define TIMEOUT_GIST_WIN_SIZE       8
-#define TIMEOUT_GIST_SUCSSESS_SIZE  4
-#define TIMEOUT_GIST_ERROR_SIZE     6
+#define TIMEOUT_GIST_WIN_SIZE       128
+#define TIMEOUT_GIST_SUCSSESS_SIZE  1
 /***************************************************************/
 #define SENSOR_STATUS_OK       (uint16_t)0x0
 #define SENSOR_STATUS_NOT_INIT (uint16_t)0xFFFF
@@ -72,14 +73,9 @@ typedef union
 
 typedef struct
 {
-    uint16_t thresholdWindowSize;
-    uint16_t thresholdSucssesSize;
-    uint16_t thresholdErrorSize;
-
-    uint16_t thresholdSucssesCnt;
-    uint16_t thresholdErrorCnt;
-
-    bool     state;
+    bool ringBuffRez[TIMEOUT_GIST_WIN_SIZE];
+    uint16_t posWrite;
+    uint16_t cntTrue;
 }gistT;
 
 #endif // PROCESSING_TC_SINAL

@@ -283,60 +283,22 @@ static inline void updateSensorStatus(uint16_t newStatus){
 }
 
 
-static void gistConfig(gistT *inGist, uint16_t thresholdWindowSize, uint16_t thresholdSucsses, uint16_t thresholdError, bool defState)
-{
-    inGist->thresholdWindowSize  = thresholdWindowSize;
-    inGist->thresholdSucssesSize = thresholdSucsses;
-    inGist->thresholdErrorSize   = thresholdError;
-
-    inGist->thresholdSucssesCnt = (defState) ? (inGist->thresholdWindowSize) : (0);
-    inGist->thresholdErrorCnt   = (defState) ? (0) : (inGist->thresholdWindowSize);
-    inGist->state               = defState;
-}
-
-
 static bool gistAddData(gistT *inGist, bool rez)
 {
-    if(rez)
-    {
-        if(inGist->thresholdSucssesCnt < inGist->thresholdWindowSize)
-        {
-            inGist->thresholdSucssesCnt++;
-        }
-        if(inGist->thresholdErrorCnt != 0)
-        {
-            inGist->thresholdErrorCnt--;
-        }
-    }
-    else
-    {
-        if(inGist->thresholdSucssesCnt != 0)
-        {
-            inGist->thresholdSucssesCnt--;
-        }
-        if(inGist->thresholdErrorCnt < inGist->thresholdWindowSize)
-        {
-            inGist->thresholdErrorCnt++;
-        }
-    }
+	inGist->ringBuffRez[inGist->posWrite] = rez;
+	if(rez)
+	{
+		inGist->cntTrue++;
+	}
+	uint16_t lastPointer = (inGist->posWrite + 1) & (sizeof(inGist->ringBuffRez) - 1);
+	if(inGist->ringBuffRez[lastPointer])
+	{
+		inGist->cntTrue--;
+	}
+	inGist->posWrite++;
+	inGist->posWrite &= (sizeof(inGist->ringBuffRez) - 1);
 
-    if(inGist->state) // current state true
-    {
-        // check for false
-        if( inGist->thresholdErrorCnt >= inGist->thresholdErrorSize)
-        {
-            inGist->state = false;
-        }
-    }
-    else            // current state false
-    {
-        //check for true
-        if( inGist->thresholdSucssesCnt >= inGist->thresholdSucssesSize)
-        {
-        	inGist->state = true;
-        }
-    }
-    return inGist->state;
+	return (inGist->cntTrue >= TIMEOUT_GIST_SUCSSESS_SIZE) ? (true) : (false);
 }
 
 
@@ -389,16 +351,20 @@ void processingRemoteSensor(void)
 {
 	STATUS status_reg;
 	uint16_t moduleStatus = SENSOR_STATUS_OK;
-	gistT inGist;
-
-    gistConfig(&inGist, TIMEOUT_GIST_WIN_SIZE, TIMEOUT_GIST_SUCSSESS_SIZE, TIMEOUT_GIST_ERROR_SIZE, false);
+	gistT inGist =
+	{
+		.ringBuffRez = {[0 ... (sizeof(inGist.ringBuffRez) - 1)] = false},
+		.posWrite = 0,
+		.cntTrue  = 0
+	};
 
 	initNRF();
 	while(1)
     {
-		vTaskDelay(MESSUREMT_PERIOD);
+		vTaskDelay(MESSUREMT_PERIOD_MS);
         updateSensorStatus(moduleStatus);
     	NRF24L01_get_status_tx_rx(nrfRx, &status_reg);
+
     	if(status_reg.RX_DR == 0)//wait interrupt
     	{
     		if(!gistAddData(&inGist, false))
@@ -415,6 +381,7 @@ void processingRemoteSensor(void)
     			moduleStatus &= ~(uint16_t)(1 << SENSOR_STATUS_ERROR_REM_RX_TIMEOUT);
     		}
     	}
+
     	if(*(uint8_t*)(&status_reg) == 0xff)
     	{
     		moduleStatus  = SENSOR_STATUS_OK;
