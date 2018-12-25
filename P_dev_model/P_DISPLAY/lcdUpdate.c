@@ -28,8 +28,8 @@
 #define SYMBOL_FRQ           "F"
 
 #define SYMBOL_ALLARM        "~"
-#define SYMBOL_RAIN          "%"
-#define SYMBOL_BATARY        "^"
+#define SYMBOL_RAIN          "^"
+#define SYMBOL_BATARY        "%"
 
 #define ERROR_INF            "ErrO"
 #define TEST_STR             "@8888"
@@ -71,23 +71,23 @@ static const UpdateFunStr updateFunStr[]=
 };
 
 
-static void numToStr(uint8_t *str, int16_t currentValue, uint8_t strS, uint8_t fractionS, uint8_t fillSymboll)
+static void numToStr(uint8_t *str, int32_t currentValue, uint8_t strS, uint8_t fractionS, uint8_t fillSymboll)
 {
 #define MULL 10
-    int8_t cnt = strS;
+    int8_t cnt = strS - 1;
     bool signV = true;
     currentValue = ((currentValue >= 0) ? (currentValue) : (signV = false, (-1) * currentValue));
     memset(str, fillSymboll, strS);
 
     if(fractionS){
         while((fractionS--) && (cnt >= 0)){
-            str[--cnt] =  currentValue - (currentValue / MULL) * MULL + '0';
+            str[cnt--] =  currentValue - (currentValue / MULL) * MULL + '0';
             currentValue /= MULL;
         }
         if(cnt < 0){
             return;
         }
-        str[--cnt] = '.';
+        str[cnt--] = '.';
 
         if(cnt < 0){
             return;
@@ -95,12 +95,12 @@ static void numToStr(uint8_t *str, int16_t currentValue, uint8_t strS, uint8_t f
     }
 
     do{
-        str[--cnt] =  currentValue - (currentValue / MULL) * MULL + '0';
+        str[cnt--] =  currentValue - (currentValue / MULL) * MULL + '0';
         currentValue /= MULL;
     }while((currentValue) && (cnt >= 0));
 
     if(!signV && (cnt >= 0)){
-        str[--cnt] = '-';
+        str[cnt--] = '-';
     }
 #undef MULL
 }
@@ -120,15 +120,15 @@ static void getDateTimeStr(uint16_t value, uint8_t *str, bool point)
 }
 
 
-static void addSymbols(uint8_t *dest, uint8_t destLen, const uint8_t *src, uint8_t srcLen)
+static void addSymbols(uint8_t *dest, uint8_t lenDst, const uint8_t *src, uint8_t lenSrc)
 {
     uint8_t cntDst = 0;
     uint8_t cntSrc = 0;
-    while((dest[cntDst]) && (cntDst < destLen))
+    while((dest[cntDst] != ' ') && (cntDst < lenDst))
     {
         cntDst++;
     }
-    while((cntDst < destLen) && (cntSrc < srcLen))
+    while((cntDst < lenDst) && (cntSrc < lenSrc))
     {
         dest[cntDst++] = src[cntSrc++];
     }
@@ -144,10 +144,10 @@ static void getTemperatureStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE
 	processing_mem_map_read_s_proces_object_modbus(&status, 1, s_address_oper_data.s_sensor_address.status_sensor);
 
 	//set value
-	if(status && ((1 << SENSOR_STATUS_ERROR_LOCAL)                     // set value
-			     |(1 << SENSOR_STATUS_ERROR_RECEIVER)
-			     |(1 << SENSOR_STATUS_ERROR_REM_RX_TIMEOUT)
-			     |(1 << SENSOR_STATUS_ERROR_REM_SENSOR)))
+	if(status & ( (1 << SENSOR_STATUS_ERROR_LOCAL)
+			    | (1 << SENSOR_STATUS_ERROR_RECEIVER)
+			    | (1 << SENSOR_STATUS_ERROR_REM_RX_TIMEOUT)
+			    | (1 << SENSOR_STATUS_ERROR_REM_SENSOR)))
 	{
 		memcpy(strValue, ERROR_INF, sizeof(ERROR_INF));
 	}
@@ -158,7 +158,7 @@ static void getTemperatureStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE
 	}
 	// set symbol
 	addSymbols(strSymbol, 4, (const uint8_t*)SYMBOL_TEMPERATURE, (sizeof(SYMBOL_TEMPERATURE) - 1));
-	if(status && (1 << SENSOR_STATUS_ERROR_REM_BATARY))                // set btray error
+	if(status & (1 << SENSOR_STATUS_ERROR_REM_BATARY))                // set btray error
 	{
 		addSymbols(strSymbol, 4, (const uint8_t*)SYMBOL_BATARY, (sizeof(SYMBOL_BATARY) - 1));
 	}
@@ -169,7 +169,7 @@ static void getTemperatureStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE
 	case DISPLAY_MENU_UDJUSTMENT:
 		if(blinkState == BLINK_STATE_LOW && focus)
 		{
-            memset(strValue,' ', 4);
+            memset(strSymbol,' ', 4);
 		}
 		break;
 	default: break;
@@ -186,17 +186,17 @@ static void getPressurePaStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE 
 	processing_mem_map_read_s_proces_object_modbus(&status, 1, s_address_oper_data.s_sensor_address.status_sensor);
 
 	//set value
-	if(status && ((1 << SENSOR_STATUS_ERROR_LOCAL)                     // set value
-			     |(1 << SENSOR_STATUS_ERROR_RECEIVER)
-			     |(1 << SENSOR_STATUS_ERROR_REM_RX_TIMEOUT)
-			     |(1 << SENSOR_STATUS_ERROR_REM_SENSOR)))
+	if(status & ( (1 << SENSOR_STATUS_ERROR_LOCAL)                     // set value
+			    | (1 << SENSOR_STATUS_ERROR_RECEIVER)
+			    | (1 << SENSOR_STATUS_ERROR_REM_RX_TIMEOUT)
+			    | (1 << SENSOR_STATUS_ERROR_REM_SENSOR)))
 	{
 		memcpy(strValue, ERROR_INF, sizeof(ERROR_INF));
 	}
 	else
 	{
 		processing_mem_map_read_s_proces_object_modbus(&value,  1, s_address_oper_data.s_sensor_address.rezPressure_GPasc);
-		numToStr(strValue, value, 5, 0, ' ');
+		numToStr(strValue, value, 4, 0, ' ');
 	}
 	// set symbol
 	addSymbols(strSymbol, 4, (const uint8_t*)SYMBOL_PRESSURE_PA, (sizeof(SYMBOL_PRESSURE_PA) - 1));
@@ -206,7 +206,7 @@ static void getPressurePaStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE 
 	case DISPLAY_MENU_UDJUSTMENT:
 		if(blinkState == BLINK_STATE_LOW && focus)
 		{
-            memset(strValue,' ', 4);
+            memset(strSymbol,' ', 4);
 		}
 		break;
 	default: break;
@@ -222,10 +222,10 @@ static void getPressureMMStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE 
 	processing_mem_map_read_s_proces_object_modbus(&status, 1, s_address_oper_data.s_sensor_address.status_sensor);
 
 	//set value
-	if(status && ((1 << SENSOR_STATUS_ERROR_LOCAL)                     // set value
-			     |(1 << SENSOR_STATUS_ERROR_RECEIVER)
-			     |(1 << SENSOR_STATUS_ERROR_REM_RX_TIMEOUT)
-			     |(1 << SENSOR_STATUS_ERROR_REM_SENSOR)))
+	if(status & ( (1 << SENSOR_STATUS_ERROR_LOCAL)                     // set value
+			    | (1 << SENSOR_STATUS_ERROR_RECEIVER)
+			    | (1 << SENSOR_STATUS_ERROR_REM_RX_TIMEOUT)
+			    | (1 << SENSOR_STATUS_ERROR_REM_SENSOR)))
 	{
 		memcpy(strValue, ERROR_INF, sizeof(ERROR_INF));
 	}
@@ -242,7 +242,7 @@ static void getPressureMMStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE 
 	case DISPLAY_MENU_UDJUSTMENT:
 		if(blinkState == BLINK_STATE_LOW && focus)
 		{
-            memset(strValue,' ', 4);
+            memset(strSymbol,' ', 4);
 		}
 		break;
 	default: break;
@@ -260,10 +260,10 @@ static void getHumidityStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE bl
 	processing_mem_map_read_s_proces_object_modbus(&status, 1, s_address_oper_data.s_sensor_address.status_sensor);
 
 	//set value
-	if(status && ((1 << SENSOR_STATUS_ERROR_LOCAL)                     // set value
-			     |(1 << SENSOR_STATUS_ERROR_RECEIVER)
-			     |(1 << SENSOR_STATUS_ERROR_REM_RX_TIMEOUT)
-			     |(1 << SENSOR_STATUS_ERROR_REM_SENSOR)))
+	if(status & ( (1 << SENSOR_STATUS_ERROR_LOCAL)                     // set value
+			    | (1 << SENSOR_STATUS_ERROR_RECEIVER)
+			    | (1 << SENSOR_STATUS_ERROR_REM_RX_TIMEOUT)
+			    | (1 << SENSOR_STATUS_ERROR_REM_SENSOR)))
 	{
 		memcpy(strValue, ERROR_INF, sizeof(ERROR_INF));
 	}
@@ -271,7 +271,6 @@ static void getHumidityStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE bl
 	{
 
 		processing_mem_map_read_s_proces_object_modbus(&value,  1, s_address_oper_data.s_sensor_address.rezHumidity);
-
 		numToStr(strValue, value, 5, 1, ' ');
 	}
 	// set symbol
@@ -287,7 +286,7 @@ static void getHumidityStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE bl
 	case DISPLAY_MENU_UDJUSTMENT:
 		if(blinkState == BLINK_STATE_LOW && focus)
 		{
-            memset(strValue,' ', 4);
+            memset(strSymbol,' ', 4);
 		}
 		break;
 	default: break;
@@ -311,18 +310,16 @@ static void getFrqStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkSt
 	else
 	{
 		processing_mem_map_read_s_proces_object_modbus(&value,  1, s_address_oper_data.s_FRQmetter_address.rez_FRQmetter);
+		value /= 10;
 		numToStr(strValue, value, 5, 2, ' ');
 	}
-	// set symbol. We should show alarm status also
-	addSymbols(strSymbol, 4, (const uint8_t*)SYMBOL_HUMIDITY, (sizeof(SYMBOL_HUMIDITY) - 1));
+	// set symbol. We should show alarm status also if need
+	addSymbols(strSymbol, 4, (const uint8_t*)SYMBOL_FRQ, (sizeof(SYMBOL_FRQ) - 1));
 	switch (displayMenu) {
 	case DISPLAY_MENU_WORK:
-		if((blinkState == BLINK_STATE_HIGHT))
+		if(status == FRQ_STATUS_ALLARM)
 		{
-			if(status == FRQ_STATUS_ALLARM)
-			{
-				addSymbols(strSymbol, 4, (const uint8_t*)SYMBOL_ALLARM, (sizeof(SYMBOL_ALLARM) - 1));
-			}
+			addSymbols(strSymbol, 4, (const uint8_t*)SYMBOL_ALLARM, (sizeof(SYMBOL_ALLARM) - 1));
 		}
         break;
 	case DISPLAY_MENU_UDJUSTMENT:
@@ -330,7 +327,7 @@ static void getFrqStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkSt
 		{
 			if(focus)
 			{
-                memset(strValue,' ', 4);
+                memset(strSymbol,' ', 4);
 			}
 		}
 		break;
@@ -339,16 +336,20 @@ static void getFrqStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkSt
 }
 
 
-static void getDateStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkState, DISPLAY_MENU displayMenu, bool focus, uint8_t clockPos)
+static void getDateStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkState, DISPLAY_MENU displayMenu, bool focus, uint8_t clockPos, bool isDate)
 {
 	uint16_t value;
 	uint16_t status;
 
 	processing_mem_map_read_s_proces_object_modbus(&status, 1, s_address_oper_data.s_TIME_address.status_TIME);
 	//set value
-	processing_mem_map_read_s_proces_object_modbus(&value,  1, s_address_oper_data.s_TIME_address.clock[clockPos].DATE);
+	processing_mem_map_read_s_proces_object_modbus(&value,  1,
+			(isDate) ? (s_address_oper_data.s_TIME_address.clock[clockPos].DATE): (s_address_oper_data.s_TIME_address.clock[clockPos].TIME));
 	// set symbol. We should show alarm status also
-	addSymbols(strSymbol, 4, (const uint8_t*)SYMBOL_DATE, (sizeof(SYMBOL_DATE) - 1));
+	addSymbols(strSymbol,
+			   4,
+			   (isDate) ? ((const uint8_t*)SYMBOL_DATE) : ((const uint8_t*)SYMBOL_TIME),
+			   (sizeof(SYMBOL_DATE) - 1));
 	if(status == FRQ_STATUS_ALLARM)
 	{
 		addSymbols(strSymbol, 4, (const uint8_t*)SYMBOL_ALLARM, (sizeof(SYMBOL_ALLARM) - 1));
@@ -379,7 +380,7 @@ static void getDateStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkS
 			getDateTimeStr(value, strValue, false);
 			if(focus)
 			{
-                memset(strValue,' ', 4);
+                memset(strSymbol, ' ', 4);
 			}
 		}
         break;
@@ -387,34 +388,52 @@ static void getDateStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkS
 	}
 }
 
-static void getTimeStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkState, DISPLAY_MENU displayMenu, bool focus){}
-
 
 static void getDate1Str(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkState, DISPLAY_MENU displayMenu, bool focus)
 {
-	getDateStr(strSymbol, strValue, blinkState, displayMenu, focus);
+	getDateStr(strSymbol, strValue, blinkState, displayMenu, focus, 0, true );
 }
+
 
 static void getTime1Str(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkState, DISPLAY_MENU displayMenu, bool focus)
 {
-	getDateStr(strSymbol, strValue, blinkState, displayMenu, focus);
+	getDateStr(strSymbol, strValue, blinkState, displayMenu, focus, 0, false);
 }
+
+
 static void getDate2Str(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkState, DISPLAY_MENU displayMenu, bool focus)
 {
-	getDateStr(strSymbol, strValue, blinkState, displayMenu, focus);
+	getDateStr(strSymbol, strValue, blinkState, displayMenu, focus, 1, true);
 }
-static void getTime2Str(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkState, DISPLAY_MENU displayMenu, bool focus){}
+
+
+static void getTime2Str(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkState, DISPLAY_MENU displayMenu, bool focus)
+{
+	getDateStr(strSymbol, strValue, blinkState, displayMenu, focus, 1, false);
+}
+
+
 static void getDate3Str(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkState, DISPLAY_MENU displayMenu, bool focus)
 {
-	getDateStr(strSymbol, strValue, blinkState, displayMenu, focus);
+	getDateStr(strSymbol, strValue, blinkState, displayMenu, focus, 2, true);
 }
-static void getTime3Str(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkState, DISPLAY_MENU displayMenu, bool focus){}
+
+
+static void getTime3Str(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkState, DISPLAY_MENU displayMenu, bool focus)
+{
+	getDateStr(strSymbol, strValue, blinkState, displayMenu, focus, 2, false);
+}
+
+
 static void getDate4Str(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkState, DISPLAY_MENU displayMenu, bool focus)
 {
-	getDateStr(strSymbol, strValue, blinkState, displayMenu, focus);
+	getDateStr(strSymbol, strValue, blinkState, displayMenu, focus, 3, true);
 }
-static void getTime4Str(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkState, DISPLAY_MENU displayMenu, bool focus){
 
+
+static void getTime4Str(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkState, DISPLAY_MENU displayMenu, bool focus)
+{
+	getDateStr(strSymbol, strValue, blinkState, displayMenu, focus, 3, false);
 }
 
 
@@ -427,6 +446,7 @@ void updateLCD(uint8_t *str, BLINK_STATE blinkState, DISPLAY_MENU displayMenu, b
 	switch (displayMenu) {
 		case DISPLAY_MENU_WORK:
 		case DISPLAY_MENU_UDJUSTMENT:
+			memset(str, ' ', 4);
 			updateFunStr[numberValue](str, &str[4], blinkState, displayMenu, focus);
 			break;
 		case DISPLAY_MENU_TEST:

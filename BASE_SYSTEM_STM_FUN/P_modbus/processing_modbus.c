@@ -501,8 +501,8 @@ void t_Modbus_SLAVE(void *p_task_par) {
 	while (ReadUSART(ptaskparameters->RdUSART, (u8*) ps_modbus_req_input, 1, 1)) {} // очищаю буффер приема
 	vTaskDelay(500); //таймаут переда стартом всех задач, для валидации данных в картепамяти
 	while (1) {
-
-		if (ReadUSART(ptaskparameters->RdUSART, (u8*)ps_modbus_req_input, 8,20) != 8) { //считываю из стека USART. Если размер прочитаной посылки не 8 байт, повторяю чтение
+        Clrinbuf_without_time(ptaskparameters);
+		if (ReadUSART(ptaskparameters->RdUSART, (u8*)ps_modbus_req_input, 1, 20) != 8) { //считываю из стека USART. Если размер прочитаной посылки не 8 байт, повторяю чтение
 			//vTaskDelay(50);
 			continue;
 		}
@@ -628,15 +628,15 @@ REZ_REQ_CHEACK_SLAVE cheack_req_modbus(S_Task_parameters *p_iparameters,
 
 	// если функция дополнительной проверки возвратила недопустимый аргумент
 	if ((rez_addition_chek != REQ_SLAVE_OK)
-			&& (rez_addition_chek != REQ_SLAVE_ERROR)
-			&& (rez_addition_chek != ILLEGAL_FUNCTION)
-			&& (rez_addition_chek != ILLEGAL_DATA_ADRESS)
-			&& (rez_addition_chek != ILLEGAL_DATA_VALUE)
-			&& (rez_addition_chek != SLAVE_DEVICE_FALIURE)
-			&& (rez_addition_chek != ACKNOWLEDGE)
-			&& (rez_addition_chek != SLAVE_DEVICE_BUSY)
-			&& (rez_addition_chek != NEGATIVE_ACKNOWLEDGE)
-			&& (rez_addition_chek != MEMORY_PARITY_ERROR)) {
+		&& (rez_addition_chek != REQ_SLAVE_ERROR)
+		&& (rez_addition_chek != ILLEGAL_FUNCTION)
+		&& (rez_addition_chek != ILLEGAL_DATA_ADRESS)
+		&& (rez_addition_chek != ILLEGAL_DATA_VALUE)
+		&& (rez_addition_chek != SLAVE_DEVICE_FALIURE)
+		&& (rez_addition_chek != ACKNOWLEDGE)
+		&& (rez_addition_chek != SLAVE_DEVICE_BUSY)
+		&& (rez_addition_chek != NEGATIVE_ACKNOWLEDGE)
+		&& (rez_addition_chek != MEMORY_PARITY_ERROR)) {
 		return REQ_SLAVE_ERROR;
 	}
 

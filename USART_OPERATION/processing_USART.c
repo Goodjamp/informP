@@ -347,6 +347,14 @@ USART_errort  ConfigureUSART(const S_port_config *ps_port_unit_config, USART_Typ
 	/* Enable USART */
 	USART_Cmd(USART_init, ENABLE);
 
+	USART_init->DR = 53;
+	uint32_t cnt = 10000;
+	while(cnt != 0)
+	{
+		cnt--;
+	}
+	USART_init->DR = 54;
+
 	return USART_OK;
 }
 

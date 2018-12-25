@@ -44,8 +44,6 @@ static volatile LDDescr LDList[NUMBER_OF_LCD_STRING] = {
 };
 
 
-
-
 static volatile struct {
 	uint16_t numLD;
 	TX_ADDRESS address;
@@ -113,7 +111,7 @@ static inline void indicationPinSetAll(void)
 {
     for(uint8_t cnt = 0; cnt < sizeof(indicationLCDList) / sizeof(indicationLCDList[0]); cnt++)
     {
-    	GPIO_SetBits(indicationLCDList[cnt].port, indicationLCDList[cnt].pin);
+    	GPIO_ResetBits(indicationLCDList[cnt].port, indicationLCDList[cnt].pin);
     }
 }
 
@@ -122,7 +120,7 @@ static inline void indicationPinResetAll(void)
 {
     for(uint8_t cnt = 0; cnt < sizeof(indicationLCDList) / sizeof(indicationLCDList[0]); cnt++)
     {
-    	GPIO_ResetBits(indicationLCDList[cnt].port, indicationLCDList[cnt].pin);
+    	GPIO_SetBits(indicationLCDList[cnt].port, indicationLCDList[cnt].pin);
     }
 }
 
@@ -137,7 +135,7 @@ static void configIndicationPin()
     	gpioConfig.GPIO_Speed = GPIO_Speed_2MHz;
     	gpioConfig.GPIO_Pin   = indicationLCDList[cnt].pin;
     	GPIO_Init(indicationLCDList[cnt].port, &gpioConfig);
-    	GPIO_ResetBits(indicationLCDList[cnt].port, indicationLCDList[cnt].pin);
+    	GPIO_SetBits(indicationLCDList[cnt].port, indicationLCDList[cnt].pin);
     }
 }
 
@@ -297,7 +295,7 @@ static inline void setLDPin(void){
 	{
 		GPIO_SetBits(LDList[ldTxDef.numLD].port, LDList[ldTxDef.numLD].pin);
 		// control indication pin activity
-		GPIO_ResetBits(indicationLCDList[ldTxDef.numLD].port, indicationLCDList[ldTxDef.numLD].pin);
+		GPIO_SetBits(indicationLCDList[ldTxDef.numLD].port, indicationLCDList[ldTxDef.numLD].pin);
 	}
 	else
 	{
@@ -424,7 +422,7 @@ void hwInterfaceTx(uint16_t orderNumberDispl, TX_ADDRESS txAddress){
 	if(txAddress == TX_ADDRESS_ONE)
 	{
 		// control indication pin activity
-		GPIO_SetBits(indicationLCDList[ldTxDef.numLD].port, indicationLCDList[ldTxDef.numLD].pin);
+		GPIO_ResetBits(indicationLCDList[ldTxDef.numLD].port, indicationLCDList[ldTxDef.numLD].pin);
 	}
 	else
 	{

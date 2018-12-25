@@ -458,7 +458,8 @@ void processingRemoteSensor(void)
     	else
     	{
     		moduleStatus &= ~(uint16_t)(1 << SENSOR_STATUS_ERROR_REM_RAINE_SENSOR);
-        	processing_mem_map_write_s_proces_object_modbus((rxData.status & (uint8_t)(1 << REM_METEO_STATUS_RAINE)) ? ((const uint16_t*)1) : ((const uint16_t*)0),
+    		uint16_t rezRain = (rxData.status & (uint8_t)(1 << REM_METEO_STATUS_RAINE)) ? 1 : 0;
+        	processing_mem_map_write_s_proces_object_modbus(&rezRain,
         			                                        1,
         			                                        s_address_oper_data.s_sensor_address.rezRain);
     	}

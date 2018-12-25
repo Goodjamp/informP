@@ -161,13 +161,13 @@ void displayWrite(displayHandlerDef *displayHandlerIn, uint16_t numString, uint8
 	// second max7219 - 7-segment indicator
 	displayClearBuff(displayHandlerIn->txData,MAX_PER_SCREEN);
 	// set max#1 symbol - 8x8 matrix(maximum 3 layer support)
-	for(uint8_t k = 0; k < 3; k++)
+	for(uint8_t k = 0; k < 4; k++)
 	{
 		displaySet8x8Matrix(displayHandlerIn->txData, ORDER_NUM_MATRIX,  str[ORDER_NUM_MATRIX + k], LAYER_ORDER_SECOND );
 	}
 
 	// set max#2 - 7 segment 4 ripple colors digits
-	for(cnt = 3, digCnt = 0; cnt < (strSize); cnt++)
+	for(cnt = 4, digCnt = 0; cnt < (strSize); cnt++)
 	{
 		// set new value for selected screen
 		if(str[cnt] == '.')
