@@ -130,7 +130,7 @@ void t_processing_configurationHID(void *in_Data) {
 		//Wait for receive message
 		xQueueReceive( inMessageQueue, (void*)reqBuf, portMAX_DELAY);
 
-		switch ( ((headOfReq_t*) reqBuf)->reqType)
+		switch ( ((headOfReq_t*)reqBuf)->reqType)
 		{
 		case COMUNICATION_GET_REG:
 		{
