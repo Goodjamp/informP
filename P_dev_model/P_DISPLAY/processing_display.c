@@ -1,4 +1,4 @@
-/********************************************************************************
+  /********************************************************************************
   * @file    processing_display.c
   * @author  Gerasimchuk A.
   * @version V1.0.0
@@ -41,7 +41,7 @@ uint8_t tempSaveBrightnes = 0;
 QueueHandle_t menuQueue;
 uint8_t lcdPeriodType;
 uint8_t *blinkStateP;
-uint8_t lcdStr[7];
+uint8_t lcdStr[12];
 const static uint8_t brightnes[] = {DISPLAY_BRIGHTNES_7,
 		                            DISPLAY_BRIGHTNES_11,
 		                            DISPLAY_BRIGHTNES_19,
@@ -64,20 +64,12 @@ typedef struct{
 	uint8_t brightnes;
 }menuWork;
 
-typedef struct{
-    uint8_t cursorPos;
-    uint8_t QW;
-}menuConfig;
-
-
 struct{
 	uint8_t numPar;
 	uint8_t listPar;
 }screenAdjustment[NUMBER_OF_LCD_STRING];
 
-
 /*============================================================================================*/
-
 
 static uint8_t getNumberOfParamiter(uint16_t configBitField, uint8_t selectPos)
 {
@@ -85,7 +77,7 @@ static uint8_t getNumberOfParamiter(uint16_t configBitField, uint8_t selectPos)
 	uint8_t  cntBit = 0;
 	uint8_t  cntPar = 0;
 	selectPos++;
-	for(;cntPar < NUMBER_OF_VALUE; cntPar++)
+	for(;cntPar < PAR_QUANTITY; cntPar++)
 	{
 		if(configBitField & mask)
 		{
@@ -100,9 +92,9 @@ static uint8_t getNumberOfParamiter(uint16_t configBitField, uint8_t selectPos)
 	return 0;
 }
 
+
 void updateLcdVal(BLINK_STATE blinkState) {
 	uint8_t cnt;
-	uint8_t k;
 
 	if( BLINK_STATE_HIGHT == blinkState )
 	{
@@ -110,22 +102,11 @@ void updateLcdVal(BLINK_STATE blinkState) {
 	}
 	for (cnt = 0; cnt < displayUserConfig->numScreen; cnt++) {
 
-		if (!updateLCD( lcdStr,
-				        blinkState,
-				        menuGetCurrentMenu(),
-				        (cnt == menuGetListbox() ) ? (true):(false),
-				        getNumberOfParamiter(displayUserConfig->screenConfig[cnt].bitsOfParamiters, menuGetListboxItemIndex(cnt)))
-		    )
-			continue;
-
-		for(k = 0; k < sizeof(lcdStr); k++)
-		{
-			// list of second layer symbols
-			if( ('.' == lcdStr[k]) || ('~' == lcdStr[k])|| ('h' == lcdStr[k]))
-			{
-				lcdStr[k] |= 0b10000000;
-			}
-		}
+		updateLCD( lcdStr,
+				   blinkState,
+				   menuGetCurrentMenu(),
+				   (cnt == menuGetListbox() ) ? (true):(false),
+				   getNumberOfParamiter(displayUserConfig->screenConfig[cnt].bitsOfParamiters, menuGetListboxItemIndex(cnt)));
 		displayWrite(&myDisplay, cnt, lcdStr, strlen((const char*)lcdStr), COLOR_GREEN, TX_ADDRESS_ONE);
 	}
 }
@@ -197,9 +178,9 @@ static menuActionListDef decodeKeyAction(uint8_t action, int8_t intervalIn){
 }
 
 
-void setBreightnes(menuActionListDef menuAction){
+void setBrightness(menuActionListDef menuAction){
 	actionQueueMember actionMember = {
-		.type = event_Brightnes,
+		.type = event_UPDATE_BRIGHTNESS,
 		.queueType.payload[0] = (uint8_t)menuAction
 	};
     // push button action to queue
@@ -226,7 +207,6 @@ static void initUserMenu(S_display_user_config *configData){
 
 	displayInit( &myDisplay, brightnes, configData->numScreen);
 	keyboardInit();
-	initValueAddress();
 
 	//-------------------Init key processing timer and queue-------------------------------
 	keyTimerHandler =  xTimerCreate((const char*)"BUTTON TIMER",
@@ -234,12 +214,12 @@ static void initUserMenu(S_display_user_config *configData){
 			pdTRUE,
 			(void *)0,
 			butttonTimerFunctionCB);
-	lcdTimerHandler =  xTimerCreate((const char*)"LCD TIMER",
+	lcdTimerHandler =  xTimerCreate((const char*)"LCD UPDATE TIMER",
 			LCD_UPDATE_HIGHT_MS,
 			pdTRUE,
 			(void *)&lcdPeriodType,
 			lcdTimerFunctionCB);
-	escTimerHandler = xTimerCreate((const char*)"LCD TIMER",
+	escTimerHandler = xTimerCreate((const char*)"LCD ESC TIMER",
 			BUTTON_ESC_PERIOD_MS,
 			pdFALSE,
 			(void *)0,
@@ -314,8 +294,7 @@ void t_processing_display(void *pvParameters){
 			break;
 		// Key update
 		case event_KEY:
-			menuUpdate(
-					decodeKeyAction(  actionMember.queueType.KeyAction.action,
+			menuUpdate( decodeKeyAction(  actionMember.queueType.KeyAction.action,
 							          actionMember.queueType.KeyAction.periodIndex
 					               )
 					  );
@@ -325,25 +304,33 @@ void t_processing_display(void *pvParameters){
 			    xTimerStart(escTimerHandler,10);
 			}
 			break;
-		case event_Brightnes:
-			switch( actionMember.queueType.Brightnes.action ){
+		case event_UPDATE_BRIGHTNESS:
+			/* update brightness according menu that we wont to switch:
+			  - switch to TEST_BRIGHTNES_INDEX if we swaith to test mode
+			  - switch to to normal brightness level in other case
+			*/
+			switch( actionMember.queueType.Brightnes.action )
+			{
 			case MENU_ACTION_SWITCH_TO_TEST:
-				tempSaveBrightnes = myDisplay.currentSettings.brightnes;
-				myDisplay.currentSettings.brightnes = TEST_BRIGHTNES_UNDEX;
+				//tempSaveBrightnes = myDisplay.currentSettings.brightnes;
+				//myDisplay.currentSettings.brightnes = TEST_BRIGHTNES_INDEX;
+				displaySetBrightness(&myDisplay, myDisplay.brightnesList[TEST_BRIGHTNES_INDEX], 0, TX_ADDRESS_ALL);
 				break;
 			case MENU_ACTION_SWITCH_TO_WORK:
 			case MENU_ACTION_SWITCH_TO_ADJ:
-				myDisplay.currentSettings.brightnes = tempSaveBrightnes;
+				//myDisplay.currentSettings.brightnes = tempSaveBrightnes;
+				displaySetBrightness(&myDisplay, myDisplay.brightnesList[myDisplay.currentSettings.brightnes], 0, TX_ADDRESS_ALL);
 				break;
-			default:
+			case MENU_ACTION_SELL:
 				if( ++myDisplay.currentSettings.brightnes > (sizeof(brightnes)/sizeof(brightnes[0])-1 ) )
 				{
 					myDisplay.currentSettings.brightnes = 0;
 				}
-				displaySetBrightnes(&myDisplay, myDisplay.brightnesList[myDisplay.currentSettings.brightnes], 0, TX_ADDRESS_ALL);
+				displaySetBrightness(&myDisplay, myDisplay.brightnesList[myDisplay.currentSettings.brightnes], 0, TX_ADDRESS_ALL);
+				break;
+			default:
 				break;
 			};
-			break;
 		}
 
 

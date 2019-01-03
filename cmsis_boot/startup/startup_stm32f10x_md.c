@@ -221,9 +221,9 @@ void Default_Reset_Handler(void)
   */
 #pragma weak Reset_Handler = Default_Reset_Handler  
 #pragma weak NMI_Handler = Default_Handler
-#pragma weak HardFault_Handler = Default_Handler
-#pragma weak MemManage_Handler = Default_Handler
-#pragma weak BusFault_Handler = Default_Handler
+//#pragma weak HardFault_Handler = Default_Handler
+//#pragma weak MemManage_Handler = Default_Handler
+//#pragma weak BusFault_Handler = Default_Handler
 #pragma weak UsageFault_Handler = Default_Handler
 #pragma weak SVC_Handler = Default_Handler
 #pragma weak DebugMon_Handler = Default_Handler
@@ -283,10 +283,9 @@ void Default_Reset_Handler(void)
   */
 static void Default_Handler(void) 
 {
-  /* Go into an infinite loop. */
-  while (1) 
-  {
-  }
+    /* Go into an infinite loop. */
+    while (1)
+    {}
 }
 
 /*********************** (C) COPYRIGHT 2009 Coocox ************END OF FILE*****/

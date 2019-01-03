@@ -107,7 +107,7 @@ void displayWrite(displayHandlerDef *displayHandlerIn, uint16_t numScreen, uint8
 void displaySetDefConfig(displayHandlerDef *displayHandler);
 void displayClear(displayHandlerDef *displayHandlerIn, uint16_t numScreen, TX_ADDRESS txAddress);
 DISPLAY_STATUS displayIntarfaceGetStatus(displayHandlerDef const *displayHandler);
-void displaySetBrightnes(displayHandlerDef *displayHandlerIn, DISPLAY_BRIGHTNES brightnes, uint16_t numScreen, TX_ADDRESS txAddress);
+void displaySetBrightness(displayHandlerDef *displayHandlerIn, DISPLAY_BRIGHTNES brightnes, uint16_t numScreen, TX_ADDRESS txAddress);
 
 
 

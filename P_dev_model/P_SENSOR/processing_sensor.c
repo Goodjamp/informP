@@ -173,7 +173,8 @@ u16 sensor_calc_address_oper_reg(S_sensor_address *ps_sensor_address, u16 adres_
 	ps_sensor_address->rezHumidity       = ps_sensor_address->rezTemperature + structFieldRegSize(S_sensor_oper_data,rezTemperature);
 	ps_sensor_address->rezPressure_mmHg  = ps_sensor_address->rezHumidity + structFieldRegSize(S_sensor_oper_data,rezHumidity);
 	ps_sensor_address->rezPressure_GPasc = ps_sensor_address->rezPressure_mmHg + structFieldRegSize(S_sensor_oper_data,rezPressure_mmHg);
-	adres_start = ps_sensor_address->rezPressure_GPasc + structFieldRegSize(S_sensor_oper_data,rezPressure_GPasc);
+	ps_sensor_address->rezRain           = ps_sensor_address->rezPressure_GPasc + structFieldRegSize(S_sensor_oper_data,rezPressure_GPasc);
+	adres_start                          = ps_sensor_address->rezRain + structFieldRegSize(S_sensor_oper_data,rezRain);
 	return adres_start;
 }
 
@@ -282,60 +283,22 @@ static inline void updateSensorStatus(uint16_t newStatus){
 }
 
 
-static void gistConfig(gistT *inGist, uint16_t thresholdWindowSize, uint16_t thresholdSucsses, uint16_t thresholdError, bool defState)
-{
-    inGist->thresholdWindowSize  = thresholdWindowSize;
-    inGist->thresholdSucssesSize = thresholdSucsses;
-    inGist->thresholdErrorSize   = thresholdError;
-
-    inGist->thresholdSucssesCnt = (defState) ? (inGist->thresholdWindowSize) : (0);
-    inGist->thresholdErrorCnt   = (defState) ? (0) : (inGist->thresholdWindowSize);
-    inGist->state               = defState;
-}
-
-
 static bool gistAddData(gistT *inGist, bool rez)
 {
-    if(rez)
-    {
-        if(inGist->thresholdSucssesCnt < inGist->thresholdWindowSize)
-        {
-            inGist->thresholdSucssesCnt++;
-        }
-        if(inGist->thresholdErrorCnt != 0)
-        {
-            inGist->thresholdErrorCnt--;
-        }
-    }
-    else
-    {
-        if(inGist->thresholdSucssesCnt != 0)
-        {
-            inGist->thresholdSucssesCnt--;
-        }
-        if(inGist->thresholdErrorCnt < inGist->thresholdWindowSize)
-        {
-            inGist->thresholdErrorCnt++;
-        }
-    }
+	inGist->ringBuffRez[inGist->posWrite] = rez;
+	if(rez)
+	{
+		inGist->cntTrue++;
+	}
+	uint16_t lastPointer = (inGist->posWrite + 1) & (sizeof(inGist->ringBuffRez) - 1);
+	if(inGist->ringBuffRez[lastPointer])
+	{
+		inGist->cntTrue--;
+	}
+	inGist->posWrite++;
+	inGist->posWrite &= (sizeof(inGist->ringBuffRez) - 1);
 
-    if(inGist->state) // current state true
-    {
-        // check for false
-        if( inGist->thresholdErrorCnt >= inGist->thresholdErrorSize)
-        {
-            inGist->state = false;
-        }
-    }
-    else            // current state false
-    {
-        //check for true
-        if( inGist->thresholdSucssesCnt >= inGist->thresholdSucssesSize)
-        {
-        	inGist->state = true;
-        }
-    }
-    return inGist->state;
+	return (inGist->cntTrue >= TIMEOUT_GIST_SUCSSESS_SIZE) ? (true) : (false);
 }
 
 
@@ -388,16 +351,20 @@ void processingRemoteSensor(void)
 {
 	STATUS status_reg;
 	uint16_t moduleStatus = SENSOR_STATUS_OK;
-	gistT inGist;
-
-    gistConfig(&inGist, TIMEOUT_GIST_WIN_SIZE, TIMEOUT_GIST_SUCSSESS_SIZE, TIMEOUT_GIST_ERROR_SIZE, false);
+	gistT inGist =
+	{
+		.ringBuffRez = {[0 ... (sizeof(inGist.ringBuffRez) - 1)] = false},
+		.posWrite = 0,
+		.cntTrue  = 0
+	};
 
 	initNRF();
 	while(1)
     {
-		vTaskDelay(MESSUREMT_PERIOD);
+		vTaskDelay(MESSUREMT_PERIOD_MS);
         updateSensorStatus(moduleStatus);
     	NRF24L01_get_status_tx_rx(nrfRx, &status_reg);
+
     	if(status_reg.RX_DR == 0)//wait interrupt
     	{
     		if(!gistAddData(&inGist, false))
@@ -414,6 +381,7 @@ void processingRemoteSensor(void)
     			moduleStatus &= ~(uint16_t)(1 << SENSOR_STATUS_ERROR_REM_RX_TIMEOUT);
     		}
     	}
+
     	if(*(uint8_t*)(&status_reg) == 0xff)
     	{
     		moduleStatus  = SENSOR_STATUS_OK;
@@ -429,6 +397,7 @@ void processingRemoteSensor(void)
     	NRF24L01_read_rx_data(nrfRx, sizeof(transactionT), rxBuff.buf);
     	NRF24L01_FLUSH_RX(nrfRx);
     	NRF24L01_clear_interrupt(nrfRx,STATUS_RX_DR);
+    	// update status register
     	if( rxData.status & (uint8_t)(1 << REM_METEO_STATUS_ERROR_SENSOR) )
     	{
     		moduleStatus |= (uint16_t)(1 << SENSOR_STATUS_ERROR_REM_SENSOR);
@@ -438,15 +407,7 @@ void processingRemoteSensor(void)
     	{
     		moduleStatus &= ~(uint16_t)(1 << SENSOR_STATUS_ERROR_REM_SENSOR);
     	}
-    	if( rxData.status & (uint8_t)(1 << REM_METEO_STATUS_ERROR_MES) )
-    	{
-    		moduleStatus |= (uint16_t)(1 << SENSOR_STATUS_ERROR_REM_MES);
-            continue;
-    	}
-    	else
-    	{
-    		moduleStatus &= ~(uint16_t)(1 << SENSOR_STATUS_ERROR_REM_MES);
-    	}
+
     	if( rxData.status & (uint8_t)(1 << REM_METEO_STATUS_ERROR_BATARY) )
     	{
     		moduleStatus |= (uint16_t)(1 << SENSOR_STATUS_ERROR_REM_BATARY);
@@ -455,10 +416,26 @@ void processingRemoteSensor(void)
     	{
     		moduleStatus &= ~(uint16_t)(1 << SENSOR_STATUS_ERROR_REM_BATARY);
     	}
+
+
+    	if( rxData.status & (uint8_t)(1 << REM_METEO_STATUS_ERROR_RAINE_SENSOR) )
+    	{
+    		moduleStatus |= (uint16_t)(1 << SENSOR_STATUS_ERROR_REM_RAINE_SENSOR);
+    	}
+    	else
+    	{
+    		moduleStatus &= ~(uint16_t)(1 << SENSOR_STATUS_ERROR_REM_RAINE_SENSOR);
+    		uint16_t rezRain = (rxData.status & (uint8_t)(1 << REM_METEO_STATUS_RAINE)) ? 1 : 0;
+        	processing_mem_map_write_s_proces_object_modbus(&rezRain,
+        			                                        1,
+        			                                        s_address_oper_data.s_sensor_address.rezRain);
+    	}
+
     	processing_mem_map_write_s_proces_object_modbus((uint16_t*)&rxData.temperature,    1, s_address_oper_data.s_sensor_address.rezTemperature);
     	processing_mem_map_write_s_proces_object_modbus((uint16_t*)&rxData.humifity,       1, s_address_oper_data.s_sensor_address.rezHumidity);
     	processing_mem_map_write_s_proces_object_modbus((uint16_t*)&rxData.atmPressure,    1, s_address_oper_data.s_sensor_address.rezPressure_mmHg);
     	processing_mem_map_write_s_proces_object_modbus((uint16_t*)&rxData.atmPressurehPa, 1, s_address_oper_data.s_sensor_address.rezPressure_GPasc);
+
     }
 }
 
@@ -480,8 +457,3 @@ void t_processing_sensor(void *pvParameters){
 		processingRemoteSensor();
 	}
 }
-
-
-
-
-

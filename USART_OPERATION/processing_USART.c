@@ -182,7 +182,7 @@ void TIM4_IRQHandler(void)
 	//uint8_t	usinglechar;
 	/*Очищаем бит обрабатываемого прерывания*/
 	TIM_ClearITPendingBit(TIM4,TIM_IT_Update);
-	counter_ms++;  //счетчик миллисекунд через таймер TIM7
+	counter_ms++;
 }
 
 

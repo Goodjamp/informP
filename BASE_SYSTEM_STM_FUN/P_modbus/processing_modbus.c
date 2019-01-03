@@ -501,17 +501,15 @@ void t_Modbus_SLAVE(void *p_task_par) {
 	while (ReadUSART(ptaskparameters->RdUSART, (u8*) ps_modbus_req_input, 1, 1)) {} // очищаю буффер приема
 	vTaskDelay(500); //таймаут переда стартом всех задач, дл€ валидации данных в картепам€ти
 	while (1) {
-
-		if (ReadUSART(ptaskparameters->RdUSART, (u8*)ps_modbus_req_input, 8,20) != 8) { //считываю из стека USART. ≈сли размер прочитаной посылки не 8 байт, повтор€ю чтение
+		if (ReadUSART(ptaskparameters->RdUSART, (u8*)ps_modbus_req_input, 8, 20) != 8) { //считываю из стека USART. ≈сли размер прочитаной посылки не 8 байт, повтор€ю чтение
 			//vTaskDelay(50);
 			continue;
 		}
-
 		// выполн€ю проверку
 		rez_chack_req = cheack_req_modbus(ptaskparameters, ps_modbus_req_input,address_KP); //
 		// анализирую результаты проверки
 		if (rez_chack_req == REQ_SLAVE_ERROR)
-		{ // ошибка полей или контрольной суммы
+		{
 			continue;
 		}
 		else if (rez_chack_req)
@@ -522,7 +520,7 @@ void t_Modbus_SLAVE(void *p_task_par) {
 		{ // запрос коректный, вызываю ф-ю обработки команды
 			if((ps_modbus_req_input->function - 1)==16)
 			{
-				ps_modbus_req_input->function =ps_modbus_req_input->function;
+				ps_modbus_req_input->function = ps_modbus_req_input->function;
 			}
 			num_TSTI = p_procesing_slave[ps_modbus_req_input->function - 1]((void*) ps_modbus_req_input,(S_modbus_make_res*) buf_out_slave);
 		}
@@ -628,15 +626,15 @@ REZ_REQ_CHEACK_SLAVE cheack_req_modbus(S_Task_parameters *p_iparameters,
 
 	// если функци€ дополнительной проверки возвратила недопустимый аргумент
 	if ((rez_addition_chek != REQ_SLAVE_OK)
-			&& (rez_addition_chek != REQ_SLAVE_ERROR)
-			&& (rez_addition_chek != ILLEGAL_FUNCTION)
-			&& (rez_addition_chek != ILLEGAL_DATA_ADRESS)
-			&& (rez_addition_chek != ILLEGAL_DATA_VALUE)
-			&& (rez_addition_chek != SLAVE_DEVICE_FALIURE)
-			&& (rez_addition_chek != ACKNOWLEDGE)
-			&& (rez_addition_chek != SLAVE_DEVICE_BUSY)
-			&& (rez_addition_chek != NEGATIVE_ACKNOWLEDGE)
-			&& (rez_addition_chek != MEMORY_PARITY_ERROR)) {
+		&& (rez_addition_chek != REQ_SLAVE_ERROR)
+		&& (rez_addition_chek != ILLEGAL_FUNCTION)
+		&& (rez_addition_chek != ILLEGAL_DATA_ADRESS)
+		&& (rez_addition_chek != ILLEGAL_DATA_VALUE)
+		&& (rez_addition_chek != SLAVE_DEVICE_FALIURE)
+		&& (rez_addition_chek != ACKNOWLEDGE)
+		&& (rez_addition_chek != SLAVE_DEVICE_BUSY)
+		&& (rez_addition_chek != NEGATIVE_ACKNOWLEDGE)
+		&& (rez_addition_chek != MEMORY_PARITY_ERROR)) {
 		return REQ_SLAVE_ERROR;
 	}
 

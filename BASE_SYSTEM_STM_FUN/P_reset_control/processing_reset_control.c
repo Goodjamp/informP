@@ -30,6 +30,28 @@ S_mode_blink s_mode_blink={
 // асоциативный масив для установки битов статуса
 u8 a_bit_status[MAX_NUM_MODULS]={[0 ... (MAX_NUM_MODULS-1)]=0};
 
+/**************Workaround for avoid device hang**************/
+void resetDeviceCB(void)
+{
+	NVIC_SystemReset();
+}
+
+void HardFault_Handler(void)
+{
+	resetDeviceCB();
+}
+
+void MemManage_Handler(void)
+{
+	resetDeviceCB();
+}
+
+void BusFault_Handler(void)
+{
+	resetDeviceCB();
+}
+/***********************************************************/
+
 //-------------p_watchdog_init------------------
 //функция p_watchdog_init - выполняет конфигурацию watchdog
 // входные аргументы:
