@@ -65,7 +65,8 @@ typedef struct
 
 typedef struct
 {
-	uint16_t  timeCorection:15;  // time correction in minutes
+	uint16_t  timeCorection:14;  // time correction in minutes
+    uint16_t  isMinusCorrection:1;
     uint16_t  isDaylightSaving:1;
 }clockIndConfigT;
 
@@ -83,9 +84,9 @@ typedef struct
 
 
 typedef struct{
-	uint16_t       status_TIME; // status register TIME module
-	clockIndStateT clockState[CLOCK_QUANTITY];
-	serverSetTime  serverTime;
+    uint16_t       status_TIME; // status register TIME module
+    clockIndStateT clockState[CLOCK_QUANTITY];
+    serverSetTime  serverTime;
 } S_TIME_oper_data;
 //--------------------------------------------------------------------------------------------------------------------------------------
 

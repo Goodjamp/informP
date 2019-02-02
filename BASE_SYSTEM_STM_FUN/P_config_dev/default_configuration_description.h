@@ -32,12 +32,16 @@
 	/*==========default TIME configuration========*/                                               \
 	.s_config_moduls.s_TIME_user_config.state                             = ENABLE,                \
 	.s_config_moduls.s_TIME_user_config.clockConfig[0].timeCorection      = 120,                   \
+	.s_config_moduls.s_TIME_user_config.clockConfig[0].isMinusCorrection  = 1,                     \
 	.s_config_moduls.s_TIME_user_config.clockConfig[0].isDaylightSaving   = 1,                     \
 	.s_config_moduls.s_TIME_user_config.clockConfig[1].timeCorection      = 120,                   \
+	.s_config_moduls.s_TIME_user_config.clockConfig[1].isMinusCorrection  = 1,                     \
 	.s_config_moduls.s_TIME_user_config.clockConfig[1].isDaylightSaving   = 1,                     \
 	.s_config_moduls.s_TIME_user_config.clockConfig[2].timeCorection      = 120,                   \
+	.s_config_moduls.s_TIME_user_config.clockConfig[2].isMinusCorrection  = 1,                     \
 	.s_config_moduls.s_TIME_user_config.clockConfig[2].isDaylightSaving   = 1,                     \
 	.s_config_moduls.s_TIME_user_config.clockConfig[3].timeCorection      = 120,                   \
+	.s_config_moduls.s_TIME_user_config.clockConfig[3].isMinusCorrection  = 1,                     \
 	.s_config_moduls.s_TIME_user_config.clockConfig[3].isDaylightSaving   = 1,                     \
 	.s_config_moduls.s_TIME_user_config.synchronizationSource             = 1,                     \
 	/*==========default SENSOR configuration========*/                                             \

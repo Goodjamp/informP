@@ -334,7 +334,8 @@ void t_processing_TIME(void *p_task_par){
 			for(uint8_t k = 0; k < CLOCK_QUANTITY; k++)
 			{
 			    // get current date/time value
-			    timeGetUTC = clockGetTime() + configData->clockConfig[k].timeCorection * 60;
+			    timeGetUTC = clockGetTime() + ((configData->clockConfig[k].isMinusCorrection) ? (-60 * configData->clockConfig[k].timeCorection ) :
+			    		                                                                        ( 60 * configData->clockConfig[k].timeCorection));
 				if(configData->clockConfig[k].isDaylightSaving)
 				{
 					timeGet = gmtime(&timeGetUTC);

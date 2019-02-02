@@ -41,7 +41,7 @@
         <exclude name="P_dev_model/P_DISPLAY/MAX7219/maxTimer/LCD.c"/>
         <exclude name="P_dev_model/P_DISPLAY/MAX7219/maxTimer/LCD.h"/>
       </fileset>
-      <fileset casesensitive="false" dir="D:\Private\Programing\MCU\STM32\CooCox\INFORM_P\informP\P_dev_model\P_SENSOR\NRF24L01">
+      <fileset casesensitive="false" dir="D:\CooCox\INFORM_P\informP\P_dev_model\P_SENSOR\NRF24L01">
         <include name="**/*.c"/>
         <include name="**/*.cpp"/>
         <include name="**/*.s"/>
@@ -97,6 +97,7 @@
       <includepath path="P_dev_model/configurationHID"/>
       <includepath path="P_dev_model/P_configurationHID"/>
       <includepath path="D:\Private\Programing\MCU\STM32\CooCox\INFORM_P\informP\P_dev_model\P_SENSOR\NRF24L01"/>
+      <includepath path="D:\CooCox\INFORM_P\informP\P_dev_model\P_SENSOR\NRF24L01"/>
       
       <!-- arm-none-eabi-gcc compiler arguments -->
       <compilerarg value="-mcpu=cortex-m3"/>
