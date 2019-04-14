@@ -12,19 +12,6 @@
 #include "stm32f10x_gpio.h"
 #include "stm32f10x_rcc.h"
 
-
-//-----------user port definition--------------------------
-#define P3_PORT         GPIOA
-#define P4_PORT         GPIOA
-#define P6_PORT         GPIOB
-#define P7_PORT         GPIOB
-
-//-----------user pin definition--------------------------
-#define P3_PIN          GPIO_Pin_0
-#define P4_PIN          GPIO_Pin_2
-#define P6_PIN          GPIO_Pin_3
-#define P7_PIN          GPIO_Pin_4
-
 // Настройки джамперов
 // порты джамперов выбора режима конфигурации (по_умолчанию/пользовательская)
 #define PORT_JAMP1         GPIOB

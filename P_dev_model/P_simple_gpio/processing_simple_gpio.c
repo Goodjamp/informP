@@ -9,27 +9,12 @@
 #include "debugStuff.h"
 
 
-//------- функция work_user_init -------------
-// функция work_ind_init - выполняет настройку портов и пинов служебных светодиодов режма работы
-void work_user_init(void){
-	GPIO_InitTypeDef gpio_InitTypeDef;
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA,ENABLE);
-	gpio_InitTypeDef.GPIO_Mode=GPIO_Mode_Out_PP;
-	gpio_InitTypeDef.GPIO_Pin=P7_PIN | P6_PIN;
-	gpio_InitTypeDef.GPIO_Speed=GPIO_Speed_2MHz;
-	GPIO_Init(P7_PORT,&gpio_InitTypeDef);
-	GPIO_ResetBits(P6_PORT,P6_PIN);
-	GPIO_ResetBits(P7_PORT,P7_PIN);
-}
-
-
 //------- функция processing_simple_gpio -------------
 // функция processing_simple_gpio - выполняет настройку портов индиувции, джамперов (всех портов логического управления)
 void processing_simple_gpio(void){
 	remap_out_pin();
 	work_jamper_init();
 	work_ind_init();
-	work_user_init();
 }
 
 //------- функция work_jamper_init -------------

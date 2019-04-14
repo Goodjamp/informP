@@ -291,7 +291,7 @@ void t_processing_TIME(void *p_task_par){
 
 	while(1){
 
-		if( fineTuneClock )
+		if(fineTuneClock && (configData->synchronizationSource == SYNCRONISATION_SOURCE_GPS))
 		{
 			numRezRead = ReadUSART(task_parameters[gpsUSARTNum].RdUSART, (uint8_t*)usartReadBuff, USART_READ_BUFF_SIZE, USART_READ_BUFF_TIME_MS);
 			if( 0 != numRezRead)
@@ -326,7 +326,7 @@ void t_processing_TIME(void *p_task_par){
 			    ( SECOND_EVENT_BIT | ALARM_EVENT_BITS | SERVER_UPDATE_TIME  ),
 			    pdTRUE,
 			    pdFALSE,
-			    (fineTuneClock) ? (0) : (portMAX_DELAY) // if we still in fine tune clock process - continue
+			    (fineTuneClock && (configData->synchronizationSource == SYNCRONISATION_SOURCE_GPS)) ? (0) : (portMAX_DELAY) // if we still in fine tune clock process - continue
 			    );
         // processing event
 		if( rezWaiteEvent & SECOND_EVENT_BIT ) // processing second event
@@ -369,13 +369,13 @@ void t_processing_TIME(void *p_task_par){
 				processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.clock[k].TIME);
 			}
 		}
-		else if( rezWaiteEvent & SERVER_UPDATE_TIME ) // new time was received from server
+		else if((rezWaiteEvent & SERVER_UPDATE_TIME) && (configData->synchronizationSource == SYNCRONISATION_SOURCE_SERVER)) // new time was received from server
 		{
             // serverSetTime
 			processing_mem_map_read_s_proces_object_modbus(timeBuffManager.timeBuf, sizeof(serverSetTime) / 2, s_address_oper_data.s_TIME_address.serverYear);
 			setRCTTime(timeBuffManager.timeData, false);
 		}
-		else if( rezWaiteEvent & ALARM_EVENT_BITS ) // fine tune
+		else if((rezWaiteEvent & ALARM_EVENT_BITS) && (configData->synchronizationSource == SYNCRONISATION_SOURCE_GPS)) // fine tune
 		{
 			fineTuneClock = true;
 			// clear USART input buff

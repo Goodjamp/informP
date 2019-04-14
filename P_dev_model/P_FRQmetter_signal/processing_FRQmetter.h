@@ -15,8 +15,10 @@
 #include "processing_FRQmetter_extern.h"
 
 // frequency threshold F*1000
-#define FRQ_MAX 51000
-#define FRQ_MIN 49000
+#define FRQ_MAX     51000
+#define FRQ_MIN     49000
+#define FRQ_MAX_MES 60000
+#define FRQ_MIN_MES 40000
 
 
 // GPIO timer description
@@ -37,8 +39,10 @@
 #define ERROR_TIMEOUT_MS    1000
 
 //Average interval
-#define NUMBER_OF_RESULTS     8
-#define MAX_INDEX_OF_RESULTS  7
+#define NUMBER_OF_RESULTS       32
+#define MAX_INDEX_OF_RESULTS    31
+#define OUT_OF_RANGE_THRESHOLD  5
+
 
 #define GET_TIM_F(X)     (uint32_t)(X.PCLK2_Frequency)
 

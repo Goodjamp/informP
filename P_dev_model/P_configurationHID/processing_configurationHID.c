@@ -25,8 +25,11 @@
 #include "processing_config_dev.h"
 #include "processing_TIME_extern.h"
 
-#define NUM_QUEUE_MESSAGE   3
-#define QUEUE_MESSAGE_SIZE  64
+#define INDICATION_TIMEOUT_MS 100
+#define NUM_QUEUE_MESSAGE     3
+#define QUEUE_MESSAGE_SIZE    64
+#define USB_IND_PORT          GPIOB
+#define USB_IND_PIN           GPIO_Pin_4
 
 extern S_address_oper_data s_address_oper_data;
 QueueHandle_t inMessageQueue;
@@ -99,6 +102,25 @@ typedef struct
 
 #pragma pack(pop)
 
+void usbSoftConnectIndInit(void){
+	GPIO_InitTypeDef gpio_InitTypeDef;
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+	gpio_InitTypeDef.GPIO_Mode=GPIO_Mode_Out_PP;
+	gpio_InitTypeDef.GPIO_Pin=USB_IND_PIN;
+	gpio_InitTypeDef.GPIO_Speed=GPIO_Speed_2MHz;
+	GPIO_Init(USB_IND_PORT,&gpio_InitTypeDef);
+	GPIO_ResetBits(USB_IND_PORT,USB_IND_PIN);
+}
+
+void usbSoftConnectIndSet(void)
+{
+	GPIO_SetBits(USB_IND_PORT, USB_IND_PIN);
+}
+
+void usbSoftConnectIndReset(void)
+{
+	GPIO_ResetBits(USB_IND_PORT, USB_IND_PIN);
+}
 
 void rxDataCB(uint8_t epNumber, uint8_t numRx, uint8_t* rxData)
 {
@@ -120,6 +142,8 @@ void t_processing_configurationHID(void *in_Data) {
 	/*init USB HID */
 	uint16_t regAddress;
 	uint16_t regQuantity;
+	usbSoftConnectIndInit();
+	usbSoftConnectIndReset();
 	usbHIDInit();
 	usbHIDAddRxCB(rxDataCB);
 	usbHIDAddTxCompleteCB(txDataComplete);
@@ -128,7 +152,11 @@ void t_processing_configurationHID(void *in_Data) {
 	outMessageQueue = xQueueCreate(NUM_QUEUE_MESSAGE, QUEUE_MESSAGE_SIZE);
 	while (1) {
 		//Wait for receive message
-		xQueueReceive( inMessageQueue, (void*)reqBuf, portMAX_DELAY);
+		if(xQueueReceive( inMessageQueue, (void*)reqBuf, INDICATION_TIMEOUT_MS) == pdFALSE) {
+			usbSoftConnectIndReset();
+			continue;
+		}
+		usbSoftConnectIndSet();
 
 		switch ( ((headOfReq_t*)reqBuf)->reqType)
 		{

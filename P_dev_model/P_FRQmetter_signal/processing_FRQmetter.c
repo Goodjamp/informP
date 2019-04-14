@@ -39,12 +39,10 @@ struct{
 }frqMiddleRez;
 
 uint16_t updateMiddleRez(uint16_t newFrq){
-
 	frqMiddleRez.summ = frqMiddleRez.summ - frqMiddleRez.rezArray[ frqMiddleRez.cnt ] + newFrq;
 	frqMiddleRez.rezArray[ frqMiddleRez.cnt++ ] = newFrq;
     frqMiddleRez.cnt &= (MAX_INDEX_OF_RESULTS);
-
-   return (uint16_t)( frqMiddleRez.summ/NUMBER_OF_RESULTS );
+    return (uint16_t)( frqMiddleRez.summ/NUMBER_OF_RESULTS );
 }
 
 volatile struct{
@@ -54,7 +52,7 @@ volatile struct{
 	double df;
 	uint32_t rezMesFRQ;
 	uint32_t Fosc;
-}frqRezMes = {
+} frqRezMes = {
 		0,
 		0,
 		0,
@@ -76,8 +74,7 @@ static uint16_t frqTIMCalcPSC(void){
 	uint32_t f50Hz = 50;
 	uint32_t FoscIdeal = (f50Hz*f50Hz*10000)/FRQ_ACCURACY - f50Hz;
 	RCC_GetClocksFreq(&rccClock);
-	uint32_t cnt=1;
-	for( ; cnt<65535 ; cnt++){
+	for(uint32_t cnt=1; cnt < 65535 ; cnt++){
 		if( GET_TIM_F(rccClock)/cnt <= FoscIdeal)
 		{
 			return cnt-1;
@@ -159,19 +156,19 @@ void TIM1_UP_IRQHandler(void)
 	TIM_ClearFlag(FREQ_TIMER,TIM_FLAG_Update);
 	frqRezMes.updateCNT++;
 }
-
-
-static uint16_t rez[100] = {[0 ... 19] = 0};
-static uint32_t rezC[100] = {[0 ... 19] = 0};
+/*
+#define LOG_ARRAY_SIZE  100
+static uint16_t rez[LOG_ARRAY_SIZE] = {[0 ... (LOG_ARRAY_SIZE - 1)] = 0};
+static uint32_t rezC[LOG_ARRAY_SIZE] = {[0 ... (LOG_ARRAY_SIZE - 1)] = 0};
 static void logFRQ(uint32_t newCNT, uint16_t newF){
 
 	static uint8_t rezCNT = 0;
 	rezC[rezCNT] = newCNT;
 	rez[rezCNT] = newF;
 	rezCNT++;
-	if(rezCNT >= 100) rezCNT=0;
+	if(rezCNT >= LOG_ARRAY_SIZE) rezCNT=0;
 }
-
+*/
 
 /* @brief
  *
@@ -229,7 +226,9 @@ static void updateFrqStatus(FRQ_STATUS newStatus){
  */
 void t_processing_FRQmetter(void *pvParameters){
 	uint32_t totatalCNT;
-	uint16_t frq;
+	uint16_t middleFrq;
+	uint16_t momentaryFrq;
+	uint8_t outOfRangeCounter = 0;
 	s_FRQConfig =(S_FRQmetter_user_config*)pvParameters;
 
     // init state - ERROR (up to obtain first result)
@@ -255,17 +254,25 @@ void t_processing_FRQmetter(void *pvParameters){
         // processing result of measurement
  		frqRezMes.f_ICinterrupt = 0;
 		totatalCNT = frqRezMes.updateCNT * TIM_MAX_CNT + frqRezMes.inputCaptureCNT;
-		// calculate frq + correction
-		frq = updateMiddleRez( ((float)(frqRezMes.df/(float)totatalCNT)*1000)  + s_FRQConfig->frqCorrection );
-		if((frq < FRQ_MAX) && (frq > FRQ_MIN)){
-			updateFrqStatus(FRQ_STATUS_OK);
-		}
-		else{
-			updateFrqStatus(FRQ_STATUS_ALLARM);
-		}
-		processing_mem_map_write_s_proces_object_modbus(&frq, 1, s_address_oper_data.s_FRQmetter_address.rez_FRQmetter);
-		logFRQ(totatalCNT, frq);
 		frqRezMes.updateCNT = 0;
 		frqRezMes.inputCaptureCNT = 0;
+		// calculate middleFrq + correction
+		momentaryFrq = ((float)(frqRezMes.df/(float)totatalCNT)*1000.f) + s_FRQConfig->frqCorrection;
+		//logFRQ(totatalCNT, momentaryFrq);
+	    if ((momentaryFrq > FRQ_MAX_MES) || (momentaryFrq < FRQ_MIN_MES)){
+	    	if(outOfRangeCounter < OUT_OF_RANGE_THRESHOLD) {
+	    		outOfRangeCounter++;
+	    		continue;
+	    	}
+	    } else {
+	    	outOfRangeCounter = 0;
+	    }
+		middleFrq = updateMiddleRez(momentaryFrq);
+		if((middleFrq < FRQ_MAX) && (middleFrq > FRQ_MIN)){
+			updateFrqStatus(FRQ_STATUS_OK);
+		} else {
+			updateFrqStatus(FRQ_STATUS_ALLARM);
+		}
+		processing_mem_map_write_s_proces_object_modbus(&middleFrq, 1, s_address_oper_data.s_FRQmetter_address.rez_FRQmetter);
 	}
 }
