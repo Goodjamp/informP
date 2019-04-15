@@ -143,7 +143,7 @@ void t_processing_configurationHID(void *in_Data) {
 	uint16_t regAddress;
 	uint16_t regQuantity;
 	usbSoftConnectIndInit();
-	usbSoftConnectIndReset();
+	usbSoftConnectIndSet();
 	usbHIDInit();
 	usbHIDAddRxCB(rxDataCB);
 	usbHIDAddTxCompleteCB(txDataComplete);
@@ -153,10 +153,10 @@ void t_processing_configurationHID(void *in_Data) {
 	while (1) {
 		//Wait for receive message
 		if(xQueueReceive( inMessageQueue, (void*)reqBuf, INDICATION_TIMEOUT_MS) == pdFALSE) {
-			usbSoftConnectIndReset();
+			usbSoftConnectIndSet();
 			continue;
 		}
-		usbSoftConnectIndSet();
+		usbSoftConnectIndReset();
 
 		switch ( ((headOfReq_t*)reqBuf)->reqType)
 		{
