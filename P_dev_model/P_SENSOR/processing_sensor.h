@@ -29,7 +29,7 @@
 
 /**********NRF24L01 default paramiters****************/
 #define NRF_ADDRESS             (uint8_t*)"METEO"
-#define NRF_CHANEL              10
+#define NRF_CHANEL              120
 
 #define MESSUREMT_PERIOD_MS         1000
 /**Hysteresis settings for receive result from remote meteo post****/

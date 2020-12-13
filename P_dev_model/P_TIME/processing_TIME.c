@@ -309,6 +309,7 @@ void t_processing_TIME(void *p_task_par){
 					timeBuffManager.timeData->Minutes = myGPRMC.minutes;
 					timeBuffManager.timeData->Seconds = myGPRMC.seconds;
 					setRCTTime(timeBuffManager.timeData, true);
+					RESET_GLOBAL_STATUS(DEV_6);
 					continue;
 				}
 		    }
@@ -316,8 +317,9 @@ void t_processing_TIME(void *p_task_par){
 			if( allarmErrorIndTime_ms <= xTaskGetTickCount() )
 			{
 				// set alarm status and indication
-				registerValue = TIME_STATUS_ALLARM;
+				registerValue = TIME_STATUS_ERROR;
 				processing_mem_map_write_s_proces_object_modbus(&registerValue, 1, s_address_oper_data.s_TIME_address.status_TIME);
+				SET_GLOBAL_STATUS(DEV_6);
 			}
 		}
         // Wait for any event

@@ -350,7 +350,7 @@ static void getDateStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkS
 			   4,
 			   (isDate) ? ((const uint8_t*)SYMBOL_DATE) : ((const uint8_t*)SYMBOL_TIME),
 			   (sizeof(SYMBOL_DATE) - 1));
-	if(status == FRQ_STATUS_ALLARM)
+	if(status == TIME_STATUS_ERROR) // Special case: error indication as alarm
 	{
 		addSymbols(strSymbol, 4, (const uint8_t*)SYMBOL_ALLARM, (sizeof(SYMBOL_ALLARM) - 1));
 	}

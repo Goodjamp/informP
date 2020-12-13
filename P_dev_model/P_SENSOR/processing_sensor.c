@@ -341,7 +341,7 @@ static void processingLocalSensor(void)
 		    processing_mem_map_write_s_proces_object_modbus(&rezMes, 1, s_address_oper_data.s_sensor_address.rezPressure_GPasc);
 		    rezMes = (rezMesPressure * PASCAL_TO_MMHG_COEF);
 		    processing_mem_map_write_s_proces_object_modbus(&rezMes, 1, s_address_oper_data.s_sensor_address.rezPressure_mmHg);
-		    vTaskDelay(50);
+		    vTaskDelay(10000);
 		}
 	}
 }

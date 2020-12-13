@@ -13,7 +13,7 @@
 
 #include "processing_mem_map.h"
 
-#define DEV_6                TIME
+#define DEV_6            TIME
 #define CLOCK_QUANTITY   4
 
 typedef enum {
