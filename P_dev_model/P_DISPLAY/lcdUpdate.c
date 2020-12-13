@@ -138,7 +138,6 @@ static void addSymbols(uint8_t *dest, uint8_t lenDst, const uint8_t *src, uint8_
 /*In this string we wont to show temperature and battery status*/
 static void getTemperatureStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkState, DISPLAY_MENU displayMenu, bool focus)
 {
-	uint16_t value;
 	uint16_t status;
 
 	processing_mem_map_read_s_proces_object_modbus(&status, 1, s_address_oper_data.s_sensor_address.status_sensor);
@@ -153,8 +152,10 @@ static void getTemperatureStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE
 	}
 	else
 	{
-		processing_mem_map_read_s_proces_object_modbus(&value,  1, s_address_oper_data.s_sensor_address.rezTemperature);
-		numToStr(strValue, value, 5, 1, ' ');
+        int16_t value;
+        processing_mem_map_read_s_proces_object_modbus((uint16_t *)&value,  1, s_address_oper_data.s_sensor_address.rezTemperature);
+        int32_t temp = value;
+        numToStr(strValue, temp, 5, 1, ' ');
 	}
 	// set symbol
 	addSymbols(strSymbol, 4, (const uint8_t*)SYMBOL_TEMPERATURE, (sizeof(SYMBOL_TEMPERATURE) - 1));

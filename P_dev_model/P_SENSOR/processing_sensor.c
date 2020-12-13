@@ -305,6 +305,7 @@ static bool gistAddData(gistT *inGist, bool rez)
 static void processingLocalSensor(void)
 {
 	uint16_t rezMes = 0;
+	int16_t intMesTemp = 0;
 	float rezMesHumidity;
 	float rezMesTemperature;
 	float rezMesPressure;
@@ -333,8 +334,8 @@ static void processingLocalSensor(void)
 				continue;
 			}
 
-		    rezMes = rezMesTemperature*10;
-		    processing_mem_map_write_s_proces_object_modbus(&rezMes, 1, s_address_oper_data.s_sensor_address.rezTemperature);
+			intMesTemp = rezMesTemperature*10;
+		    processing_mem_map_write_s_proces_object_modbus((uint16_t *)&intMesTemp, 1, s_address_oper_data.s_sensor_address.rezTemperature);
 		    rezMes = rezMesHumidity*10;
 		    processing_mem_map_write_s_proces_object_modbus(&rezMes, 1, s_address_oper_data.s_sensor_address.rezHumidity);
 		    rezMes = rezMesPressure/100;
