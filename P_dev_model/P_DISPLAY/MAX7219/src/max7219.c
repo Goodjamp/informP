@@ -72,16 +72,15 @@ void displaySet8x8Matrix(displayBuffDef *displayBuffer, uint8_t numMax, uint8_t 
 			// Copy
 			if( LAYER_ORDER_FIRST == layerOrder ){
 			    memcpy( (uint8_t*)displayBuffer[numMax], symbols8x8Matrix[cnt].points, sizeof(symbols8x8Matrix[cnt].points) );
-			}
-			else{
+			} else {
                 for(cnt2 = 0; cnt2 < NUM_MAX_DIGITS; cnt2++){
-                	displayBuffer[numMax][cnt2] |= symbols8x8Matrix[cnt].points[cnt2];
+                    displayBuffer[numMax][cnt2] |= symbols8x8Matrix[cnt].points[cnt2];
                 }
 			}
 			return; // if symbol was found - return
 		}
 	}
-	// if symbol was not found, cope cle
+	// if symbol was not found, copy
    memcpy( (uint8_t*)displayBuffer[numMax], symbols8x8Matrix[cnt].points, sizeof(symbols8x8Matrix[cnt].points) );
 }
 

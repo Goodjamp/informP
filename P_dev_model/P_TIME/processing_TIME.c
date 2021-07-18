@@ -94,10 +94,10 @@ static void initUSARTGPS(void){
             .baudrate     = gpsUSARTSpeed,
             .stopbits     = gpsUSARTStopBits,
             .parity       = gpsUSARTParity,
-            .amountbyte   = gpsUSARTWordLengt,
+            .amountBit    = gpsUSARTWordLengt,
             .controlpotok = 0
     };
-    ConfigureUSART(&portConfig, gpsUSARTDef);
+    ConfigureUSART(&portConfig, gpsUSARTDef, NULL);
 }
 
 /*------------------------- SWITCH TIM WINTER/SUMMER RULES--------------------------

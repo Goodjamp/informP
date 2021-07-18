@@ -12,30 +12,23 @@
 #include "global_dev.h"
 #include "processing_mem_map.h"
 
-// подключаимые модули
 #include "processing_includ.h"
-
-
-//------ОПИСАНИЕ ОБЩЕПОЛЬЗОВАТЕЛЬСКИХ СТРУКТУР-----------------------
 
 #pragma pack(push, 1)
 
-// Структура адресов статус регистров устройства
 typedef struct{
 	u16 address_device_rcr;              //  device reset_control_register
 	u16 address_device_statys;	         // device status register
 } S_address_devise_reset_status;
 
-// Структура  статус регистров устройства
 typedef struct{
 	S_proces_object_modbus device_rcr;              // device reset_control_register
 	S_proces_object_modbus device_statys;	         // device status register
 } S_devise_reset_status;
 
-// структура адресов оперативных регистров
 typedef struct{
-	S_address_devise_reset_status s_address_devise_reset_status; // структура регистров статуса устройства
-	S_modbus_address s_modbus_address; // структура регистров портов
+	S_address_devise_reset_status s_address_devise_reset_status;
+	S_modbus_address s_modbus_address;
 
 #ifdef DEV_0
 	USER_ADDRESS_FIELD(S,DEV_0) USER_ADDRESS_FIELD(s,DEV_0);
@@ -87,13 +80,10 @@ typedef struct{
 #endif
 }S_address_oper_data;
 
-
-// структура оперативных регистров
-// ИСПОЛЬЗУЕТЬСЯ ДЛЯ РАСЧЕТА РАЗМЕРА ОБЛАСТИ ОПЕРАТИВНЫХ РЕГИСТРОВ, ПЕРЕМЕННАЯ ДАНОГО ТИПА НЕ СОЗДАЕТЬСЯ !!!
 typedef struct{
 	S_devise_reset_status s_devise_reset_status;
 
-	S_modbus_oper_data s_modbus_oper_data; // структура регистров портов
+	S_modbus_oper_data s_modbus_oper_data;
 
 #ifdef DEV_0
 	USER_OPER_DATA_FIELD(S,DEV_0) USER_OPER_DATA_FIELD(s,DEV_0);
@@ -144,13 +134,9 @@ typedef struct{
 	USER_OPER_DATA_FIELD(S,DEV_15) USER_OPER_DATA_FIELD(s,DEV_15);
 #endif
 }S_oper_data;
-
 #pragma pack(pop)
 
-// размер карты памяти (лперативные регистры и регистры данных)
 #define SIZE_OPER_DATA            sizeof(S_oper_data)
-// размер области оперативных регистров в единицах размера типового proces_object ( для Герасимчук: все поля структур S_oper_data
-// имеют тип S_proces_object_modbus, поэтому и размер S_oper_data кратен размеру S_proces_object_modbus !!! )
 #define NUM_REG_OPER_DATA         sizeof(S_oper_data)/SIZE_PROCES_OBJECT
 
 #endif

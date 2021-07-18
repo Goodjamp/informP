@@ -76,19 +76,20 @@ int main(void)
 	u8 count_modbus=0;
 	for(k1=0;k1<NUMBER_USART;k1++){
 
-		// если в конфигурации поточный порт включен, выполняю настройку modbus
+		// пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ modbus
 		if(MODBUS_USART & (1<<k1)){
 
-			if(!(s_config_moduls.s_connectmodbus_global[count_modbus].state)){// если в конфигурации поточный порт выключен
+			if(!(s_config_moduls.s_connectmodbus_global[count_modbus].state)){// пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 				count_modbus++;
 				continue;
 			}
-			// 	Настраиваю аппаратную часть USART
-			ConfigureUSART(&P_SHIFT(ps_connectmodbus_global,count_modbus)->s_port_config, present_usart[k1]); // настраиваю USART
-			// описываю параметры задачи
+			// 	пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ USART
+			ConfigureUSART(&P_SHIFT(ps_connectmodbus_global,count_modbus)->s_port_config, present_usart[k1],
+					       NULL);
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 			s_modbus_tsk_par[count_modbus].num_modbus=count_modbus;
 			s_modbus_tsk_par[count_modbus].ps_task_parameters=ptask_parameters+k1;
-			// Описываю задачу для заданого порта
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 			if(s_config_moduls.s_connectmodbus_global[count_modbus].type==PROTOCOL_MODBUS_MASTER){
 				xTaskCreate( t_Modbus_MASTER, ( const char * ) "Modbus_MASTER", 230, (void*)(&s_modbus_tsk_par[count_modbus]), mainQUEUE_RECEIVE_TASK_PRIORITY, NULL );
 			}
@@ -101,14 +102,14 @@ int main(void)
 	//------------------------------------------------------------------------------------------------------------------------------------
 
 	/*******************************************************************************/
-	//---------------ЗАПУСКАЮ ЗАДАЧИ ПРОГРАМНЫХ ПРОЦЕСОВ СОГЛАСНО НАСТРОЕК----------/
+	//---------------пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ----------/
 	/*******************************************************************************/
 
 #ifdef DEV_0
 #if (TASK_PRIORITY(DEV_1)<MIN_T_PRIORITY)||(TASK_PRIORITY(DEV_1)>MAX_T_PRIORITY)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
-	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_0).state){// если в конфигурации поточный порт выключен
+	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_0).state){// пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		xTaskCreate(  TASK_PROCESSING(DEV_0), ( const char * ) TASK_IDENT(DEV_1), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_0), TASK_PRIORITY(DEV_0), NULL );
 	}
 #endif
@@ -117,7 +118,7 @@ int main(void)
 #if (TASK_PRIORITY(DEV_1)<MIN_T_PRIORITY)||(TASK_PRIORITY(DEV_1)>MAX_T_PRIORITY)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
-	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_1).state){// если в конфигурации поточный модуль выключен
+	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_1).state){// пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		xTaskCreate(  TASK_PROCESSING(DEV_1), ( const char * ) TASK_IDENT(DEV_1), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_1), TASK_PRIORITY(DEV_1), NULL );
 	}
 #endif
@@ -126,7 +127,7 @@ int main(void)
 #if (TASK_PRIORITY(DEV_1)<MIN_T_PRIORITY)||(TASK_PRIORITY(DEV_1)>MAX_T_PRIORITY)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
-	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_2).state){// если в конфигурации поточный модуль выключен
+	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_2).state){// пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		xTaskCreate(  TASK_PROCESSING(DEV_2), ( const char * ) TASK_IDENT(DEV_2), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_2), TASK_PRIORITY(DEV_2), NULL );
 	}
 #endif
@@ -135,7 +136,7 @@ int main(void)
 #if (TASK_PRIORITY(DEV_1)<MIN_T_PRIORITY)||(TASK_PRIORITY(DEV_1)>MAX_T_PRIORITY)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
-	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_3).state){// если в конфигурации поточный модуль выключен
+	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_3).state){// пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		xTaskCreate(  TASK_PROCESSING(DEV_3), ( const char * ) TASK_IDENT(DEV_3), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_3), TASK_PRIORITY(DEV_3), NULL );
 	}
 #endif
@@ -144,7 +145,7 @@ int main(void)
 #if (TASK_PRIORITY(DEV_1)<MIN_T_PRIORITY)||(TASK_PRIORITY(DEV_1)>MAX_T_PRIORITY)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
-	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_4).state){// если в конфигурации поточный модуль выключен
+	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_4).state){// пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		xTaskCreate(  TASK_PROCESSING(DEV_4), ( const char * ) TASK_IDENT(DEV_4), 700,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_4), TASK_PRIORITY(DEV_4), NULL );
 	}
 #endif
@@ -185,11 +186,11 @@ int main(void)
 	}
 #endif
 
-#ifdef DEV_9 // display processing
+#ifdef DEV_9
 #if (TASK_PRIORITY(DEV_1)<MIN_T_PRIORITY)||(TASK_PRIORITY(DEV_1)>MAX_T_PRIORITY)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
-	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_9).state){// если в конфигурации поточный модуль выключен
+	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_9).state){// пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		xTaskCreate(  TASK_PROCESSING(DEV_9), ( const char * ) TASK_IDENT(DEV_9), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_9), TASK_PRIORITY(DEV_9), NULL );
 	}
 #endif
@@ -198,7 +199,7 @@ int main(void)
 #if (TASK_PRIORITY(DEV_1)<MIN_T_PRIORITY)||(TASK_PRIORITY(DEV_1)>MAX_T_PRIORITY)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
-	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_10).state){// если в конфигурации поточный модуль выключен
+	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_10).state){// пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		xTaskCreate(  TASK_PROCESSING(DEV_10), ( const char * ) TASK_IDENT(DEV_10), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_10), TASK_PRIORITY(DEV_10), NULL );
 	}
 #endif
@@ -207,7 +208,7 @@ int main(void)
 #if (TASK_PRIORITY(DEV_1)<MIN_T_PRIORITY)||(TASK_PRIORITY(DEV_1)>MAX_T_PRIORITY)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
-	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_11).state){// если в конфигурации поточный модуль выключен
+	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_11).state){// пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		xTaskCreate(  TASK_PROCESSING(DEV_11), ( const char * ) TASK_IDENT(DEV_11), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_11), TASK_PRIORITY(DEV_11), NULL );
 	}
 #endif
@@ -216,7 +217,7 @@ int main(void)
 #if (TASK_PRIORITY(DEV_1)<MIN_T_PRIORITY)||(TASK_PRIORITY(DEV_1)>MAX_T_PRIORITY)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
-	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_12).state){// если в конфигурации поточный модуль выключен
+	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_12).state){// пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		xTaskCreate(  TASK_PROCESSING(DEV_12), ( const char * ) TASK_IDENT(DEV_12), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_12), TASK_PRIORITY(DEV_12), NULL );
 	}
 #endif
@@ -225,7 +226,7 @@ int main(void)
 #if (TASK_PRIORITY(DEV_1)<MIN_T_PRIORITY)||(TASK_PRIORITY(DEV_1)>MAX_T_PRIORITY)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
-	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_13).state){// если в конфигурации поточный модуль выключен
+	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_13).state){// пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		xTaskCreate(  TASK_PROCESSING(DEV_13), ( const char * ) TASK_IDENT(DEV_13), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_13), TASK_PRIORITY(DEV_13), NULL );
 	}
 #endif
@@ -234,7 +235,7 @@ int main(void)
 #if (TASK_PRIORITY(DEV_1)<MIN_T_PRIORITY)||(TASK_PRIORITY(DEV_1)>MAX_T_PRIORITY)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
-	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_14).state){// если в конфигурации поточный модуль выключен
+	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_14).state){// пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		xTaskCreate(  TASK_PROCESSING(DEV_14), ( const char * ) TASK_IDENT(DEV_14), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_14), TASK_PRIORITY(DEV_14), NULL );
 	}
 #endif
@@ -243,7 +244,7 @@ int main(void)
 #if (TASK_PRIORITY(DEV_1)<MIN_T_PRIORITY)||(TASK_PRIORITY(DEV_1)>MAX_T_PRIORITY)
 #error  Inavalide task DEV_1 priopity (Ger)
 #endif
-	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_15).state){// если в конфигурации поточный модуль выключен
+	if(s_config_moduls.USER_CONFIG_FIELD(s,DEV_15).state){// пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		xTaskCreate(  TASK_PROCESSING(DEV_15), ( const char * ) TASK_IDENT(DEV_15), 100,(void *)&s_config_moduls.USER_CONFIG_FIELD(s,DEV_15), TASK_PRIORITY(DEV_15), NULL );
 	}
 #endif
