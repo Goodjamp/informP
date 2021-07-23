@@ -102,6 +102,8 @@ void updateLcdVal(BLINK_STATE blinkState) {
 	}
 	for (cnt = 0; cnt < displayUserConfig->numScreen; cnt++) {
 
+		memset(lcdStr, 0, sizeof(lcdStr));
+
 		updateLCD( lcdStr,
 				   blinkState,
 				   menuGetCurrentMenu(),
