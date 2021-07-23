@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project default="postbuild" name="test">
-  <property name="project.name" value="informP75"/>
+  <property name="project.name" value="informP"/>
   <property name="project.debug" value="Debug"/>
   <property name="project.obj" value="Debug/obj"/>
   <property name="project.bin" value="Debug/bin"/>
@@ -72,6 +72,7 @@
       <includepath path="P_dev_model/P_simple_gpio"/>
       <includepath path="USART_OPERATION"/>
       <includepath path="P_dev_model/P_FRQmetter_signal"/>
+      <includepath path="P_dev_model/P_BUI"/>
       <includepath path="STM32_USB-FS-Device_Driver/core/inc"/>
       <includepath path="STM32_USB-FS-Device_Driver/portable/inc"/>
       <includepath path="P_dev_model/P_TIME"/>

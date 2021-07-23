@@ -9,13 +9,11 @@
 #ifndef PROCESSING_INCLUD_H_
 #define PROCESSING_INCLUD_H_
 
-
 #define MAX_T_PRIORITY    4
 #define MIN_T_PRIORITY    1
 
-
-// приоритеты задач (смотри описание FreeRTOS)
-// должны быть в диапазоне MIN_T_PRIORITY-MAX_T_PRIORITY
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ FreeRTOS)
+// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ MIN_T_PRIORITY-MAX_T_PRIORITY
 #define DEV_0_T_PRIORITY  1
 #define DEV_1_T_PRIORITY  1
 #define DEV_2_T_PRIORITY  1
@@ -32,11 +30,12 @@
 #define DEV_13_T_PRIORITY  1
 #define DEV_14_T_PRIORITY  1
 
-// подключаимые файлы програмных модулей
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 #include "processing_FRQmetter_extern.h"
 #include "processing_modbus_extern.h"
 #include "processing_TIME_extern.h"
 #include "processing_sensor_extern.h"
 #include "processing_display_extern.h"
+#include "processing_bui_extern.h"
 
 #endif

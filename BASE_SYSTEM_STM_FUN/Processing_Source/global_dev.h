@@ -8,9 +8,6 @@
 #ifndef GLOBAL_DEV_H_
 #define  GLOBAL_DEV_H_
 
-// макрос для подключения хидера нового устройства по макроопредилению
-#define MY_FAIL(X)        _MY_FAIL(X)
-#define _MY_FAIL(NAME)   <processing_##NAME.h>
 
 // макрос для конструирования имени структуры конфигурации
 #define USER_CONFIG_FIELD(Y,X)         _USER_CONFIG_FIELD(Y,X)
@@ -38,10 +35,5 @@
 
 //макрос для конструирования строки приоритета задачи
 #define TASK_PRIORITY(X)   X##_T_PRIORITY
-
-//макрос для конструирования имени-указателя на USART
-#define USART(X)   _USART(X)
-#define _USART(NUM)   USART##NUM
-
 
 #endif

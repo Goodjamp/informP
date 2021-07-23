@@ -17,7 +17,7 @@
 #include "processing_mem_map.h"
 
 
-// настройки портов и пинов USART
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ USART
 // USART1
 #define USART1_PORT_TX GPIOA
 #define USART1_PORT_RX GPIOA
@@ -34,12 +34,12 @@
 #define USART3_PIN_TX  GPIO_Pin_10
 #define USART3_PIN_RX  GPIO_Pin_11
 
-// Настройки буффера приема USART
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ USART
 #define SIZE_OUT_BUFER						30
 #define REAL_SIZE_OUT_BUFER 				29
 #define SIZE_WAIT_POINT_OUT_READ			25
 
-// Настройки буффера передачи USART
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ USART
 #define SIZE_READ_BUFER						100
 #define REAL_SIZE_READ_BUFER 				100
 #define SIZE_WAIT_POINT_READ_READ			100
@@ -57,28 +57,28 @@
 #define NUMBER_MY_PROCES					NUMBER_USART
 
 
-// ---------возвращаимые ошибки-----------
+// ---------пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ-----------
 typedef enum{
 	USART_OK=0,
 	USART_ERROR_CONFIG=1
 }USART_errort;
 
 #pragma pack(push, 1)
-// Эта сборная структура которая описывает настройки процеса, который работает с USART
+// пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ USART
 typedef struct
 {
-	USART_TypeDef                   *USARTx;            // указатель на USART с которым работает данная структура
-	struct point_wrdirobject 		*WrUSART;           // структура буферов передачи
-	struct point_wrdirobject 		*RdUSART;           // структура буферов приема
+	USART_TypeDef                   *USARTx;            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ USART пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+	struct point_wrdirobject 		*WrUSART;           // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+	struct point_wrdirobject 		*RdUSART;           // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
  }S_Task_parameters;
 
-// Эта сборная структура которая описывает настройки процеса, который работает с USART
+// пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ USART
 typedef struct {
-	u16 baudrate;              // (A)    скорость
-	u8 stopbits;               // (A)    к-во стопових битов
-	u8 parity;                 // (A)    настройки паритета
-	u8 amountbyte;             // (A)    размер к-во бит в одном байте
-	u8 controlpotok;           // (S)    настройки апаратного обеспечение подтверждения связи
+	u16 baudrate;              // (A)    пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+	u8 stopbits;               // (A)    пїЅ-пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+	u8 parity;                 // (A)    пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+	u8 amountBit;             // (A)    пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ-пїЅпїЅ пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+	u8 controlpotok;           // (S)    пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
  } S_port_config;
 
 
@@ -86,7 +86,8 @@ typedef struct {
 
 void init_timer();
 void init_USART(USART_TypeDef *USART_in, u8 num_usart);
-USART_errort  ConfigureUSART(const S_port_config *ps_port_unit_config, USART_TypeDef *USART_init);
+USART_errort  ConfigureUSART(const S_port_config *ps_port_unit_config, USART_TypeDef *USART_init,
+		                     S_Task_parameters **usartHandler);
 void Clrinbuf(S_Task_parameters *ptaskparameters,int MaxTime);
 void Clrinbuf_without_time(S_Task_parameters *ptaskparameters);
 

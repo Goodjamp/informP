@@ -36,7 +36,7 @@ typedef struct{
 
 //----------------------------- DISPLAY thread configuration--------------------------------------------------------------------------------
 typedef struct{
-	uint16_t state;                           // state of module: ENABLE/DISABLE
+	uint8_t state;                           // state of module: ENABLE/DISABLE
 	uint16_t numScreen;                       // number of screen connected to device
 	struct{                                   // configuration parameters of every screen
 	       uint32_t numParamiterPerScreen: 8;

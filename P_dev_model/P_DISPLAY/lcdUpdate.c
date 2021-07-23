@@ -14,10 +14,6 @@
 #include "processing_display.h"
 #include "processing_display_extern.h"
 #include "processing_mem_map_extern.h"
-#include "processing_FRQmetter_extern.h"
-#include "processing_sensor_extern.h"
-#include "processing_TIME_extern.h"
-
 
 #define SYMBOL_TEMPERATURE   "C"
 #define SYMBOL_PRESSURE_PA   "Ph"
@@ -50,6 +46,7 @@ static void getTime3Str(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blink
 static void getDate4Str(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkState, DISPLAY_MENU displayMenu, bool focus);
 static void getTime4Str(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkState, DISPLAY_MENU displayMenu, bool focus);
 static void getFrqStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkState, DISPLAY_MENU displayMenu, bool focus);
+static void getBui(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkState, DISPLAY_MENU displayMenu, bool focus);
 
 
 typedef void (*UpdateFunStr)(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkState, DISPLAY_MENU displayMenu, bool focus);
@@ -67,7 +64,8 @@ static const UpdateFunStr updateFunStr[]=
     [PAR_TIME_2]      = getTime3Str,
     [PAR_DATE_3]      = getDate4Str,
     [PAR_TIME_3]      = getTime4Str,
-    [PAR_FRQ]         = getFrqStr
+    [PAR_FRQ]         = getFrqStr,
+    [PAR_BUI]         = getBui,
 };
 
 
@@ -336,6 +334,40 @@ static void getFrqStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkSt
 	}
 }
 
+/*In this string we wont to show temperature and battery status*/
+static void getBui(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkState, DISPLAY_MENU displayMenu, bool focus)
+{
+#define SYMBOL_STR_SIZE     4
+#define SEGMENTS_CNT        8
+#define MAX_BUI_STR_SIZE    5
+
+	uint16_t buiStr[MAX_BUI_STR_SIZE];
+
+	processing_mem_map_read_s_proces_object_modbus(buiStr, MAX_BUI_STR_SIZE,
+			                                       s_address_oper_data.s_bui_address.buiMatrixSymbol);
+	memset(strSymbol,' ', 4);
+	strSymbol[0] = (0xFF & buiStr[0]);
+	uint32_t k = 1;
+	uint32_t m = 0;
+	for (; k < MAX_BUI_STR_SIZE; k++) {
+		strValue[m++] = 0xFF & buiStr[k];
+        if ((0xFF & (buiStr[k] >> 8)) > 0) {
+        	strValue[m++] = '.';
+        }
+	}
+
+	switch (displayMenu) {
+	case DISPLAY_MENU_WORK:
+        break;
+	case DISPLAY_MENU_UDJUSTMENT:
+		if(blinkState == BLINK_STATE_LOW && focus)
+		{
+            memset(strSymbol,' ', 4);
+		}
+		break;
+	default: break;
+	}
+}
 
 static void getDateStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkState, DISPLAY_MENU displayMenu, bool focus, uint8_t clockPos, bool isDate)
 {
@@ -357,8 +389,6 @@ static void getDateStr(uint8_t *strSymbol, uint8_t *strValue, BLINK_STATE blinkS
 	}
 	switch (displayMenu) {
 	case DISPLAY_MENU_WORK:
-
-
 		if((blinkState == BLINK_STATE_HIGHT))
 		{
 			//set value
