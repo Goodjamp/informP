@@ -302,7 +302,7 @@ const symbol8x8MatrixTypedef symbols8x8Matrix[] = {
 				0b00000000, //700
 				0b00000000  //800
 		),
-		descript8X8Sumbol('?',     // Error sumbol
+		descript8X8Sumbol('?',     // Error symbol
 				0b00011100, //1000
 				0b00100010, //2000
 				0b00100010, //3011
@@ -312,7 +312,7 @@ const symbol8x8MatrixTypedef symbols8x8Matrix[] = {
 				0b00000000, //700
 				0b00001000  //800
 		),
-		descript8X8Sumbol('Z', // Battery symbol
+		descript8X8Sumbol('Z', // Stigma symbol
 				0b00111110, //1000
 				0b00010000, //2000
 				0b00001000, //3011
@@ -322,7 +322,16 @@ const symbol8x8MatrixTypedef symbols8x8Matrix[] = {
 				0b00111110, //700
 				0b00000000  //800
 		),
-
+		descript8X8Sumbol('U',
+				0b00100010, //1000
+				0b00100010, //2000
+				0b00100010, //3011
+				0b00100010, //400
+				0b00100010, //500
+				0b00100010, //600
+				0b00011100, //700
+				0b00000000  //800
+		),
 };
 
 const symbol8x8MatrixTypedef error8x8Segments =

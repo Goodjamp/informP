@@ -18,7 +18,7 @@
 #define BUI_START_SYMBOL            0
 #define BUI_BUFFER_SIZE             12
 #define BUI_COMMAND_TYPE            0x41
-#define BUI_COMMAND_TX_STATUS       1
+#define BUI_COMMAND_TX_STATUS       0x09
 
 #define BUI_SEGMENTS_SUMBOLS_CNT    4
 
