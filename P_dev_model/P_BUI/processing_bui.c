@@ -220,6 +220,8 @@ void t_processing_bui(void *pvParameters)
             case 'Q':
             case 'O':
             case 'Z':
+            case 'U':
+            case 'I':
             	buiStr[0] = buiRequest->stringPack.matrixSymbol;
             	break;
 

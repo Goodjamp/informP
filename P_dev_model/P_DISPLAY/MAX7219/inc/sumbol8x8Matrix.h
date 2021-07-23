@@ -332,6 +332,16 @@ const symbol8x8MatrixTypedef symbols8x8Matrix[] = {
 				0b00011100, //700
 				0b00000000  //800
 		),
+		descript8X8Sumbol('I',
+				0b00001000, //1000
+				0b00001000, //2000
+				0b00001000, //3011
+				0b00001000, //400
+				0b00001000, //500
+				0b00001000, //600
+				0b00001000, //700
+				0b00000000  //800
+		),
 };
 
 const symbol8x8MatrixTypedef error8x8Segments =
